@@ -61,6 +61,25 @@
         <div id="effectLayer" class="effect-layer" aria-hidden="true"></div>
 
         <div id="enemyLayer" class="enemy-layer" aria-label="상대 프로젝트"></div>
+        <div class="equipment-layer" aria-live="polite">
+          <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
+            <span>장비</span>
+            <strong id="equipmentDrawCost">10</strong>
+          </button>
+          <div id="equipmentChoice" class="equipment-choice is-hidden">
+            <div class="equipment-card">
+              <span id="equipmentIcon" class="equipment-icon">?</span>
+              <div>
+                <strong id="equipmentName">장비</strong>
+                <p id="equipmentBonus">대표 능력치 상승</p>
+              </div>
+            </div>
+            <div class="equipment-actions">
+              <button id="equipItemButton" type="button">장착</button>
+              <button id="discardItemButton" type="button">버리기</button>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="message-line" aria-live="polite">
