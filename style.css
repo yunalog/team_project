@@ -253,6 +253,63 @@ h1 {
   pointer-events: none;
 }
 
+.equipped-item-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: min(250px, calc(100% - 20px));
+  padding: 8px;
+  border: 2px solid #4a2b17;
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.88);
+  box-shadow: 0 6px 18px rgba(45, 33, 25, 0.22);
+}
+
+.equipped-item-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 2px solid #4a2b17;
+  border-radius: 50%;
+  background: var(--equipment-color, #8b9b92);
+  color: #fff;
+  font-weight: 900;
+}
+
+.equipped-item-label,
+.equipped-item-panel strong,
+.equipped-item-panel p {
+  display: block;
+}
+
+.equipped-item-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.equipped-item-panel strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.equipped-item-panel p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.equipped-item-panel.is-empty {
+  opacity: 0.78;
+}
+
 .equipment-draw-button {
   position: absolute;
   left: 50%;
@@ -1069,6 +1126,13 @@ h1 {
     top: 56%;
     width: 68px;
     height: 68px;
+  }
+
+  .equipped-item-panel {
+    top: 8px;
+    left: 8px;
+    width: min(230px, calc(100% - 16px));
+    padding: 7px;
   }
 
   .equipment-choice {

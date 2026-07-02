@@ -173,6 +173,10 @@ function initGame() {
     nextStageButton: document.querySelector("#nextStageButton"),
     equipmentDrawButton: document.querySelector("#equipmentDrawButton"),
     equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
+    equippedItemPanel: document.querySelector("#equippedItemPanel"),
+    equippedItemIcon: document.querySelector("#equippedItemIcon"),
+    equippedItemName: document.querySelector("#equippedItemName"),
+    equippedItemStats: document.querySelector("#equippedItemStats"),
     equipmentChoice: document.querySelector("#equipmentChoice"),
     equipmentIcon: document.querySelector("#equipmentIcon"),
     equipmentName: document.querySelector("#equipmentName"),
@@ -1090,6 +1094,7 @@ function renderEquipment() {
   refs.equipmentDrawButton.disabled = Boolean(pending);
   refs.equipmentDrawButton.classList.toggle("is-unaffordable", state.gold < cost && !pending);
   refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
+  renderEquippedItem(equipped);
 
   refs.equipmentChoice.classList.toggle("is-hidden", !pending);
   if (!pending) return;
@@ -1099,6 +1104,25 @@ function renderEquipment() {
   refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
   refs.equipmentName.style.color = pending.gradeColor;
   refs.equipmentBonus.textContent = formatEquipmentBonus(pending, equipped);
+}
+
+function renderEquippedItem(equipped) {
+  refs.equippedItemPanel.classList.toggle("is-empty", !equipped);
+
+  if (!equipped) {
+    refs.equippedItemIcon.textContent = "-";
+    refs.equippedItemIcon.style.removeProperty("--equipment-color");
+    refs.equippedItemName.textContent = "없음";
+    refs.equippedItemName.style.removeProperty("color");
+    refs.equippedItemStats.textContent = "자동 공격 +0 / 직접 처리 +0";
+    return;
+  }
+
+  refs.equippedItemIcon.textContent = equipped.icon;
+  refs.equippedItemIcon.style.setProperty("--equipment-color", equipped.gradeColor);
+  refs.equippedItemName.textContent = `${equipped.grade} ${equipped.name}`;
+  refs.equippedItemName.style.color = equipped.gradeColor;
+  refs.equippedItemStats.textContent = `자동 공격 +${equipped.powerBonus} / 직접 처리 +${equipped.clickBonus}`;
 }
 
 function formatEquipmentBonus(item, equipped) {
