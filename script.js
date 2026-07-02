@@ -201,6 +201,8 @@ function initGame() {
     companyValueText: document.querySelector("#companyValueText"),
     companyEmployeeText: document.querySelector("#companyEmployeeText"),
     companyFacilityText: document.querySelector("#companyFacilityText"),
+    companyStatusStrip: document.querySelector("#companyStatusStrip"),
+    battleStatusItems: [...document.querySelectorAll(".battle-status-item")],
     squadFormation: document.querySelector("#squadFormation"),
     squadRoster: document.querySelector("#squadRoster"),
     effectLayer: document.querySelector("#effectLayer"),
@@ -1134,6 +1136,8 @@ function updatePrimaryScene() {
   const isCompanyTab = activeTab === "tools";
   refs.battlefield.classList.toggle("is-hidden", isCompanyTab);
   refs.companyScene.classList.toggle("is-hidden", !isCompanyTab);
+  refs.battleStatusItems.forEach((element) => element.classList.toggle("is-hidden", isCompanyTab));
+  refs.companyStatusStrip.classList.toggle("is-hidden", !isCompanyTab);
 
   if (isCompanyTab) {
     const companyLevel = companyLevels[getCompanyLevelIndex()];

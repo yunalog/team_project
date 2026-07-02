@@ -1310,32 +1310,38 @@ h1 {
   letter-spacing: 0.12em;
 }
 
-.company-metrics {
+.company-status-strip {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
-.company-metrics > div {
-  padding: 10px;
+.company-status-strip > div {
+  min-width: 0;
+  padding: 6px 9px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--panel);
+  text-align: center;
 }
 
-.company-metrics span,
-.company-metrics strong {
+.company-status-strip span,
+.company-status-strip strong {
   display: block;
 }
 
-.company-metrics span {
+.company-status-strip span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 10px;
 }
 
-.company-metrics strong {
-  margin-top: 4px;
-  font-size: 17px;
+.company-status-strip strong {
+  overflow: hidden;
+  margin-top: 2px;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .squad-management {
@@ -1730,10 +1736,6 @@ h1 {
 
   .company-campus {
     top: 78px;
-  }
-
-  .company-metrics {
-    grid-template-columns: 1fr;
   }
 
   .squad-layout {

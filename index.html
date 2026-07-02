@@ -99,10 +99,24 @@
 
       </section>
 
-      <section class="message-line" aria-live="polite">
-        <span id="battleLog">새 프로젝트가 도착했습니다.</span>
-        <span id="dpsText" class="combat-power">초당 기여도 1</span>
-        <button id="manualWorkButton" type="button">직접 처리</button>
+      <section class="message-line">
+        <span id="battleLog" class="battle-status-item" aria-live="polite">새 프로젝트가 도착했습니다.</span>
+        <span id="dpsText" class="combat-power battle-status-item">초당 기여도 1</span>
+        <button id="manualWorkButton" class="battle-status-item" type="button">직접 처리</button>
+        <div class="company-status-strip is-hidden" id="companyStatusStrip" aria-label="회사 현황">
+          <div>
+            <span>회사 가치</span>
+            <strong id="companyValueText">0</strong>
+          </div>
+          <div>
+            <span>구성원</span>
+            <strong id="companyEmployeeText">1명</strong>
+          </div>
+          <div>
+            <span>시설 투자</span>
+            <strong id="companyFacilityText">0회</strong>
+          </div>
+        </div>
       </section>
 
       <section class="panel-area">
@@ -163,20 +177,6 @@
               <p class="squad-help">각 위치의 목록에서 동료를 선택하면 업무 화면 배치와 자동 기여도에 바로 반영됩니다.</p>
             </div>
 
-            <div class="company-metrics">
-              <div>
-                <span>회사 가치</span>
-                <strong id="companyValueText">0</strong>
-              </div>
-              <div>
-                <span>구성원</span>
-                <strong id="companyEmployeeText">1명</strong>
-              </div>
-              <div>
-                <span>시설 투자</span>
-                <strong id="companyFacilityText">0회</strong>
-              </div>
-            </div>
           </div>
         </article>
 
