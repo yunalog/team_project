@@ -7,6 +7,8 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
+const EQUIPMENT_DRAW_COST = 10;
+const SPEED_TICKET_SECONDS = 600;
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
@@ -95,6 +97,14 @@ const equipmentGrades = [
   { name: "전설", chance: 0.03, multiplier: 3.2, color: "#b85c22" },
 ];
 
+const equipmentUpgradeConfigs = [
+  { level: 1, label: "1단계", maxGrade: 1, nextCost: 20, duration: 0, desc: "일반/희귀 장비 등장" },
+  { level: 2, label: "2단계", maxGrade: 2, nextCost: 45, duration: 180, desc: "영웅 장비 등장" },
+  { level: 3, label: "3단계", maxGrade: 2, nextCost: 90, duration: 420, desc: "희귀 이상 확률 상승" },
+  { level: 4, label: "4단계", maxGrade: 3, nextCost: 160, duration: 900, desc: "전설 장비 등장" },
+  { level: 5, label: "5단계", maxGrade: 3, nextCost: 0, duration: 0, desc: "최대 연구 단계" },
+];
+
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
 
 const defaultState = {
@@ -118,6 +128,10 @@ const defaultState = {
     equipped: null,
     pending: null,
     drawCount: 0,
+    gradeLevel: 1,
+    upgradeRemaining: 0,
+    upgradingTo: null,
+    speedTickets: 3,
   },
 };
 
@@ -177,6 +191,12 @@ function initGame() {
     equippedItemIcon: document.querySelector("#equippedItemIcon"),
     equippedItemName: document.querySelector("#equippedItemName"),
     equippedItemStats: document.querySelector("#equippedItemStats"),
+    equipmentUpgradePanel: document.querySelector("#equipmentUpgradePanel"),
+    equipmentGradeText: document.querySelector("#equipmentGradeText"),
+    equipmentUpgradeTimer: document.querySelector("#equipmentUpgradeTimer"),
+    equipmentUpgradeButton: document.querySelector("#equipmentUpgradeButton"),
+    speedTicketButton: document.querySelector("#speedTicketButton"),
+    speedTicketText: document.querySelector("#speedTicketText"),
     equipmentChoice: document.querySelector("#equipmentChoice"),
     equipmentIcon: document.querySelector("#equipmentIcon"),
     equipmentName: document.querySelector("#equipmentName"),
@@ -231,6 +251,8 @@ function bindEvents() {
   refs.equipmentDrawButton.addEventListener("click", drawEquipment);
   refs.equipItemButton.addEventListener("click", equipPendingEquipment);
   refs.discardItemButton.addEventListener("click", discardPendingEquipment);
+  refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
+  refs.speedTicketButton.addEventListener("click", useSpeedTicket);
   refs.saveButton.addEventListener("click", () => saveState("수동 저장 완료"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
@@ -398,6 +420,7 @@ function tick(delta) {
 
     moveEnemies(delta);
     updateAutoCombat(delta);
+    updateEquipmentUpgrade(delta);
 
     if (saveCooldown >= 10) {
       saveCooldown = 0;
@@ -457,6 +480,10 @@ function normalizeEquipment(equipment) {
     equipped: normalizeEquipmentItem(safeEquipment.equipped),
     pending: normalizeEquipmentItem(safeEquipment.pending),
     drawCount: Math.max(0, Number(safeEquipment.drawCount) || 0),
+    gradeLevel: Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(safeEquipment.gradeLevel) || 1)),
+    upgradeRemaining: Math.max(0, Number(safeEquipment.upgradeRemaining) || 0),
+    upgradingTo: safeEquipment.upgradingTo ? Number(safeEquipment.upgradingTo) : null,
+    speedTickets: Math.max(0, Number(safeEquipment.speedTickets) || 0),
   };
 }
 
@@ -947,7 +974,7 @@ function buyTool(id) {
 }
 
 function getEquipmentDrawCost() {
-  return Math.floor(8 * Math.pow(1.12, state.equipment.drawCount));
+  return EQUIPMENT_DRAW_COST;
 }
 
 function drawEquipment() {
@@ -982,13 +1009,28 @@ function createEquipmentItem() {
 }
 
 function pickEquipmentGrade() {
+  const gradeLevel = getEquipmentGradeLevel();
+  const config = getEquipmentUpgradeConfig(gradeLevel);
+  const candidates = equipmentGrades
+    .slice(0, config.maxGrade + 1)
+    .map((grade, index) => ({
+      ...grade,
+      chance: getAdjustedGradeChance(grade.chance, index, gradeLevel),
+    }));
+  const chanceSum = candidates.reduce((sum, grade) => sum + grade.chance, 0);
   const roll = Math.random();
   let total = 0;
-  for (const grade of equipmentGrades) {
-    total += grade.chance;
+  for (const grade of candidates) {
+    total += grade.chance / chanceSum;
     if (roll <= total) return grade;
   }
-  return equipmentGrades[0];
+  return candidates[0];
+}
+
+function getAdjustedGradeChance(baseChance, gradeIndex, gradeLevel) {
+  if (gradeLevel < 3) return baseChance;
+  const bonus = gradeIndex === 0 ? -0.18 : gradeIndex * 0.08;
+  return Math.max(0.05, baseChance + bonus);
 }
 
 function rollEquipmentValue(range, multiplier) {
@@ -1014,6 +1056,87 @@ function discardPendingEquipment() {
   state.equipment.pending = null;
   log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
   renderAll();
+}
+
+function getMaxEquipmentUpgradeLevel() {
+  return equipmentUpgradeConfigs[equipmentUpgradeConfigs.length - 1].level;
+}
+
+function getEquipmentGradeLevel() {
+  return Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(state.equipment.gradeLevel) || 1));
+}
+
+function getEquipmentUpgradeConfig(level = getEquipmentGradeLevel()) {
+  return equipmentUpgradeConfigs.find((config) => config.level === level) || equipmentUpgradeConfigs[0];
+}
+
+function getNextEquipmentUpgradeConfig() {
+  return equipmentUpgradeConfigs.find((config) => config.level === getEquipmentGradeLevel() + 1) || null;
+}
+
+function isEquipmentUpgrading() {
+  return Boolean(state.equipment.upgradingTo) && state.equipment.upgradeRemaining > 0;
+}
+
+function startEquipmentUpgrade() {
+  if (isEquipmentUpgrading()) return;
+
+  const nextConfig = getNextEquipmentUpgradeConfig();
+  if (!nextConfig) {
+    log("장비 연구가 최대 단계입니다.");
+    return;
+  }
+
+  if (state.idea < nextConfig.nextCost) {
+    log(`장비 연구에는 아이디어 ${nextConfig.nextCost}이 필요합니다.`);
+    return;
+  }
+
+  state.idea -= nextConfig.nextCost;
+  state.equipment.upgradingTo = nextConfig.level;
+  state.equipment.upgradeRemaining = nextConfig.duration;
+  log(`장비 연구 ${nextConfig.label} 진행을 시작했습니다.`);
+  renderAll();
+}
+
+function updateEquipmentUpgrade(delta) {
+  if (!isEquipmentUpgrading()) return;
+
+  state.equipment.upgradeRemaining = Math.max(0, state.equipment.upgradeRemaining - delta);
+  if (state.equipment.upgradeRemaining > 0) return;
+
+  completeEquipmentUpgrade();
+}
+
+function completeEquipmentUpgrade() {
+  if (!state.equipment.upgradingTo) return;
+
+  state.equipment.gradeLevel = Math.max(getEquipmentGradeLevel(), state.equipment.upgradingTo);
+  state.equipment.upgradingTo = null;
+  state.equipment.upgradeRemaining = 0;
+  log(`장비 연구가 ${getEquipmentUpgradeConfig().label}로 상승했습니다.`);
+  renderAll();
+}
+
+function useSpeedTicket() {
+  if (!isEquipmentUpgrading()) {
+    log("진행 중인 장비 연구가 없습니다.");
+    return;
+  }
+
+  if (state.equipment.speedTickets <= 0) {
+    log("사용할 가속티켓이 없습니다.");
+    return;
+  }
+
+  state.equipment.speedTickets -= 1;
+  state.equipment.upgradeRemaining = Math.max(0, state.equipment.upgradeRemaining - SPEED_TICKET_SECONDS);
+  if (state.equipment.upgradeRemaining <= 0) {
+    completeEquipmentUpgrade();
+  } else {
+    log("가속티켓을 사용해 연구 시간을 10분 단축했습니다.");
+    renderBattle();
+  }
 }
 
 function getEquippedItem() {
@@ -1095,6 +1218,7 @@ function renderEquipment() {
   refs.equipmentDrawButton.classList.toggle("is-unaffordable", state.gold < cost && !pending);
   refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
   renderEquippedItem(equipped);
+  renderEquipmentUpgrade();
 
   refs.equipmentChoice.classList.toggle("is-hidden", !pending);
   if (!pending) return;
@@ -1123,6 +1247,28 @@ function renderEquippedItem(equipped) {
   refs.equippedItemName.textContent = `${equipped.grade} ${equipped.name}`;
   refs.equippedItemName.style.color = equipped.gradeColor;
   refs.equippedItemStats.textContent = `자동 공격 +${equipped.powerBonus} / 직접 처리 +${equipped.clickBonus}`;
+}
+
+function renderEquipmentUpgrade() {
+  const currentConfig = getEquipmentUpgradeConfig();
+  const nextConfig = getNextEquipmentUpgradeConfig();
+  const upgrading = isEquipmentUpgrading();
+
+  refs.equipmentGradeText.textContent = `${currentConfig.label} · ${currentConfig.desc}`;
+  refs.equipmentUpgradePanel.classList.toggle("is-upgrading", upgrading);
+
+  if (upgrading) {
+    refs.equipmentUpgradeTimer.textContent = `${getEquipmentUpgradeConfig(state.equipment.upgradingTo).label} 완료까지 ${formatTime(state.equipment.upgradeRemaining)}`;
+  } else if (nextConfig) {
+    refs.equipmentUpgradeTimer.textContent = `${nextConfig.label} 연구: 아이디어 ${nextConfig.nextCost} · ${formatTime(nextConfig.duration)}`;
+  } else {
+    refs.equipmentUpgradeTimer.textContent = "최대 연구 단계입니다.";
+  }
+
+  refs.equipmentUpgradeButton.textContent = upgrading ? "연구 진행 중" : nextConfig ? "등급 업그레이드" : "최대 단계";
+  refs.equipmentUpgradeButton.disabled = upgrading || !nextConfig || state.idea < nextConfig.nextCost;
+  refs.speedTicketButton.disabled = !upgrading || state.equipment.speedTickets <= 0;
+  refs.speedTicketText.textContent = `보유 ${state.equipment.speedTickets}장 · 1장당 10분`;
 }
 
 function formatEquipmentBonus(item, equipped) {
