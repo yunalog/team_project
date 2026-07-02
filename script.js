@@ -169,7 +169,6 @@ let titleBgmUnlockArmed = false;
 let audioSettings = { ...defaultAudioSettings };
 let activeTab = "battle";
 let lastCompanyVisualKey = "";
-let lastCompanyRoadmapKey = "";
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -199,14 +198,9 @@ function initGame() {
     employeeCrowd: document.querySelector("#employeeCrowd"),
     companySceneProgressText: document.querySelector("#companySceneProgressText"),
     companySceneProgressFill: document.querySelector("#companySceneProgressFill"),
-    companyPanelLevel: document.querySelector("#companyPanelLevel"),
-    companyXpText: document.querySelector("#companyXpText"),
-    companyPanelProgressFill: document.querySelector("#companyPanelProgressFill"),
-    companyNextBenefit: document.querySelector("#companyNextBenefit"),
     companyValueText: document.querySelector("#companyValueText"),
     companyEmployeeText: document.querySelector("#companyEmployeeText"),
     companyFacilityText: document.querySelector("#companyFacilityText"),
-    companyLevelRoadmap: document.querySelector("#companyLevelRoadmap"),
     squadFormation: document.querySelector("#squadFormation"),
     squadRoster: document.querySelector("#squadRoster"),
     effectLayer: document.querySelector("#effectLayer"),
@@ -572,7 +566,6 @@ function resetGame() {
   state = cloneDefaultState();
   lastRosterKey = "";
   lastCompanyVisualKey = "";
-  lastCompanyRoadmapKey = "";
   spawnWave();
   renderAll();
   saveState("초기화 완료");
@@ -1160,7 +1153,6 @@ function renderCompany() {
   setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
   setText(refs.companySceneName, progress.current.name);
   setText(refs.companySceneDesc, progress.current.desc);
-  setText(refs.companyPanelLevel, `Lv.${levelNumber} · ${progress.current.name}`);
   setText(refs.companyEmployeeText, `${getEmployeeCount()}명`);
   setText(refs.companyFacilityText, `${facilityCount}회`);
 
@@ -1171,25 +1163,19 @@ function renderCompany() {
 
   if (progress.next) {
     setText(refs.companySceneProgressText, `다음 성장까지 ${progress.requiredXp - progress.currentXp} EXP`);
-    setText(refs.companyXpText, `${progress.currentXp} / ${progress.requiredXp} EXP`);
-    setText(refs.companyNextBenefit, `다음 단계: ${progress.next.name} · ${progress.current.benefit}`);
   } else {
     setText(refs.companySceneProgressText, "최고 성장 단계 달성");
-    setText(refs.companyXpText, `${state.companyXp} EXP · MAX`);
-    setText(refs.companyNextBenefit, "글로벌 기업 완성 · 이후 경험치는 계속 누적됩니다.");
   }
 
   refs.companySceneProgressFill.style.width = `${progress.percent}%`;
-  refs.companyPanelProgressFill.style.width = `${progress.percent}%`;
   refs.companySceneProgressFill.parentElement.setAttribute("aria-valuenow", String(progress.percent));
-  refs.companyPanelProgressFill.parentElement.setAttribute("aria-valuenow", String(progress.percent));
 
   if (visualKey !== lastCompanyVisualKey) {
     const isFirstRender = !lastCompanyVisualKey;
     lastCompanyVisualKey = visualKey;
     refs.companyCampus.dataset.companyTier = String(visualTier);
     refs.companyBuilding.style.setProperty("--building-width", `${160 + visualTier * 20}px`);
-    refs.companyBuilding.style.setProperty("--building-height", `${126 + visualTier * 11}px`);
+    refs.companyBuilding.style.setProperty("--building-height", `${96 + visualTier * 6}px`);
     renderCompanyFloors(visualTier, progress.levelIndex);
     renderCompanyEmployees();
 
@@ -1200,22 +1186,6 @@ function renderCompany() {
     }
   }
 
-  const roadmapKey = String(progress.levelIndex);
-  if (roadmapKey !== lastCompanyRoadmapKey) {
-    lastCompanyRoadmapKey = roadmapKey;
-    refs.companyLevelRoadmap.innerHTML = companyLevels
-      .map((level, index) => {
-        const stateClass = index < progress.levelIndex ? " is-complete" : index === progress.levelIndex ? " is-current" : "";
-        return `
-          <div class="level-step${stateClass}">
-            <b>Lv.${index + 1}</b>
-            <strong>${level.name}</strong>
-            <small>${index === 0 ? "시작" : `${level.minXp} EXP`}</small>
-          </div>
-        `;
-      })
-      .join("");
-  }
 }
 
 function renderCompanyFloors(visualTier, levelIndex) {

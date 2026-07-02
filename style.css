@@ -108,10 +108,13 @@ button:disabled {
 
 .game-shell {
   display: grid;
-  grid-template-rows: auto minmax(310px, min(45vh, 540px)) auto minmax(150px, auto) auto;
+  grid-template-rows: auto minmax(250px, min(42vh, 480px)) auto minmax(0, 1fr) auto;
   width: min(100%, 760px);
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   margin: 0 auto;
+  overflow: hidden;
   background: var(--paper);
   border-inline: 1px solid #7d5830;
   box-shadow: 0 0 36px rgba(0, 0, 0, 0.26);
@@ -191,7 +194,7 @@ h1 {
 .company-scene {
   position: relative;
   overflow: hidden;
-  min-height: 310px;
+  min-height: 250px;
   border-bottom: 2px solid var(--ink);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent 42%),
@@ -351,7 +354,7 @@ h1 {
 
 .office-building {
   position: absolute;
-  bottom: 40px;
+  bottom: 30px;
   left: 50%;
   width: var(--building-width);
   height: var(--building-height);
@@ -1142,13 +1145,20 @@ h1 {
 }
 
 .panel-area {
+  min-height: 0;
+  overflow: hidden;
   background: linear-gradient(180deg, #e7c68e 0%, #d7b174 100%);
 }
 
 .tab-panel {
   display: none;
-  min-height: 150px;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 12px;
+  scrollbar-color: #a87f49 transparent;
+  scrollbar-gutter: stable;
 }
 
 .tab-panel.is-active {
@@ -1292,51 +1302,12 @@ h1 {
   gap: 12px;
 }
 
-.company-level-card {
-  padding: 13px;
-  border: 2px solid #6b4a2b;
-  border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.72), transparent 58%),
-    #f2dfb8;
-  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.22);
-}
-
 .section-kicker {
   display: block;
   color: #39725a;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.12em;
-}
-
-.company-level-title {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 5px;
-}
-
-.company-level-title strong {
-  font-size: 18px;
-}
-
-.company-level-title span {
-  flex: 0 0 auto;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.company-panel-progress {
-  height: 13px;
-  margin-top: 10px;
-}
-
-.company-level-card p {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 12px;
 }
 
 .company-metrics {
@@ -1603,78 +1574,6 @@ h1 {
   filter: grayscale(0.45);
 }
 
-.level-roadmap-wrap {
-  min-width: 0;
-}
-
-.level-roadmap {
-  display: flex;
-  gap: 7px;
-  overflow-x: auto;
-  margin-top: 8px;
-  padding: 2px 2px 8px;
-  scrollbar-color: #a87f49 transparent;
-}
-
-.level-step {
-  position: relative;
-  flex: 0 0 104px;
-  min-height: 72px;
-  padding: 9px;
-  border: 1px solid #b89a6b;
-  border-radius: 6px;
-  background: rgba(255, 247, 229, 0.62);
-  color: #8a7862;
-}
-
-.level-step::after {
-  position: absolute;
-  top: 20px;
-  right: -8px;
-  width: 8px;
-  height: 2px;
-  background: #b89a6b;
-  content: "";
-}
-
-.level-step:last-child::after {
-  display: none;
-}
-
-.level-step b,
-.level-step strong,
-.level-step small {
-  display: block;
-}
-
-.level-step b {
-  font-size: 10px;
-}
-
-.level-step strong {
-  margin-top: 4px;
-  color: inherit;
-  font-size: 12px;
-}
-
-.level-step small {
-  margin-top: 5px;
-  font-size: 10px;
-}
-
-.level-step.is-complete {
-  border-color: #2f7d5f;
-  background: #d9eadb;
-  color: #2e634e;
-}
-
-.level-step.is-current {
-  border: 2px solid #8a4b22;
-  background: #fff1bd;
-  color: #65391f;
-  box-shadow: 0 3px 0 rgba(101, 57, 31, 0.18);
-}
-
 .save-state {
   margin: 10px 0 0;
   color: var(--muted);
@@ -1724,7 +1623,7 @@ h1 {
   }
 
   .game-shell {
-    grid-template-rows: auto minmax(300px, min(43vh, 420px)) auto minmax(160px, auto) auto;
+    grid-template-rows: auto minmax(230px, min(32vh, 280px)) auto minmax(0, 1fr) auto;
   }
 
   .top-bar {
@@ -1812,8 +1711,9 @@ h1 {
     flex-wrap: wrap;
   }
 
+  .battlefield,
   .company-scene {
-    min-height: 290px;
+    min-height: 230px;
   }
 
   .company-scene-heading {
