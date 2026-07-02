@@ -1367,6 +1367,156 @@ h1 {
   font-size: 17px;
 }
 
+.squad-management {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.squad-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(170px, 0.8fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.squad-subtitle {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.squad-formation {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.squad-leader,
+.squad-slot,
+.squad-roster-item {
+  border: 1px solid #b59666;
+  border-radius: 7px;
+  background: #fff8e9;
+}
+
+.squad-leader {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  border-color: #39725a;
+  background: #e1efe2;
+}
+
+.squad-leader strong,
+.squad-leader small,
+.squad-slot strong,
+.squad-slot small,
+.squad-roster-item strong,
+.squad-roster-item small {
+  display: block;
+}
+
+.squad-leader small,
+.squad-slot small,
+.squad-roster-item small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.squad-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--squad-color);
+  border-radius: 50%;
+  background: var(--squad-color);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.28);
+}
+
+.squad-slot {
+  display: grid;
+  gap: 6px;
+  padding: 7px;
+}
+
+.squad-slot.is-filled {
+  border-color: #718d6d;
+  background: #f4f7e8;
+}
+
+.squad-position {
+  color: #7f5d33;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.squad-slot-body,
+.squad-roster-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.squad-slot-body > span:last-child,
+.squad-roster-item > div {
+  min-width: 0;
+}
+
+.squad-slot strong,
+.squad-roster-item strong {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.squad-slot select {
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 5px;
+  border: 1px solid #9d7b4c;
+  border-radius: 5px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 11px;
+}
+
+.squad-roster {
+  display: grid;
+  gap: 6px;
+}
+
+.squad-roster-item {
+  padding: 8px;
+}
+
+.squad-roster-item.is-unowned {
+  filter: grayscale(0.75);
+  opacity: 0.55;
+}
+
+.squad-help {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .facility-heading {
   display: flex;
   justify-content: space-between;
@@ -1684,6 +1834,22 @@ h1 {
 
   .company-metrics {
     grid-template-columns: 1fr;
+  }
+
+  .squad-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-formation {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-leader {
+    grid-column: auto;
+  }
+
+  .squad-roster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .facility-heading {

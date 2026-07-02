@@ -31,7 +31,7 @@
         <div class="resource-row" aria-label="보유 자원">
           <span><b id="goldText">0</b> 자금</span>
           <span><b id="ideaText">0</b> 아이디어</span>
-          <span><b id="stageText">1</b><span id="progressUnitText"> 스테이지</span></span>
+          <span><b id="stageText">1</b> 스테이지</span>
         </div>
         <div class="audio-control hud-audio-control" aria-label="게임 BGM 설정">
           <button id="hudMuteButton" class="mute-button" type="button" data-audio-mute>음소거</button>
@@ -91,7 +91,7 @@
         </div>
 
         <div class="company-scene-progress">
-          <span id="companySceneProgressText">다음 성장까지 8 EXP</span>
+          <span id="companySceneProgressText">다음 성장까지 24 EXP</span>
           <div class="company-progress-track" role="progressbar" aria-label="회사 성장도" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <span id="companySceneProgressFill"></span>
           </div>
@@ -137,7 +137,7 @@
               <span class="section-kicker">COMPANY GROWTH</span>
               <div class="company-level-title">
                 <strong id="companyPanelLevel">Lv.1 · 1인 창업실</strong>
-                <span id="companyXpText">0 / 8 EXP</span>
+                <span id="companyXpText">0 / 24 EXP</span>
               </div>
               <div class="company-progress-track company-panel-progress" role="progressbar" aria-label="회사 레벨 경험치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <span id="companyPanelProgressFill"></span>
@@ -158,6 +158,27 @@
                 <span>시설 투자</span>
                 <strong id="companyFacilityText">0회</strong>
               </div>
+            </div>
+
+            <div class="squad-management">
+              <div class="facility-heading">
+                <div>
+                  <span class="section-kicker">ACTIVE SQUAD</span>
+                  <h2>업무 스쿼드 구성</h2>
+                </div>
+                <small>대표 1명 + 동료 4명까지 배치할 수 있습니다.</small>
+              </div>
+              <div class="squad-layout">
+                <div>
+                  <span class="squad-subtitle">배치 위치</span>
+                  <div class="squad-formation" id="squadFormation"></div>
+                </div>
+                <div>
+                  <span class="squad-subtitle">보유 동료</span>
+                  <div class="squad-roster" id="squadRoster"></div>
+                </div>
+              </div>
+              <p class="squad-help">각 위치의 목록에서 동료를 선택하면 업무 화면 배치와 자동 기여도에 바로 반영됩니다.</p>
             </div>
 
             <div class="facility-heading">

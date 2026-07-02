@@ -75,17 +75,17 @@ const recruits = [
 
 const companyLevels = [
   { name: "1인 창업실", minXp: 0, desc: "작은 책상에서 첫 프로젝트를 시작했습니다.", benefit: "창문과 업무 공간 확장" },
-  { name: "작은 작업실", minXp: 8, desc: "동료를 맞이할 작은 작업실이 생겼습니다.", benefit: "두 번째 업무 공간 개방" },
-  { name: "프로젝트 팀", minXp: 20, desc: "각자의 역할을 갖춘 팀이 자리를 잡았습니다.", benefit: "사무실 간판과 휴게 공간" },
-  { name: "초기 스타트업", minXp: 38, desc: "정식 회사의 모습을 갖추기 시작합니다.", benefit: "2층 오피스로 이전" },
-  { name: "성장 스타트업", minXp: 62, desc: "입소문을 타고 더 큰 의뢰가 들어옵니다.", benefit: "회의실과 조경 추가" },
-  { name: "전문 스튜디오", minXp: 94, desc: "전문 제작 조직으로 업계에 이름을 알립니다.", benefit: "전문 부서층 개방" },
-  { name: "소형 기업", minXp: 136, desc: "안정적인 조직과 여러 프로젝트를 운영합니다.", benefit: "독립 사옥 착공" },
-  { name: "확장 오피스", minXp: 190, desc: "새 사옥에서 더 많은 인재와 함께합니다.", benefit: "대형 로비와 편의 시설" },
-  { name: "중견 기업", minXp: 258, desc: "시장을 이끄는 탄탄한 회사로 성장했습니다.", benefit: "도심 타워로 확장" },
-  { name: "멀티 스튜디오", minXp: 344, desc: "여러 제작팀이 동시에 성과를 만들어냅니다.", benefit: "브랜드 네온 사인" },
-  { name: "대형 기업", minXp: 450, desc: "도시를 대표하는 대형 스튜디오가 되었습니다.", benefit: "글로벌 캠퍼스 개방" },
-  { name: "글로벌 기업", minXp: 580, desc: "전 세계가 주목하는 글로벌 기업입니다.", benefit: "최고 단계 달성" },
+  { name: "작은 작업실", minXp: 24, desc: "동료를 맞이할 작은 작업실이 생겼습니다.", benefit: "두 번째 업무 공간 개방" },
+  { name: "프로젝트 팀", minXp: 60, desc: "각자의 역할을 갖춘 팀이 자리를 잡았습니다.", benefit: "사무실 간판과 휴게 공간" },
+  { name: "초기 스타트업", minXp: 114, desc: "정식 회사의 모습을 갖추기 시작합니다.", benefit: "2층 오피스로 이전" },
+  { name: "성장 스타트업", minXp: 186, desc: "입소문을 타고 더 큰 의뢰가 들어옵니다.", benefit: "회의실과 조경 추가" },
+  { name: "전문 스튜디오", minXp: 282, desc: "전문 제작 조직으로 업계에 이름을 알립니다.", benefit: "전문 부서층 개방" },
+  { name: "소형 기업", minXp: 408, desc: "안정적인 조직과 여러 프로젝트를 운영합니다.", benefit: "독립 사옥 착공" },
+  { name: "확장 오피스", minXp: 570, desc: "새 사옥에서 더 많은 인재와 함께합니다.", benefit: "대형 로비와 편의 시설" },
+  { name: "중견 기업", minXp: 774, desc: "시장을 이끄는 탄탄한 회사로 성장했습니다.", benefit: "도심 타워로 확장" },
+  { name: "멀티 스튜디오", minXp: 1032, desc: "여러 제작팀이 동시에 성과를 만들어냅니다.", benefit: "브랜드 네온 사인" },
+  { name: "대형 기업", minXp: 1350, desc: "도시를 대표하는 대형 스튜디오가 되었습니다.", benefit: "글로벌 캠퍼스 개방" },
+  { name: "글로벌 기업", minXp: 1740, desc: "전 세계가 주목하는 글로벌 기업입니다.", benefit: "최고 단계 달성" },
 ];
 
 const tools = [
@@ -148,6 +148,8 @@ const defaultState = {
   companyXp: 0,
   elapsed: 0,
   recruits: {},
+  squad: [null, null, null, null],
+  squadConfigured: false,
   tools: {},
 };
 
@@ -205,11 +207,12 @@ function initGame() {
     companyEmployeeText: document.querySelector("#companyEmployeeText"),
     companyFacilityText: document.querySelector("#companyFacilityText"),
     companyLevelRoadmap: document.querySelector("#companyLevelRoadmap"),
+    squadFormation: document.querySelector("#squadFormation"),
+    squadRoster: document.querySelector("#squadRoster"),
     effectLayer: document.querySelector("#effectLayer"),
     goldText: document.querySelector("#goldText"),
     ideaText: document.querySelector("#ideaText"),
     stageText: document.querySelector("#stageText"),
-    progressUnitText: document.querySelector("#progressUnitText"),
     dpsText: document.querySelector("#dpsText"),
     enemyLayer: document.querySelector("#enemyLayer"),
     battleLog: document.querySelector("#battleLog"),
@@ -279,6 +282,7 @@ function bindEvents() {
   });
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
+  document.addEventListener("change", handleSquadChange);
 }
 
 function startGame() {
@@ -393,6 +397,35 @@ function handleAudioInput(event) {
   if (!audioSettings.muted) playBgm(currentBgmKey || "title", { silentFail: true });
 }
 
+function handleSquadChange(event) {
+  const select = event.target.closest("[data-squad-slot]");
+  if (!select) return;
+
+  const slotIndex = Number(select.dataset.squadSlot);
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= state.squad.length) return;
+
+  const nextId = select.value || null;
+  if (nextId) {
+    const owned = getRecruitCount(nextId);
+    const deployedElsewhere = state.squad.reduce(
+      (count, id, index) => count + (index !== slotIndex && id === nextId ? 1 : 0),
+      0
+    );
+    if (!recruits.some((recruit) => recruit.id === nextId) || deployedElsewhere >= owned) {
+      log("보유한 동료 수보다 많이 배치할 수 없습니다.");
+      renderSquadManagement();
+      return;
+    }
+  }
+
+  state.squad[slotIndex] = nextId;
+  state.squadConfigured = true;
+  lastRosterKey = "";
+  const recruit = recruits.find((item) => item.id === nextId);
+  log(recruit ? `${slotIndex + 1}번 위치에 ${recruit.name} 배치 완료` : `${slotIndex + 1}번 위치를 비웠습니다.`);
+  renderAll();
+}
+
 function getBattleBgmKey() {
   return state.battleMode === "boss" ? "boss" : "field";
 }
@@ -485,8 +518,40 @@ function normalizeState(nextState) {
     companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
+    squad: normalizeSquad(nextState.squad, nextState.recruits, !nextState.squadConfigured),
+    squadConfigured: Boolean(nextState.squadConfigured),
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
   };
+}
+
+function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
+  const normalized = [null, null, null, null];
+  const used = {};
+  const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
+
+  if (Array.isArray(savedSquad)) {
+    savedSquad.slice(0, normalized.length).forEach((id, index) => {
+      const owned = Math.max(0, Number(ownedRoster[id]) || 0);
+      if (!recruits.some((recruit) => recruit.id === id) || (used[id] || 0) >= owned) return;
+      normalized[index] = id;
+      used[id] = (used[id] || 0) + 1;
+    });
+  }
+
+  if (autoFill) {
+    recruits.forEach((recruit) => {
+      let remaining = Math.max(0, Number(ownedRoster[recruit.id]) || 0) - (used[recruit.id] || 0);
+      while (remaining > 0) {
+        const emptyIndex = normalized.indexOf(null);
+        if (emptyIndex < 0) return;
+        normalized[emptyIndex] = recruit.id;
+        used[recruit.id] = (used[recruit.id] || 0) + 1;
+        remaining -= 1;
+      }
+    });
+  }
+
+  return normalized;
 }
 
 function saveState(message) {
@@ -871,15 +936,17 @@ function getPlayerUnit(power = state.playerLevel) {
 
 function getUnits() {
   const units = [getPlayerUnit()];
-  recruits.forEach((recruit) => {
-    const count = getRecruitCount(recruit.id);
-    if (count > 0) {
-      units.push({
-        ...recruit,
-        count,
-        power: getRecruitPower(recruit) * count,
-      });
-    }
+  state.squad.forEach((recruitId, slotIndex) => {
+    const recruit = recruits.find((item) => item.id === recruitId);
+    if (!recruit) return;
+
+    units.push({
+      ...recruit,
+      id: `squad-${slotIndex}-${recruit.id}`,
+      recruitId: recruit.id,
+      count: 1,
+      power: getRecruitPower(recruit),
+    });
   });
   return units;
 }
@@ -909,11 +976,15 @@ function getGlobalMultiplier() {
 }
 
 function getTotalDps() {
-  const recruitDps = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
-  return Math.max(1, Math.round((state.playerLevel + recruitDps) * getGlobalMultiplier()));
+  const squadPower = getUnits().reduce((sum, unit) => sum + unit.power, 0);
+  return Math.max(1, Math.round(squadPower * getGlobalMultiplier()));
 }
 
 function getTeamCount() {
+  return getUnits().length;
+}
+
+function getEmployeeCount() {
   return 1 + recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id), 0);
 }
 
@@ -994,6 +1065,10 @@ function buyRecruit(id) {
 
   state.gold -= cost;
   state.recruits[id] = count + 1;
+  if (!state.squadConfigured) {
+    state.squad = normalizeSquad(state.squad, state.recruits, true);
+    lastRosterKey = "";
+  }
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
   log(`${recruit.name} 영입 완료. 회사 성장 경험치 +4`);
@@ -1046,6 +1121,7 @@ function renderBattle() {
 
   refs.goldText.textContent = Math.floor(state.gold);
   refs.ideaText.textContent = Math.floor(state.idea);
+  refs.stageText.textContent = getProgressLabel();
   refs.battlefield.style.setProperty("--battle-bg", `url("${getBattleBackground()}")`);
   renderCompany();
   updatePrimaryScene();
@@ -1069,12 +1145,8 @@ function updatePrimaryScene() {
   if (isCompanyTab) {
     const companyLevel = companyLevels[getCompanyLevelIndex()];
     setText(refs.companyLocationText, `회사 규모: ${companyLevel.name}`);
-    setText(refs.stageText, `회사 Lv.${getCompanyLevelIndex() + 1}`);
-    setText(refs.progressUnitText, "");
   } else {
     setText(refs.companyLocationText, "위치: 사무실 1층");
-    setText(refs.stageText, getProgressLabel());
-    setText(refs.progressUnitText, " 스테이지");
   }
 }
 
@@ -1083,16 +1155,18 @@ function renderCompany() {
   const levelNumber = progress.levelIndex + 1;
   const facilityCount = getFacilityInvestmentCount();
   const visualTier = Math.min(6, Math.floor(progress.levelIndex / 2) + 1);
-  const visualKey = `${progress.levelIndex}:${getTeamCount()}:${facilityCount}`;
+  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}`;
 
   setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
   setText(refs.companySceneName, progress.current.name);
   setText(refs.companySceneDesc, progress.current.desc);
   setText(refs.companyPanelLevel, `Lv.${levelNumber} · ${progress.current.name}`);
-  setText(refs.companyEmployeeText, `${getTeamCount()}명`);
+  setText(refs.companyEmployeeText, `${getEmployeeCount()}명`);
   setText(refs.companyFacilityText, `${facilityCount}회`);
 
-  const companyValue = Math.floor(state.gold + state.idea * 5 + state.companyXp * 12 + getTeamCount() * 120 + facilityCount * 80);
+  const companyValue = Math.floor(
+    state.gold + state.idea * 5 + state.companyXp * 12 + getEmployeeCount() * 120 + facilityCount * 80
+  );
   setText(refs.companyValueText, `${companyValue.toLocaleString("ko-KR")} 가치`);
 
   if (progress.next) {
@@ -1160,11 +1234,11 @@ function renderCompanyFloors(visualTier, levelIndex) {
 
 function renderCompanyEmployees() {
   const colors = ["#315f78", "#b05b45", "#6a6fa6", "#3c7c58", "#c4893f", "#805b86"];
-  const visibleEmployees = Math.min(12, getTeamCount());
+  const visibleEmployees = Math.min(12, getEmployeeCount());
   refs.employeeCrowd.innerHTML = Array.from({ length: visibleEmployees }, (_, index) => {
     return `<span class="scene-employee" style="--employee-color: ${colors[index % colors.length]}"></span>`;
   }).join("");
-  refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getTeamCount()}명`);
+  refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getEmployeeCount()}명`);
 }
 
 function renderEnemies() {
@@ -1216,11 +1290,11 @@ function renderAllies() {
 
 function getAllyPosition(index) {
   const positions = [
-    { x: 15, y: 64 },
-    { x: 24, y: 42 },
-    { x: 24, y: 106 },
-    { x: 32, y: 72 },
-    { x: 20, y: 138 },
+    { x: 8, y: 82 },
+    { x: 34, y: 34 },
+    { x: 34, y: 134 },
+    { x: 21, y: 34 },
+    { x: 21, y: 134 },
   ];
   return positions[index] || { x: 16 + index * 5, y: 42 + (index % 3) * 46 };
 }
@@ -1257,6 +1331,81 @@ function renderShop() {
           <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>
             ${cost} 아이디어 · 성장 +${growthXp}
           </button>
+        </div>
+      `;
+    })
+    .join("");
+
+  renderSquadManagement();
+}
+
+function renderSquadManagement() {
+  const positionNames = ["전열 A", "전열 B", "지원 A", "지원 B"];
+  const deployedCounts = state.squad.reduce((counts, id) => {
+    if (id) counts[id] = (counts[id] || 0) + 1;
+    return counts;
+  }, {});
+
+  const leaderMarkup = `
+    <div class="squad-leader">
+      <span class="squad-avatar" style="--squad-color: #059669;">C</span>
+      <div>
+        <strong>대표</strong>
+        <small>리더 · 고정 배치</small>
+      </div>
+    </div>
+  `;
+
+  const slotMarkup = state.squad
+    .map((recruitId, slotIndex) => {
+      const assigned = recruits.find((recruit) => recruit.id === recruitId);
+      const options = recruits
+        .map((recruit) => {
+          const owned = getRecruitCount(recruit.id);
+          const deployedElsewhere = state.squad.reduce(
+            (count, id, index) => count + (index !== slotIndex && id === recruit.id ? 1 : 0),
+            0
+          );
+          const unavailable = recruit.id !== recruitId && deployedElsewhere >= owned;
+          return `<option value="${recruit.id}" ${recruit.id === recruitId ? "selected" : ""} ${
+            unavailable ? "disabled" : ""
+          }>${recruit.name} · 보유 ${owned}</option>`;
+        })
+        .join("");
+      const color = assigned ? assigned.color : "#9a8b77";
+      const mark = assigned ? assigned.mark : "+";
+
+      return `
+        <label class="squad-slot${assigned ? " is-filled" : ""}">
+          <span class="squad-position">${positionNames[slotIndex]}</span>
+          <span class="squad-slot-body">
+            <span class="squad-avatar" style="--squad-color: ${color};">${mark}</span>
+            <span>
+              <strong>${assigned ? assigned.name : "빈 위치"}</strong>
+              <small>${slotIndex + 1}번 배치 슬롯</small>
+            </span>
+          </span>
+          <select data-squad-slot="${slotIndex}" aria-label="${positionNames[slotIndex]} 동료 선택">
+            <option value="" ${assigned ? "" : "selected"}>비워두기</option>
+            ${options}
+          </select>
+        </label>
+      `;
+    })
+    .join("");
+
+  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup;
+  refs.squadRoster.innerHTML = recruits
+    .map((recruit) => {
+      const owned = getRecruitCount(recruit.id);
+      const deployed = deployedCounts[recruit.id] || 0;
+      return `
+        <div class="squad-roster-item${owned ? "" : " is-unowned"}">
+          <span class="squad-avatar" style="--squad-color: ${recruit.color};">${recruit.mark}</span>
+          <div>
+            <strong>${recruit.name}</strong>
+            <small>보유 ${owned} · 배치 ${deployed}</small>
+          </div>
         </div>
       `;
     })
