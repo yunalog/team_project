@@ -677,6 +677,362 @@ h1 {
   pointer-events: none;
 }
 
+.equipment-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.equipped-item-panel {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  gap: 8px;
+  width: min(310px, calc(100% - 20px));
+  padding: 8px;
+  border: 2px solid #4a2b17;
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.88);
+  color: var(--ink);
+  text-align: left;
+  box-shadow: 0 6px 18px rgba(45, 33, 25, 0.22);
+  pointer-events: auto;
+}
+
+.equipped-item-label,
+.equipped-item-panel strong,
+.equipped-item-panel p {
+  display: block;
+}
+
+.equipped-item-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.equipped-item-panel strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.equipped-item-panel p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.equipped-item-panel.is-empty {
+  opacity: 0.78;
+}
+
+.equipped-item-summary {
+  min-width: 0;
+}
+
+.equipped-grade-blocks {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.equipped-grade-block {
+  min-height: 13px;
+  border: 1px solid rgba(74, 43, 23, 0.72);
+  border-radius: 4px;
+  background: var(--equipment-color);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.equipped-item-panel.is-collapsed {
+  width: min(230px, calc(100% - 20px));
+}
+
+.equipped-item-panel.is-collapsed .equipped-item-list {
+  display: none;
+}
+
+.equipped-item-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.equipped-tile {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: end;
+  min-height: 66px;
+  padding: 5px;
+  border: 2px solid var(--equipment-color, #8b9b92);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(45, 33, 25, 0.58)),
+    var(--equipment-image),
+    radial-gradient(circle at 50% 30%, var(--equipment-color, #8b9b92), #4a2b17);
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(45, 33, 25, 0.85);
+}
+
+.equipped-tile.is-empty {
+  border-color: rgba(74, 43, 23, 0.55);
+  background: linear-gradient(180deg, rgba(255, 247, 229, 0.75), rgba(139, 155, 146, 0.72));
+  color: var(--muted);
+  text-shadow: none;
+}
+
+.equipped-tile-image {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 247, 229, 0.86);
+  color: var(--equipment-color, #4a2b17);
+  font-size: 13px;
+  font-weight: 900;
+  transform: translateX(-50%);
+}
+
+.equipped-tile-grade {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.equipped-tile strong {
+  overflow: hidden;
+  display: block;
+  color: inherit;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.equipment-draw-button {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  border: 3px solid #4a2b17;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 28%, #fff4bc 0 18%, #f2b84b 42%, #b85c22 100%);
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.74);
+  transform: translateX(-50%);
+  box-shadow: 0 7px 0 rgba(74, 43, 23, 0.55), 0 0 18px rgba(242, 184, 75, 0.55);
+  pointer-events: auto;
+}
+
+.equipment-draw-button span {
+  font-size: 15px;
+}
+
+.equipment-draw-button strong {
+  font-size: 10px;
+}
+
+.equipment-draw-button:disabled {
+  filter: grayscale(0.45);
+}
+
+.equipment-draw-button.is-unaffordable {
+  filter: grayscale(0.35);
+  opacity: 0.78;
+}
+
+.equipment-draw-button.has-pending {
+  animation: equipment-pulse 0.8s ease-in-out infinite alternate;
+}
+
+.auto-draw-button {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  min-width: 92px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 2px solid #4a2b17;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #376f56 0%, #1f4636 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.6);
+  transform: translateX(-50%);
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.42);
+  pointer-events: auto;
+}
+
+.auto-draw-button.is-running {
+  background: linear-gradient(180deg, #f2b84b 0%, #b85c22 100%);
+}
+
+.equipment-choice {
+  position: absolute;
+  left: 50%;
+  bottom: 118px;
+  width: min(88%, 360px);
+  padding: 10px;
+  border: 2px solid #4a2b17;
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.94);
+  box-shadow: 0 10px 24px rgba(45, 33, 25, 0.28);
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.equipment-upgrade-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: min(265px, calc(100% - 20px));
+  padding: 8px;
+  border: 2px solid #4a2b17;
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.88);
+  box-shadow: 0 6px 18px rgba(45, 33, 25, 0.22);
+  pointer-events: auto;
+}
+
+.equipment-upgrade-label,
+.equipment-upgrade-panel small,
+.equipment-upgrade-panel p {
+  display: block;
+}
+
+.equipment-upgrade-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.equipment-upgrade-panel strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+.equipment-upgrade-panel p,
+.equipment-upgrade-panel small {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.equipment-upgrade-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.equipment-upgrade-actions button {
+  min-height: 32px;
+  padding: 5px 6px;
+  border: 2px solid #4a2b17;
+  border-radius: 6px;
+  background: linear-gradient(180deg, var(--accent-gold) 0%, var(--accent) 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.6);
+}
+
+.equipment-upgrade-actions button:disabled {
+  filter: grayscale(0.55);
+}
+
+.equipment-upgrade-actions button:last-child {
+  background: linear-gradient(180deg, #376f56 0%, #1f4636 100%);
+}
+
+.equipment-upgrade-panel.is-upgrading {
+  box-shadow: 0 6px 18px rgba(45, 33, 25, 0.22), 0 0 0 2px rgba(35, 139, 101, 0.28);
+}
+
+.equipment-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.equipment-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 2px solid #4a2b17;
+  border-radius: 50%;
+  background: var(--equipment-color, var(--accent-gold));
+  color: #fff;
+  font-weight: 900;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.4);
+}
+
+.equipment-card strong,
+.equipment-card p {
+  margin: 0;
+}
+
+.equipment-card p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.stat-positive {
+  color: #15803d;
+  font-weight: 900;
+}
+
+.stat-negative {
+  color: #b91c1c;
+  font-weight: 900;
+}
+
+.stat-neutral {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.equipment-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.equipment-actions button {
+  min-height: 36px;
+  border: 2px solid #4a2b17;
+  border-radius: 6px;
+  background: linear-gradient(180deg, var(--accent-gold) 0%, var(--accent) 100%);
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.6);
+}
+
+.equipment-actions button:last-child {
+  background: linear-gradient(180deg, #8b9b92 0%, #42554d 100%);
+}
+
 .ally {
   position: absolute;
   left: var(--ally-x);
@@ -1088,6 +1444,15 @@ h1 {
   to {
     opacity: 0;
     transform: translateX(-50%) scale(1.7);
+  }
+}
+
+@keyframes equipment-pulse {
+  from {
+    transform: translateX(-50%) scale(1);
+  }
+  to {
+    transform: translateX(-50%) scale(1.06);
   }
 }
 
@@ -1661,6 +2026,53 @@ h1 {
 
   .enemy {
     width: 124px;
+  }
+
+  .equipment-draw-button {
+    bottom: 28px;
+    width: 68px;
+    height: 68px;
+  }
+
+  .auto-draw-button {
+    bottom: 4px;
+    min-width: 84px;
+    min-height: 28px;
+    font-size: 11px;
+  }
+
+  .equipped-item-panel {
+    top: 8px;
+    left: 8px;
+    width: min(300px, calc(100% - 16px));
+    padding: 7px;
+  }
+
+  .equipped-item-panel.is-collapsed {
+    width: min(220px, calc(100% - 16px));
+  }
+
+  .equipped-tile {
+    min-height: 58px;
+    padding: 4px;
+  }
+
+  .equipped-tile-image {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+  }
+
+  .equipment-choice {
+    bottom: 104px;
+    width: calc(100% - 24px);
+  }
+
+  .equipment-upgrade-panel {
+    top: 108px;
+    right: 8px;
+    width: min(300px, calc(100% - 16px));
+    padding: 7px;
   }
 
   .enemy-sprite {

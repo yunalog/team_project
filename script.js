@@ -7,6 +7,8 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
+const EQUIPMENT_DRAW_COST = 10;
+const SPEED_TICKET_SECONDS = 600;
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
@@ -129,6 +131,37 @@ const tools = [
   },
 ];
 
+const equipmentSlots = [
+  { id: "eyewear", name: "안경" },
+  { id: "chair", name: "의자" },
+  { id: "keyboard", name: "키보드" },
+  { id: "deskItem", name: "사무용품" },
+  { id: "notebook", name: "노트" },
+];
+
+const equipmentPool = [
+  { id: "glasses", slot: "eyewear", name: "집중 안경", icon: "안", image: "", power: [1, 4], skill: [1, 3] },
+  { id: "chair", slot: "chair", name: "인체공학 의자", icon: "의", image: "", power: [2, 5], skill: [1, 4] },
+  { id: "keyboard", slot: "keyboard", name: "기계식 키보드", icon: "키", image: "", power: [1, 6], skill: [2, 5] },
+  { id: "mug", slot: "deskItem", name: "야근 머그컵", icon: "컵", image: "", power: [3, 7], skill: [1, 3] },
+  { id: "notebook", slot: "notebook", name: "아이디어 노트", icon: "노", image: "", power: [2, 4], skill: [2, 6] },
+];
+
+const equipmentGrades = [
+  { name: "일반", chance: 0.55, multiplier: 1, color: "#6f6251" },
+  { name: "희귀", chance: 0.3, multiplier: 1.45, color: "#238b65" },
+  { name: "영웅", chance: 0.12, multiplier: 2.1, color: "#7c3aed" },
+  { name: "전설", chance: 0.03, multiplier: 3.2, color: "#b85c22" },
+];
+
+const equipmentUpgradeConfigs = [
+  { level: 1, label: "1단계", maxGrade: 1, nextCost: 20, duration: 0, desc: "일반/희귀 장비 등장" },
+  { level: 2, label: "2단계", maxGrade: 2, nextCost: 45, duration: 180, desc: "영웅 장비 등장" },
+  { level: 3, label: "3단계", maxGrade: 2, nextCost: 90, duration: 420, desc: "희귀 이상 확률 상승" },
+  { level: 4, label: "4단계", maxGrade: 3, nextCost: 160, duration: 900, desc: "전설 장비 등장" },
+  { level: 5, label: "5단계", maxGrade: 3, nextCost: 0, duration: 0, desc: "최대 연구 단계" },
+];
+
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
 
 const defaultState = {
@@ -151,6 +184,15 @@ const defaultState = {
   squad: [null, null, null, null],
   squadConfigured: false,
   tools: {},
+  equipment: {
+    equipped: {},
+    pending: null,
+    drawCount: 0,
+    gradeLevel: 1,
+    upgradeRemaining: 0,
+    upgradingTo: null,
+    speedTickets: 3,
+  },
 };
 
 let state;
@@ -169,6 +211,8 @@ let titleBgmUnlockArmed = false;
 let audioSettings = { ...defaultAudioSettings };
 let activeTab = "battle";
 let lastCompanyVisualKey = "";
+let autoDrawTimer = null;
+let equipmentPanelExpanded = false;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -223,6 +267,25 @@ function initGame() {
     manualWorkButton: document.querySelector("#manualWorkButton"),
     upgradePlayerButton: document.querySelector("#upgradePlayerButton"),
     nextStageButton: document.querySelector("#nextStageButton"),
+    equipmentDrawButton: document.querySelector("#equipmentDrawButton"),
+    equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
+    autoDrawButton: document.querySelector("#autoDrawButton"),
+    equippedItemPanel: document.querySelector("#equippedItemPanel"),
+    equippedGradeBlocks: document.querySelector("#equippedGradeBlocks"),
+    equippedItemList: document.querySelector("#equippedItemList"),
+    equippedItemStats: document.querySelector("#equippedItemStats"),
+    equipmentUpgradePanel: document.querySelector("#equipmentUpgradePanel"),
+    equipmentGradeText: document.querySelector("#equipmentGradeText"),
+    equipmentUpgradeTimer: document.querySelector("#equipmentUpgradeTimer"),
+    equipmentUpgradeButton: document.querySelector("#equipmentUpgradeButton"),
+    speedTicketButton: document.querySelector("#speedTicketButton"),
+    speedTicketText: document.querySelector("#speedTicketText"),
+    equipmentChoice: document.querySelector("#equipmentChoice"),
+    equipmentIcon: document.querySelector("#equipmentIcon"),
+    equipmentName: document.querySelector("#equipmentName"),
+    equipmentBonus: document.querySelector("#equipmentBonus"),
+    equipItemButton: document.querySelector("#equipItemButton"),
+    discardItemButton: document.querySelector("#discardItemButton"),
     saveButton: document.querySelector("#saveButton"),
     resetButton: document.querySelector("#resetButton"),
     returnTitleButton: document.querySelector("#returnTitleButton"),
@@ -260,7 +323,7 @@ function bindEvents() {
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
-    attackUnit(getPlayerUnit(state.clickPower), { manual: true });
+    attackUnit(getPlayerUnit(getManualPower()), { manual: true });
   });
   refs.upgradePlayerButton.addEventListener("click", upgradePlayer);
   refs.nextStageButton.addEventListener("click", () => {
@@ -268,6 +331,13 @@ function bindEvents() {
     spawnWave();
     renderAll();
   });
+  refs.equipmentDrawButton.addEventListener("click", drawEquipment);
+  refs.autoDrawButton.addEventListener("click", toggleAutoDraw);
+  refs.equippedItemPanel.addEventListener("click", toggleEquipmentPanel);
+  refs.equipItemButton.addEventListener("click", equipPendingEquipment);
+  refs.discardItemButton.addEventListener("click", discardPendingEquipment);
+  refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
+  refs.speedTicketButton.addEventListener("click", useSpeedTicket);
   refs.saveButton.addEventListener("click", () => saveState("수동 저장 완료"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
@@ -426,6 +496,11 @@ function getBattleBgmKey() {
   return state.battleMode === "boss" ? "boss" : "field";
 }
 
+function toggleEquipmentPanel() {
+  equipmentPanelExpanded = !equipmentPanelExpanded;
+  renderEquippedItems();
+}
+
 function armTitleBgmUnlock() {
   if (titleBgmUnlockArmed) return;
 
@@ -465,6 +540,7 @@ function tick(delta) {
 
     moveEnemies(delta);
     updateAutoCombat(delta);
+    updateEquipmentUpgrade(delta);
 
     if (saveCooldown >= 10) {
       saveCooldown = 0;
@@ -517,6 +593,7 @@ function normalizeState(nextState) {
     squad: normalizeSquad(nextState.squad, nextState.recruits, !nextState.squadConfigured),
     squadConfigured: Boolean(nextState.squadConfigured),
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
+    equipment: normalizeEquipment(nextState.equipment),
   };
 }
 
@@ -548,6 +625,62 @@ function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
   }
 
   return normalized;
+}
+
+function normalizeEquipment(equipment) {
+  const safeEquipment = equipment && typeof equipment === "object" ? equipment : {};
+  return {
+    equipped: normalizeEquippedItems(safeEquipment.equipped),
+    pending: normalizeEquipmentItem(safeEquipment.pending),
+    drawCount: Math.max(0, Number(safeEquipment.drawCount) || 0),
+    gradeLevel: Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(safeEquipment.gradeLevel) || 1)),
+    upgradeRemaining: Math.max(0, Number(safeEquipment.upgradeRemaining) || 0),
+    upgradingTo: safeEquipment.upgradingTo ? Number(safeEquipment.upgradingTo) : null,
+    speedTickets: Math.max(0, Number(safeEquipment.speedTickets) || 0),
+  };
+}
+
+function normalizeEquippedItems(equipped) {
+  const normalized = {};
+  if (!equipped || typeof equipped !== "object") return normalized;
+
+  if ("powerBonus" in equipped || "skillBonus" in equipped || "clickBonus" in equipped) {
+    const legacyItem = normalizeEquipmentItem(equipped);
+    if (legacyItem) normalized[legacyItem.slot] = legacyItem;
+    return normalized;
+  }
+
+  equipmentSlots.forEach((slot) => {
+    const item = normalizeEquipmentItem(equipped[slot.id]);
+    if (item) normalized[slot.id] = item;
+  });
+  return normalized;
+}
+
+function normalizeEquipmentItem(item) {
+  if (!item || typeof item !== "object") return null;
+
+  const slot = getEquipmentSlotId(item.slot || inferEquipmentSlot(item.id));
+  return {
+    id: String(item.id || "unknown"),
+    slot,
+    name: String(item.name || "이름 없는 장비"),
+    icon: String(item.icon || "?"),
+    image: String(item.image || ""),
+    grade: String(item.grade || "일반"),
+    gradeColor: String(item.gradeColor || "#6f6251"),
+    powerBonus: Math.max(0, Number(item.powerBonus) || 0),
+    skillBonus: Math.max(0, Number(item.skillBonus ?? item.clickBonus) || 0),
+  };
+}
+
+function inferEquipmentSlot(id) {
+  const base = equipmentPool.find((item) => item.id === id || String(id || "").startsWith(`${item.id}-`));
+  return base ? base.slot : equipmentSlots[0].id;
+}
+
+function getEquipmentSlotId(slotId) {
+  return equipmentSlots.some((slot) => slot.id === slotId) ? slotId : equipmentSlots[0].id;
 }
 
 function saveState(message) {
@@ -638,11 +771,22 @@ function getWaveEnemyCount() {
 }
 
 function getEnemyHp() {
-  return Math.floor(6 + state.chapter * 2.2 + state.subStage * 1.4);
+  const stageBase = 6 + state.chapter * 2.2 + state.subStage * 1.4;
+  const growthBonus = getDifficultyGrowthPower() * (0.18 + state.chapter * 0.012);
+  return Math.floor(stageBase + growthBonus);
 }
 
 function getBossHp() {
-  return Math.floor(getEnemyHp() * (5.5 + state.chapter * 0.4));
+  const bossScale = 5.5 + state.chapter * 0.4 + getDifficultyGrowthPower() * 0.012;
+  return Math.floor(getEnemyHp() * bossScale);
+}
+
+function getDifficultyGrowthPower() {
+  const recruitPower = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
+  const equipmentPower = getEquippedItems().reduce((sum, item) => sum + item.powerBonus + item.skillBonus, 0);
+  const toolPower = tools.reduce((sum, tool) => sum + getToolLevel(tool.id) * ((tool.click || 0) + (tool.dps || 0)), 0);
+  const upgradePower = Math.max(0, state.playerLevel - 1) * 1.3 + Math.max(0, state.clickPower - 1) * 0.6;
+  return Math.max(0, upgradePower + recruitPower + equipmentPower + toolPower);
 }
 
 function getEnemyLaneY(index) {
@@ -728,7 +872,8 @@ function castSkill(unit, from) {
   playSkillEffect(unit, targets);
 
   targets.forEach((target, index) => {
-    const damage = Math.ceil(unit.power * unit.skill.multiplier + state.playerLevel * 0.6);
+    const skillPower = unit.id === "player" ? getPlayerSkillPower() : unit.power;
+    const damage = Math.ceil(skillPower * unit.skill.multiplier + state.playerLevel * 0.6);
     window.setTimeout(() => damageEnemy(target.id, damage, false), 120 + index * 70);
   });
 
@@ -914,7 +1059,7 @@ function pulseUnit(unitId, className, duration) {
   window.setTimeout(() => ally.classList.remove(className), duration);
 }
 
-function getPlayerUnit(power = state.playerLevel) {
+function getPlayerUnit(power = getPlayerPower()) {
   return {
     id: "player",
     name: "대표",
@@ -1084,6 +1229,285 @@ function buyTool(id) {
   renderAll();
 }
 
+function getEquipmentDrawCost() {
+  return EQUIPMENT_DRAW_COST;
+}
+
+function drawEquipment() {
+  if (state.equipment.pending) return;
+
+  const cost = getEquipmentDrawCost();
+  if (state.gold < cost) {
+    log(`장비 뽑기에는 자금 ${cost}이 필요합니다.`);
+    return;
+  }
+
+  state.gold -= cost;
+  state.equipment.drawCount += 1;
+  state.equipment.pending = createEquipmentItem();
+  log(`${state.equipment.pending.grade} ${state.equipment.pending.name}을 뽑았습니다.`);
+  renderAll();
+}
+
+function toggleAutoDraw() {
+  if (isAutoDrawing()) {
+    stopAutoDraw("자동 뽑기를 중지했습니다.");
+    return;
+  }
+
+  if (state.equipment.pending) {
+    log("먼저 뽑힌 장비를 장착하거나 버려주세요.");
+    return;
+  }
+
+  startAutoDraw();
+}
+
+function startAutoDraw() {
+  if (isAutoDrawing()) return;
+
+  log("공격력과 스킬 공격력이 모두 증가하는 장비가 나올 때까지 자동 뽑기를 시작합니다.");
+  autoDrawTimer = window.setTimeout(runAutoDrawStep, 120);
+  renderEquipment();
+}
+
+function stopAutoDraw(message) {
+  if (autoDrawTimer) {
+    window.clearTimeout(autoDrawTimer);
+    autoDrawTimer = null;
+  }
+  if (message) log(message);
+  renderEquipment();
+}
+
+function isAutoDrawing() {
+  return Boolean(autoDrawTimer);
+}
+
+function runAutoDrawStep() {
+  autoDrawTimer = null;
+
+  if (state.equipment.pending) {
+    stopAutoDraw();
+    return;
+  }
+
+  const cost = getEquipmentDrawCost();
+  if (state.gold < cost) {
+    stopAutoDraw(`자동 뽑기를 중지했습니다. 자금 ${cost}이 필요합니다.`);
+    return;
+  }
+
+  state.gold -= cost;
+  state.equipment.drawCount += 1;
+
+  const item = createEquipmentItem();
+  const equipped = getEquippedItem(item.slot);
+  if (hasPositiveEquipmentGain(item, equipped)) {
+    state.equipment.pending = item;
+    log(`${item.grade} ${item.name}에서 공격력과 스킬 공격력 상승을 발견했습니다.`);
+    renderAll();
+    return;
+  }
+
+  state.idea += getEquipmentDiscardRefund(item);
+  log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
+  autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
+  renderAll();
+}
+
+function createEquipmentItem() {
+  const base = equipmentPool[Math.floor(Math.random() * equipmentPool.length)];
+  const grade = pickEquipmentGrade();
+  const powerBonus = rollEquipmentValue(base.power, grade.multiplier);
+  const skillBonus = rollEquipmentValue(base.skill, grade.multiplier);
+
+  return {
+    id: `${base.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    slot: base.slot,
+    name: base.name,
+    icon: base.icon,
+    image: base.image,
+    grade: grade.name,
+    gradeColor: grade.color,
+    powerBonus,
+    skillBonus,
+  };
+}
+
+function pickEquipmentGrade() {
+  const gradeLevel = getEquipmentGradeLevel();
+  const config = getEquipmentUpgradeConfig(gradeLevel);
+  const candidates = equipmentGrades
+    .slice(0, config.maxGrade + 1)
+    .map((grade, index) => ({
+      ...grade,
+      chance: getAdjustedGradeChance(grade.chance, index, gradeLevel),
+    }));
+  const chanceSum = candidates.reduce((sum, grade) => sum + grade.chance, 0);
+  const roll = Math.random();
+  let total = 0;
+  for (const grade of candidates) {
+    total += grade.chance / chanceSum;
+    if (roll <= total) return grade;
+  }
+  return candidates[0];
+}
+
+function getAdjustedGradeChance(baseChance, gradeIndex, gradeLevel) {
+  if (gradeLevel < 3) return baseChance;
+  const bonus = gradeIndex === 0 ? -0.18 : gradeIndex * 0.08;
+  return Math.max(0.05, baseChance + bonus);
+}
+
+function rollEquipmentValue(range, multiplier) {
+  const [min, max] = range;
+  const value = min + Math.floor(Math.random() * (max - min + 1));
+  return Math.max(0, Math.ceil(value * multiplier));
+}
+
+function equipPendingEquipment() {
+  if (!state.equipment.pending) return;
+
+  state.equipment.equipped[state.equipment.pending.slot] = state.equipment.pending;
+  state.equipment.pending = null;
+  log("대표 장비를 장착했습니다.");
+  renderAll();
+}
+
+function discardPendingEquipment() {
+  if (!state.equipment.pending) return;
+
+  const refund = getEquipmentDiscardRefund(state.equipment.pending);
+  state.idea += refund;
+  state.equipment.pending = null;
+  log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
+  renderAll();
+}
+
+function hasPositiveEquipmentGain(item, equipped = getEquippedItem(item.slot)) {
+  const currentPower = equipped ? equipped.powerBonus : 0;
+  const currentSkill = equipped ? equipped.skillBonus : 0;
+  return item.powerBonus > currentPower && item.skillBonus > currentSkill;
+}
+
+function getEquipmentDiscardRefund(item) {
+  return Math.max(1, Math.floor(getEquipmentScore(item) / 2));
+}
+
+function getMaxEquipmentUpgradeLevel() {
+  return equipmentUpgradeConfigs[equipmentUpgradeConfigs.length - 1].level;
+}
+
+function getEquipmentGradeLevel() {
+  return Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(state.equipment.gradeLevel) || 1));
+}
+
+function getEquipmentUpgradeConfig(level = getEquipmentGradeLevel()) {
+  return equipmentUpgradeConfigs.find((config) => config.level === level) || equipmentUpgradeConfigs[0];
+}
+
+function getNextEquipmentUpgradeConfig() {
+  return equipmentUpgradeConfigs.find((config) => config.level === getEquipmentGradeLevel() + 1) || null;
+}
+
+function isEquipmentUpgrading() {
+  return Boolean(state.equipment.upgradingTo) && state.equipment.upgradeRemaining > 0;
+}
+
+function startEquipmentUpgrade() {
+  if (isEquipmentUpgrading()) return;
+
+  const nextConfig = getNextEquipmentUpgradeConfig();
+  if (!nextConfig) {
+    log("장비 연구가 최대 단계입니다.");
+    return;
+  }
+
+  if (state.idea < nextConfig.nextCost) {
+    log(`장비 연구에는 아이디어 ${nextConfig.nextCost}이 필요합니다.`);
+    return;
+  }
+
+  state.idea -= nextConfig.nextCost;
+  state.equipment.upgradingTo = nextConfig.level;
+  state.equipment.upgradeRemaining = nextConfig.duration;
+  log(`장비 연구 ${nextConfig.label} 진행을 시작했습니다.`);
+  renderAll();
+}
+
+function updateEquipmentUpgrade(delta) {
+  if (!isEquipmentUpgrading()) return;
+
+  state.equipment.upgradeRemaining = Math.max(0, state.equipment.upgradeRemaining - delta);
+  if (state.equipment.upgradeRemaining > 0) return;
+
+  completeEquipmentUpgrade();
+}
+
+function completeEquipmentUpgrade() {
+  if (!state.equipment.upgradingTo) return;
+
+  state.equipment.gradeLevel = Math.max(getEquipmentGradeLevel(), state.equipment.upgradingTo);
+  state.equipment.upgradingTo = null;
+  state.equipment.upgradeRemaining = 0;
+  log(`장비 연구가 ${getEquipmentUpgradeConfig().label}로 상승했습니다.`);
+  renderAll();
+}
+
+function useSpeedTicket() {
+  if (!isEquipmentUpgrading()) {
+    log("진행 중인 장비 연구가 없습니다.");
+    return;
+  }
+
+  if (state.equipment.speedTickets <= 0) {
+    log("사용할 가속티켓이 없습니다.");
+    return;
+  }
+
+  state.equipment.speedTickets -= 1;
+  state.equipment.upgradeRemaining = Math.max(0, state.equipment.upgradeRemaining - SPEED_TICKET_SECONDS);
+  if (state.equipment.upgradeRemaining <= 0) {
+    completeEquipmentUpgrade();
+  } else {
+    log("가속티켓을 사용해 연구 시간을 10분 단축했습니다.");
+    renderBattle();
+  }
+}
+
+function getEquippedItem(slotId) {
+  if (!state.equipment || !state.equipment.equipped) return null;
+  if (!slotId) return null;
+  return state.equipment.equipped[slotId] || null;
+}
+
+function getEquippedItems() {
+  if (!state.equipment || !state.equipment.equipped) return [];
+  return equipmentSlots.map((slot) => state.equipment.equipped[slot.id]).filter(Boolean);
+}
+
+function getPendingEquipment() {
+  return state.equipment && state.equipment.pending ? state.equipment.pending : null;
+}
+
+function getEquipmentScore(item) {
+  if (!item) return 0;
+  return item.powerBonus + item.skillBonus;
+}
+
+function getPlayerPower() {
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
+}
+
+function getPlayerSkillPower() {
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
+}
+
+function getManualPower() {
+  return state.clickPower;
+}
+
 function upgradePlayer() {
   const cost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
   if (state.gold < cost) return;
@@ -1123,13 +1547,117 @@ function renderBattle() {
   setText(refs.dpsText, `초당 기여도 ${getTotalDps()}`);
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
-  setText(refs.clickPowerText, state.clickPower);
+  setText(refs.clickPowerText, getManualPower());
   setText(refs.clearCountText, `${state.clearCount}건`);
   setText(refs.playTimeText, formatTime(state.elapsed));
   setText(refs.attackTimerText, `${Math.max(0, Math.min(basicAttackCooldown, skillAttackCooldown)).toFixed(1)}초`);
   refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
   refs.upgradePlayerButton.disabled = state.gold < playerCost;
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
+  renderEquipment();
+}
+
+function renderEquipment() {
+  const pending = getPendingEquipment();
+  const equipped = pending ? getEquippedItem(pending.slot) : null;
+  const cost = getEquipmentDrawCost();
+
+  refs.equipmentDrawCost.textContent = `${cost} 자금`;
+  refs.equipmentDrawButton.disabled = Boolean(pending) || isAutoDrawing();
+  refs.equipmentDrawButton.classList.toggle("is-unaffordable", state.gold < cost && !pending);
+  refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
+  refs.autoDrawButton.textContent = isAutoDrawing() ? "자동 중지" : "자동 뽑기";
+  refs.autoDrawButton.disabled = Boolean(pending);
+  refs.autoDrawButton.classList.toggle("is-running", isAutoDrawing());
+  renderEquippedItems();
+  renderEquipmentUpgrade();
+
+  refs.equipmentChoice.classList.toggle("is-hidden", !pending);
+  if (!pending) return;
+
+  refs.equipmentIcon.textContent = pending.icon;
+  refs.equipmentIcon.style.setProperty("--equipment-color", pending.gradeColor);
+  refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
+  refs.equipmentName.style.color = pending.gradeColor;
+  refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
+}
+
+function renderEquippedItems() {
+  const equippedItems = getEquippedItems();
+  const totalPower = equippedItems.reduce((sum, item) => sum + item.powerBonus, 0);
+  const totalSkill = equippedItems.reduce((sum, item) => sum + item.skillBonus, 0);
+
+  refs.equippedItemPanel.classList.toggle("is-empty", equippedItems.length === 0);
+  refs.equippedItemPanel.classList.toggle("is-collapsed", !equipmentPanelExpanded);
+  refs.equippedItemPanel.setAttribute("aria-expanded", String(equipmentPanelExpanded));
+  refs.equippedItemStats.textContent = `공격력 +${totalPower} / 스킬 공격력 +${totalSkill}`;
+  refs.equippedGradeBlocks.innerHTML = equipmentSlots
+    .map((slot) => {
+      const item = getEquippedItem(slot.id);
+      const color = item ? item.gradeColor : "rgba(74, 43, 23, 0.28)";
+      const label = item ? item.grade : "비어있음";
+      return `<span class="equipped-grade-block" title="${slot.name}: ${label}" style="--equipment-color: ${color};"></span>`;
+    })
+    .join("");
+  refs.equippedItemList.innerHTML = equipmentSlots
+    .map((slot) => {
+      const item = getEquippedItem(slot.id);
+      if (!item) {
+        return `
+          <div class="equipped-tile is-empty">
+            <span class="equipped-tile-image">${slot.name.slice(0, 1)}</span>
+            <span class="equipped-tile-grade">비어있음</span>
+            <strong>${slot.name}</strong>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="equipped-tile" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
+          <span class="equipped-tile-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-tile-grade">${item.grade}</span>
+          <strong>${item.name}</strong>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderEquipmentUpgrade() {
+  const currentConfig = getEquipmentUpgradeConfig();
+  const nextConfig = getNextEquipmentUpgradeConfig();
+  const upgrading = isEquipmentUpgrading();
+
+  refs.equipmentGradeText.textContent = `${currentConfig.label} · ${currentConfig.desc}`;
+  refs.equipmentUpgradePanel.classList.toggle("is-upgrading", upgrading);
+
+  if (upgrading) {
+    refs.equipmentUpgradeTimer.textContent = `${getEquipmentUpgradeConfig(state.equipment.upgradingTo).label} 완료까지 ${formatTime(state.equipment.upgradeRemaining)}`;
+  } else if (nextConfig) {
+    refs.equipmentUpgradeTimer.textContent = `${nextConfig.label} 연구: 아이디어 ${nextConfig.nextCost} · ${formatTime(nextConfig.duration)}`;
+  } else {
+    refs.equipmentUpgradeTimer.textContent = "최대 연구 단계입니다.";
+  }
+
+  refs.equipmentUpgradeButton.textContent = upgrading ? "연구 진행 중" : nextConfig ? "등급 업그레이드" : "최대 단계";
+  refs.equipmentUpgradeButton.disabled = upgrading || !nextConfig || state.idea < nextConfig.nextCost;
+  refs.speedTicketButton.disabled = !upgrading || state.equipment.speedTickets <= 0;
+  refs.speedTicketText.textContent = `보유 ${state.equipment.speedTickets}장 · 1장당 10분`;
+}
+
+function formatEquipmentBonus(item, equipped) {
+  const slot = equipmentSlots.find((equipmentSlot) => equipmentSlot.id === item.slot);
+  const currentPower = equipped ? equipped.powerBonus : 0;
+  const currentSkill = equipped ? equipped.skillBonus : 0;
+  const powerDiff = item.powerBonus - currentPower;
+  const skillDiff = item.skillBonus - currentSkill;
+  return `${slot ? slot.name : "장비"} · 공격력 <span class="stat-positive">+${item.powerBonus}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${item.skillBonus}</span> (${formatDiff(skillDiff)})`;
+}
+
+function formatDiff(value) {
+  if (value > 0) return `<span class="stat-positive">+${value}</span>`;
+  if (value < 0) return `<span class="stat-negative">${value}</span>`;
+  return `<span class="stat-neutral">0</span>`;
 }
 
 function updatePrimaryScene() {
