@@ -643,7 +643,7 @@ function getEnemyHp() {
 }
 
 function getBossHp() {
-  const bossScale = 5.5 + state.chapter * 0.4 + getDifficultyGrowthPower() * 0.012;
+  const bossScale = 3.1 + state.chapter * 0.18;
   return Math.floor(getEnemyHp() * bossScale);
 }
 
