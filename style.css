@@ -2870,3 +2870,188 @@ html, body {
   font-family: var(--pixel-font) !important;
   font-synthesis-weight: auto;
 }
+
+/* =========================================================
+   UI FONT SIZE NORMALIZATION
+   - Neo둥근모 적용 후 들쭉날쭉해진 글자 크기를 UI 계층별로 통일
+   - 기존 개별 font-size 선언을 최하단에서 덮어씀
+   ========================================================= */
+:root {
+  --ui-font-xs: 11px;
+  --ui-font-sm: 12px;
+  --ui-font-md: 13px;
+  --ui-font-lg: 15px;
+  --ui-font-title: 20px;
+  --ui-font-display: 24px;
+}
+
+html,
+body,
+.app,
+.phone,
+.game-shell,
+.screen,
+.panel,
+.tab-panel,
+.page,
+.section,
+.card,
+p,
+span,
+li,
+label,
+small,
+div {
+  font-size: var(--ui-font-md) !important;
+  line-height: 1.45 !important;
+}
+
+h1,
+.title,
+.game-title,
+.logo-title {
+  font-size: var(--ui-font-title) !important;
+  line-height: 1.2 !important;
+}
+
+h2,
+.panel-title,
+.section-title,
+.facility-heading h2,
+.recruit-title,
+.company-title,
+.setting-title {
+  font-size: var(--ui-font-lg) !important;
+  line-height: 1.3 !important;
+}
+
+h3,
+h4,
+.card-title,
+.member-name,
+.equipment-name,
+.facility-copy strong,
+.growth-card strong,
+.shop-item strong,
+.stat-title,
+.rank-title {
+  font-size: var(--ui-font-md) !important;
+  line-height: 1.35 !important;
+}
+
+button,
+.btn,
+.start-button,
+.tab-button,
+.title-return-button,
+.mute-button,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.equipment-draw-button,
+.auto-draw-button,
+input,
+select,
+textarea {
+  font-size: var(--ui-font-md) !important;
+  line-height: 1.25 !important;
+}
+
+.tab-button {
+  font-size: var(--ui-font-lg) !important;
+}
+
+.resource-row,
+.resource-row span,
+.stat-row,
+.stat-item,
+.stat-value,
+.battle-stat,
+.stage-info,
+.boss-hp-text,
+.member-stat,
+.equipment-stat,
+.save-state,
+.recruit-cost,
+.company-stat,
+.setting-row {
+  font-size: var(--ui-font-md) !important;
+  line-height: 1.35 !important;
+}
+
+.eyebrow,
+.help,
+.help-text,
+.description,
+.desc,
+.caption,
+.notice,
+.hint,
+.squad-help,
+.facility-heading small,
+.facility-copy span,
+.growth-card span,
+.shop-item span,
+.member-desc,
+.equipment-desc,
+.empty-text,
+.require-text,
+.cooldown-text,
+.log,
+.battle-log,
+.recruit-help,
+.company-help,
+.setting-help {
+  font-size: var(--ui-font-sm) !important;
+  line-height: 1.45 !important;
+}
+
+.badge,
+.tag,
+.level-badge,
+.rarity-badge,
+.role-badge,
+.facility-icon,
+.member-role,
+.equipment-grade {
+  font-size: var(--ui-font-xs) !important;
+  line-height: 1.2 !important;
+}
+
+/* 전투 연출 숫자는 UI 가독성을 위해 예외적으로 크게 유지하되, 크기 규칙은 통일 */
+.damage-number {
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+.damage-number.is-critical {
+  font-size: 28px !important;
+  line-height: 1 !important;
+}
+
+/* 타이틀/시작 화면의 큰 문구는 전체 UI보다 한 단계 크게만 유지 */
+.title-screen h1,
+.title-logo,
+.start-title,
+.main-title {
+  font-size: var(--ui-font-display) !important;
+  line-height: 1.15 !important;
+}
+
+/* 모바일에서 과하게 커지거나 줄바꿈이 심해지는 부분 보정 */
+@media (max-width: 430px) {
+  :root {
+    --ui-font-xs: 10px;
+    --ui-font-sm: 11px;
+    --ui-font-md: 12px;
+    --ui-font-lg: 14px;
+    --ui-font-title: 18px;
+    --ui-font-display: 22px;
+  }
+
+  .tab-button {
+    font-size: 13px !important;
+  }
+}
