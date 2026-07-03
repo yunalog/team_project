@@ -158,6 +158,7 @@ let hasStartedGame = false;
 let titleBgmUnlockArmed = false;
 let audioSettings = { ...defaultAudioSettings };
 let autoDrawTimer = null;
+let equipmentPanelExpanded = false;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -198,6 +199,7 @@ function initGame() {
     equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
     autoDrawButton: document.querySelector("#autoDrawButton"),
     equippedItemPanel: document.querySelector("#equippedItemPanel"),
+    equippedGradeBlocks: document.querySelector("#equippedGradeBlocks"),
     equippedItemList: document.querySelector("#equippedItemList"),
     equippedItemStats: document.querySelector("#equippedItemStats"),
     equipmentUpgradePanel: document.querySelector("#equipmentUpgradePanel"),
@@ -259,6 +261,7 @@ function bindEvents() {
   });
   refs.equipmentDrawButton.addEventListener("click", drawEquipment);
   refs.autoDrawButton.addEventListener("click", toggleAutoDraw);
+  refs.equippedItemPanel.addEventListener("click", toggleEquipmentPanel);
   refs.equipItemButton.addEventListener("click", equipPendingEquipment);
   refs.discardItemButton.addEventListener("click", discardPendingEquipment);
   refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
@@ -389,6 +392,11 @@ function handleAudioInput(event) {
 
 function getBattleBgmKey() {
   return state.battleMode === "boss" ? "boss" : "field";
+}
+
+function toggleEquipmentPanel() {
+  equipmentPanelExpanded = !equipmentPanelExpanded;
+  renderEquippedItems();
 }
 
 function armTitleBgmUnlock() {
@@ -627,11 +635,22 @@ function getWaveEnemyCount() {
 }
 
 function getEnemyHp() {
-  return Math.floor(6 + state.chapter * 2.2 + state.subStage * 1.4);
+  const stageBase = 6 + state.chapter * 2.2 + state.subStage * 1.4;
+  const growthBonus = getDifficultyGrowthPower() * (0.18 + state.chapter * 0.012);
+  return Math.floor(stageBase + growthBonus);
 }
 
 function getBossHp() {
-  return Math.floor(getEnemyHp() * (5.5 + state.chapter * 0.4));
+  const bossScale = 5.5 + state.chapter * 0.4 + getDifficultyGrowthPower() * 0.012;
+  return Math.floor(getEnemyHp() * bossScale);
+}
+
+function getDifficultyGrowthPower() {
+  const recruitPower = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
+  const equipmentPower = getEquippedItems().reduce((sum, item) => sum + item.powerBonus + item.skillBonus, 0);
+  const toolPower = tools.reduce((sum, tool) => sum + getToolLevel(tool.id) * ((tool.click || 0) + (tool.dps || 0)), 0);
+  const upgradePower = Math.max(0, state.playerLevel - 1) * 1.3 + Math.max(0, state.clickPower - 1) * 0.6;
+  return Math.max(0, upgradePower + recruitPower + equipmentPower + toolPower);
 }
 
 function getEnemyLaneY(index) {
@@ -1369,7 +1388,17 @@ function renderEquippedItems() {
   const totalSkill = equippedItems.reduce((sum, item) => sum + item.skillBonus, 0);
 
   refs.equippedItemPanel.classList.toggle("is-empty", equippedItems.length === 0);
+  refs.equippedItemPanel.classList.toggle("is-collapsed", !equipmentPanelExpanded);
+  refs.equippedItemPanel.setAttribute("aria-expanded", String(equipmentPanelExpanded));
   refs.equippedItemStats.textContent = `공격력 +${totalPower} / 스킬 공격력 +${totalSkill}`;
+  refs.equippedGradeBlocks.innerHTML = equipmentSlots
+    .map((slot) => {
+      const item = getEquippedItem(slot.id);
+      const color = item ? item.gradeColor : "rgba(74, 43, 23, 0.28)";
+      const label = item ? item.grade : "비어있음";
+      return `<span class="equipped-grade-block" title="${slot.name}: ${label}" style="--equipment-color: ${color};"></span>`;
+    })
+    .join("");
   refs.equippedItemList.innerHTML = equipmentSlots
     .map((slot) => {
       const item = getEquippedItem(slot.id);

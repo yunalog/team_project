@@ -62,14 +62,15 @@
 
         <div id="enemyLayer" class="enemy-layer" aria-label="상대 프로젝트"></div>
         <div class="equipment-layer" aria-live="polite">
-          <div id="equippedItemPanel" class="equipped-item-panel">
-            <div>
+          <button id="equippedItemPanel" class="equipped-item-panel is-collapsed" type="button" aria-expanded="false">
+            <div class="equipped-item-summary">
               <span class="equipped-item-label">장착 장비</span>
               <strong>대표 장비 슬롯</strong>
               <p id="equippedItemStats">공격력 +0 / 스킬 공격력 +0</p>
             </div>
+            <div id="equippedGradeBlocks" class="equipped-grade-blocks" aria-hidden="true"></div>
             <div id="equippedItemList" class="equipped-item-list"></div>
-          </div>
+          </button>
           <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
             <div>
               <span class="equipment-upgrade-label">장비 연구</span>
