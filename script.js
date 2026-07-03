@@ -7,6 +7,10 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
+const CRITICAL_CHANCE = 0.16;
+const CRITICAL_MULTIPLIER = 1.85;
+const EQUIPMENT_DRAW_COST = 10;
+const SPEED_TICKET_SECONDS = 600;
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
@@ -73,11 +77,91 @@ const recruits = [
   },
 ];
 
+const companyLevels = [
+  { name: "1인 창업실", minXp: 0, desc: "작은 책상에서 첫 프로젝트를 시작했습니다.", benefit: "창문과 업무 공간 확장" },
+  { name: "작은 작업실", minXp: 24, desc: "동료를 맞이할 작은 작업실이 생겼습니다.", benefit: "두 번째 업무 공간 개방" },
+  { name: "프로젝트 팀", minXp: 60, desc: "각자의 역할을 갖춘 팀이 자리를 잡았습니다.", benefit: "사무실 간판과 휴게 공간" },
+  { name: "초기 스타트업", minXp: 114, desc: "정식 회사의 모습을 갖추기 시작합니다.", benefit: "2층 오피스로 이전" },
+  { name: "성장 스타트업", minXp: 186, desc: "입소문을 타고 더 큰 의뢰가 들어옵니다.", benefit: "회의실과 조경 추가" },
+  { name: "전문 스튜디오", minXp: 282, desc: "전문 제작 조직으로 업계에 이름을 알립니다.", benefit: "전문 부서층 개방" },
+  { name: "소형 기업", minXp: 408, desc: "안정적인 조직과 여러 프로젝트를 운영합니다.", benefit: "독립 사옥 착공" },
+  { name: "확장 오피스", minXp: 570, desc: "새 사옥에서 더 많은 인재와 함께합니다.", benefit: "대형 로비와 편의 시설" },
+  { name: "중견 기업", minXp: 774, desc: "시장을 이끄는 탄탄한 회사로 성장했습니다.", benefit: "도심 타워로 확장" },
+  { name: "멀티 스튜디오", minXp: 1032, desc: "여러 제작팀이 동시에 성과를 만들어냅니다.", benefit: "브랜드 네온 사인" },
+  { name: "대형 기업", minXp: 1350, desc: "도시를 대표하는 대형 스튜디오가 되었습니다.", benefit: "글로벌 캠퍼스 개방" },
+  { name: "글로벌 기업", minXp: 1740, desc: "전 세계가 주목하는 글로벌 기업입니다.", benefit: "최고 단계 달성" },
+];
+
 const tools = [
-  { id: "engine", name: "게임 엔진", desc: "클릭 기여도 +1", baseCost: 35, click: 1 },
-  { id: "aiTool", name: "AI 보조도구", desc: "전체 자동 기여도 +15%", baseCost: 85, multiplier: 0.15 },
-  { id: "tablet", name: "드로잉 태블릿", desc: "일러스트레이터 효율 +2", baseCost: 120, target: "artist", dps: 2 },
-  { id: "testKit", name: "테스트 키트", desc: "QA 효율 +3", baseCost: 160, target: "qa", dps: 3 },
+  {
+    id: "engine",
+    name: "개발 랩",
+    icon: "DEV",
+    desc: "개발 장비를 확충해 업무 지원 기여도 +1",
+    baseCost: 35,
+    click: 1,
+    growthXp: 5,
+  },
+  {
+    id: "aiTool",
+    name: "자동화 서버실",
+    icon: "AI",
+    desc: "반복 업무를 자동화해 전체 기여도 +15%",
+    baseCost: 85,
+    multiplier: 0.15,
+    growthXp: 7,
+  },
+  {
+    id: "tablet",
+    name: "크리에이티브 스튜디오",
+    icon: "ART",
+    desc: "전용 제작실로 일러스트레이터 효율 +2",
+    baseCost: 120,
+    target: "artist",
+    dps: 2,
+    growthXp: 9,
+  },
+  {
+    id: "testKit",
+    name: "QA 센터",
+    icon: "QA",
+    desc: "검증 환경을 구축해 QA 효율 +3",
+    baseCost: 160,
+    target: "qa",
+    dps: 3,
+    growthXp: 11,
+  },
+];
+
+const equipmentSlots = [
+  { id: "eyewear", name: "안경" },
+  { id: "chair", name: "의자" },
+  { id: "keyboard", name: "키보드" },
+  { id: "deskItem", name: "사무용품" },
+  { id: "notebook", name: "노트" },
+];
+
+const equipmentPool = [
+  { id: "glasses", slot: "eyewear", name: "집중 안경", icon: "안", image: "", power: [1, 4], skill: [1, 3] },
+  { id: "chair", slot: "chair", name: "인체공학 의자", icon: "의", image: "", power: [2, 5], skill: [1, 4] },
+  { id: "keyboard", slot: "keyboard", name: "기계식 키보드", icon: "키", image: "", power: [1, 6], skill: [2, 5] },
+  { id: "mug", slot: "deskItem", name: "야근 머그컵", icon: "컵", image: "", power: [3, 7], skill: [1, 3] },
+  { id: "notebook", slot: "notebook", name: "아이디어 노트", icon: "노", image: "", power: [2, 4], skill: [2, 6] },
+];
+
+const equipmentGrades = [
+  { name: "일반", chance: 0.55, multiplier: 1, color: "#6f6251" },
+  { name: "희귀", chance: 0.3, multiplier: 1.45, color: "#238b65" },
+  { name: "영웅", chance: 0.12, multiplier: 2.1, color: "#7c3aed" },
+  { name: "전설", chance: 0.03, multiplier: 3.2, color: "#b85c22" },
+];
+
+const equipmentUpgradeConfigs = [
+  { level: 1, label: "1단계", maxGrade: 1, nextCost: 20, duration: 0, desc: "일반/희귀 장비 등장" },
+  { level: 2, label: "2단계", maxGrade: 2, nextCost: 45, duration: 180, desc: "영웅 장비 등장" },
+  { level: 3, label: "3단계", maxGrade: 2, nextCost: 90, duration: 420, desc: "희귀 이상 확률 상승" },
+  { level: 4, label: "4단계", maxGrade: 3, nextCost: 160, duration: 900, desc: "전설 장비 등장" },
+  { level: 5, label: "5단계", maxGrade: 3, nextCost: 0, duration: 0, desc: "최대 연구 단계" },
 ];
 
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
@@ -96,9 +180,21 @@ const defaultState = {
   clickPower: 1,
   playerLevel: 1,
   clearCount: 0,
+  companyXp: 0,
   elapsed: 0,
   recruits: {},
+  squad: [null, null, null, null],
+  squadConfigured: false,
   tools: {},
+  equipment: {
+    equipped: {},
+    pending: null,
+    drawCount: 0,
+    gradeLevel: 1,
+    upgradeRemaining: 0,
+    upgradingTo: null,
+    speedTickets: 3,
+  },
 };
 
 let state;
@@ -115,6 +211,10 @@ let currentBgmKey = "title";
 let hasStartedGame = false;
 let titleBgmUnlockArmed = false;
 let audioSettings = { ...defaultAudioSettings };
+let activeTab = "battle";
+let lastCompanyVisualKey = "";
+let autoDrawTimer = null;
+let equipmentPanelExpanded = false;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -133,6 +233,24 @@ function initGame() {
     titleVolumeValue: document.querySelector("#titleVolumeValue"),
     headerTitleButton: document.querySelector("#headerTitleButton"),
     battlefield: document.querySelector("#battlefield"),
+    companyScene: document.querySelector("#companyScene"),
+    companyLocationText: document.querySelector("#companyLocationText"),
+    companyLevelChip: document.querySelector("#companyLevelChip"),
+    companySceneName: document.querySelector("#companySceneName"),
+    companySceneDesc: document.querySelector("#companySceneDesc"),
+    companyCampus: document.querySelector("#companyCampus"),
+    companyBuilding: document.querySelector("#companyBuilding"),
+    companyFloors: document.querySelector("#companyFloors"),
+    employeeCrowd: document.querySelector("#employeeCrowd"),
+    companySceneProgressText: document.querySelector("#companySceneProgressText"),
+    companySceneProgressFill: document.querySelector("#companySceneProgressFill"),
+    companyValueText: document.querySelector("#companyValueText"),
+    companyEmployeeText: document.querySelector("#companyEmployeeText"),
+    companyFacilityText: document.querySelector("#companyFacilityText"),
+    companyStatusStrip: document.querySelector("#companyStatusStrip"),
+    battleStatusItems: [...document.querySelectorAll(".battle-status-item")],
+    squadFormation: document.querySelector("#squadFormation"),
+    squadRoster: document.querySelector("#squadRoster"),
     effectLayer: document.querySelector("#effectLayer"),
     goldText: document.querySelector("#goldText"),
     ideaText: document.querySelector("#ideaText"),
@@ -151,6 +269,25 @@ function initGame() {
     manualWorkButton: document.querySelector("#manualWorkButton"),
     upgradePlayerButton: document.querySelector("#upgradePlayerButton"),
     nextStageButton: document.querySelector("#nextStageButton"),
+    equipmentDrawButton: document.querySelector("#equipmentDrawButton"),
+    equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
+    autoDrawButton: document.querySelector("#autoDrawButton"),
+    equippedItemPanel: document.querySelector("#equippedItemPanel"),
+    equippedGradeBlocks: document.querySelector("#equippedGradeBlocks"),
+    equippedItemList: document.querySelector("#equippedItemList"),
+    equippedItemStats: document.querySelector("#equippedItemStats"),
+    equipmentUpgradePanel: document.querySelector("#equipmentUpgradePanel"),
+    equipmentGradeText: document.querySelector("#equipmentGradeText"),
+    equipmentUpgradeTimer: document.querySelector("#equipmentUpgradeTimer"),
+    equipmentUpgradeButton: document.querySelector("#equipmentUpgradeButton"),
+    speedTicketButton: document.querySelector("#speedTicketButton"),
+    speedTicketText: document.querySelector("#speedTicketText"),
+    equipmentChoice: document.querySelector("#equipmentChoice"),
+    equipmentIcon: document.querySelector("#equipmentIcon"),
+    equipmentName: document.querySelector("#equipmentName"),
+    equipmentBonus: document.querySelector("#equipmentBonus"),
+    equipItemButton: document.querySelector("#equipItemButton"),
+    discardItemButton: document.querySelector("#discardItemButton"),
     saveButton: document.querySelector("#saveButton"),
     resetButton: document.querySelector("#resetButton"),
     returnTitleButton: document.querySelector("#returnTitleButton"),
@@ -188,7 +325,7 @@ function bindEvents() {
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
-    attackUnit(getPlayerUnit(state.clickPower), { manual: true });
+    attackUnit(getPlayerUnit(getManualPower()), { manual: true });
   });
   refs.upgradePlayerButton.addEventListener("click", upgradePlayer);
   refs.nextStageButton.addEventListener("click", () => {
@@ -196,6 +333,13 @@ function bindEvents() {
     spawnWave();
     renderAll();
   });
+  refs.equipmentDrawButton.addEventListener("click", drawEquipment);
+  refs.autoDrawButton.addEventListener("click", toggleAutoDraw);
+  refs.equippedItemPanel.addEventListener("click", toggleEquipmentPanel);
+  refs.equipItemButton.addEventListener("click", equipPendingEquipment);
+  refs.discardItemButton.addEventListener("click", discardPendingEquipment);
+  refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
+  refs.speedTicketButton.addEventListener("click", useSpeedTicket);
   refs.saveButton.addEventListener("click", () => saveState("수동 저장 완료"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
@@ -206,6 +350,7 @@ function bindEvents() {
   });
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
+  document.addEventListener("change", handleSquadChange);
 }
 
 function startGame() {
@@ -320,8 +465,42 @@ function handleAudioInput(event) {
   if (!audioSettings.muted) playBgm(currentBgmKey || "title", { silentFail: true });
 }
 
+function handleSquadChange(event) {
+  const select = event.target.closest("[data-squad-slot]");
+  if (!select) return;
+
+  const slotIndex = Number(select.dataset.squadSlot);
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= state.squad.length) return;
+
+  const nextId = select.value || null;
+  if (nextId) {
+    const owned = getRecruitCount(nextId);
+    const deployedElsewhere = state.squad.reduce(
+      (count, id, index) => count + (index !== slotIndex && id === nextId ? 1 : 0),
+      0
+    );
+    if (!recruits.some((recruit) => recruit.id === nextId) || deployedElsewhere >= owned) {
+      log("보유한 동료 수보다 많이 배치할 수 없습니다.");
+      renderSquadManagement();
+      return;
+    }
+  }
+
+  state.squad[slotIndex] = nextId;
+  state.squadConfigured = true;
+  lastRosterKey = "";
+  const recruit = recruits.find((item) => item.id === nextId);
+  log(recruit ? `${slotIndex + 1}번 위치에 ${recruit.name} 배치 완료` : `${slotIndex + 1}번 위치를 비웠습니다.`);
+  renderAll();
+}
+
 function getBattleBgmKey() {
   return state.battleMode === "boss" ? "boss" : "field";
+}
+
+function toggleEquipmentPanel() {
+  equipmentPanelExpanded = !equipmentPanelExpanded;
+  renderEquippedItems();
 }
 
 function armTitleBgmUnlock() {
@@ -363,6 +542,7 @@ function tick(delta) {
 
     moveEnemies(delta);
     updateAutoCombat(delta);
+    updateEquipmentUpgrade(delta);
 
     if (saveCooldown >= 10) {
       saveCooldown = 0;
@@ -409,10 +589,100 @@ function normalizeState(nextState) {
     clickPower: Math.max(1, Number(nextState.clickPower) || 1),
     playerLevel: Math.max(1, Number(nextState.playerLevel) || 1),
     clearCount: Math.max(0, Number(nextState.clearCount) || 0),
+    companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
+    squad: normalizeSquad(nextState.squad, nextState.recruits, !nextState.squadConfigured),
+    squadConfigured: Boolean(nextState.squadConfigured),
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
+    equipment: normalizeEquipment(nextState.equipment),
   };
+}
+
+function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
+  const normalized = [null, null, null, null];
+  const used = {};
+  const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
+
+  if (Array.isArray(savedSquad)) {
+    savedSquad.slice(0, normalized.length).forEach((id, index) => {
+      const owned = Math.max(0, Number(ownedRoster[id]) || 0);
+      if (!recruits.some((recruit) => recruit.id === id) || (used[id] || 0) >= owned) return;
+      normalized[index] = id;
+      used[id] = (used[id] || 0) + 1;
+    });
+  }
+
+  if (autoFill) {
+    recruits.forEach((recruit) => {
+      let remaining = Math.max(0, Number(ownedRoster[recruit.id]) || 0) - (used[recruit.id] || 0);
+      while (remaining > 0) {
+        const emptyIndex = normalized.indexOf(null);
+        if (emptyIndex < 0) return;
+        normalized[emptyIndex] = recruit.id;
+        used[recruit.id] = (used[recruit.id] || 0) + 1;
+        remaining -= 1;
+      }
+    });
+  }
+
+  return normalized;
+}
+
+function normalizeEquipment(equipment) {
+  const safeEquipment = equipment && typeof equipment === "object" ? equipment : {};
+  return {
+    equipped: normalizeEquippedItems(safeEquipment.equipped),
+    pending: normalizeEquipmentItem(safeEquipment.pending),
+    drawCount: Math.max(0, Number(safeEquipment.drawCount) || 0),
+    gradeLevel: Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(safeEquipment.gradeLevel) || 1)),
+    upgradeRemaining: Math.max(0, Number(safeEquipment.upgradeRemaining) || 0),
+    upgradingTo: safeEquipment.upgradingTo ? Number(safeEquipment.upgradingTo) : null,
+    speedTickets: Math.max(0, Number(safeEquipment.speedTickets) || 0),
+  };
+}
+
+function normalizeEquippedItems(equipped) {
+  const normalized = {};
+  if (!equipped || typeof equipped !== "object") return normalized;
+
+  if ("powerBonus" in equipped || "skillBonus" in equipped || "clickBonus" in equipped) {
+    const legacyItem = normalizeEquipmentItem(equipped);
+    if (legacyItem) normalized[legacyItem.slot] = legacyItem;
+    return normalized;
+  }
+
+  equipmentSlots.forEach((slot) => {
+    const item = normalizeEquipmentItem(equipped[slot.id]);
+    if (item) normalized[slot.id] = item;
+  });
+  return normalized;
+}
+
+function normalizeEquipmentItem(item) {
+  if (!item || typeof item !== "object") return null;
+
+  const slot = getEquipmentSlotId(item.slot || inferEquipmentSlot(item.id));
+  return {
+    id: String(item.id || "unknown"),
+    slot,
+    name: String(item.name || "이름 없는 장비"),
+    icon: String(item.icon || "?"),
+    image: String(item.image || ""),
+    grade: String(item.grade || "일반"),
+    gradeColor: String(item.gradeColor || "#6f6251"),
+    powerBonus: Math.max(0, Number(item.powerBonus) || 0),
+    skillBonus: Math.max(0, Number(item.skillBonus ?? item.clickBonus) || 0),
+  };
+}
+
+function inferEquipmentSlot(id) {
+  const base = equipmentPool.find((item) => item.id === id || String(id || "").startsWith(`${item.id}-`));
+  return base ? base.slot : equipmentSlots[0].id;
+}
+
+function getEquipmentSlotId(slotId) {
+  return equipmentSlots.some((slot) => slot.id === slotId) ? slotId : equipmentSlots[0].id;
 }
 
 function saveState(message) {
@@ -432,6 +702,7 @@ function resetGame() {
   }
   state = cloneDefaultState();
   lastRosterKey = "";
+  lastCompanyVisualKey = "";
   spawnWave();
   renderAll();
   saveState("초기화 완료");
@@ -502,11 +773,22 @@ function getWaveEnemyCount() {
 }
 
 function getEnemyHp() {
-  return Math.floor(6 + state.chapter * 2.2 + state.subStage * 1.4);
+  const stageBase = 6 + state.chapter * 2.2 + state.subStage * 1.4;
+  const growthBonus = getDifficultyGrowthPower() * (0.18 + state.chapter * 0.012);
+  return Math.floor(stageBase + growthBonus);
 }
 
 function getBossHp() {
-  return Math.floor(getEnemyHp() * (5.5 + state.chapter * 0.4));
+  const bossScale = 3.1 + state.chapter * 0.18;
+  return Math.floor(getEnemyHp() * bossScale);
+}
+
+function getDifficultyGrowthPower() {
+  const recruitPower = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
+  const equipmentPower = getEquippedItems().reduce((sum, item) => sum + item.powerBonus + item.skillBonus, 0);
+  const toolPower = tools.reduce((sum, tool) => sum + getToolLevel(tool.id) * ((tool.click || 0) + (tool.dps || 0)), 0);
+  const upgradePower = Math.max(0, state.playerLevel - 1) * 1.3 + Math.max(0, state.clickPower - 1) * 0.6;
+  return Math.max(0, upgradePower + recruitPower + equipmentPower + toolPower);
 }
 
 function getEnemyLaneY(index) {
@@ -592,7 +874,8 @@ function castSkill(unit, from) {
   playSkillEffect(unit, targets);
 
   targets.forEach((target, index) => {
-    const damage = Math.ceil(unit.power * unit.skill.multiplier + state.playerLevel * 0.6);
+    const skillPower = unit.id === "player" ? getPlayerSkillPower() : unit.power;
+    const damage = Math.ceil(skillPower * unit.skill.multiplier + state.playerLevel * 0.6);
     window.setTimeout(() => damageEnemy(target.id, damage, false), 120 + index * 70);
   });
 
@@ -672,9 +955,11 @@ function damageEnemy(enemyId, amount, manual) {
   const target = state.enemies.find((enemy) => enemy.id === enemyId) || getTargetEnemy();
   if (!target) return;
 
-  const finalAmount = Math.max(1, Math.round(amount * getGlobalMultiplier()));
+  const critical = Math.random() < CRITICAL_CHANCE;
+  const multiplier = getGlobalMultiplier() * (critical ? CRITICAL_MULTIPLIER : 1);
+  const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
-  showDamage(finalAmount, target);
+  showDamage(finalAmount, target, { critical });
   pulseEnemy(target.id);
 
   if (target.hp <= 0) {
@@ -692,6 +977,7 @@ function defeatEnemy(enemyId, manual) {
   state.gold += goldGain;
   state.idea += ideaGain;
   state.clearCount += 1;
+  addCompanyXp(1);
 
   if (!state.enemies.length) completeWave(manual);
 }
@@ -703,6 +989,7 @@ function completeWave(manual) {
   const clearedBoss = state.battleMode === "boss";
   const bonusIdea = clearedBoss ? 8 + state.chapter * 2 : manual ? 1 : 2;
   state.idea += bonusIdea;
+  addCompanyXp(clearedBoss ? 6 : 2);
   log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}` : `${getProgressLabel()} 클리어!`);
 
   window.setTimeout(() => {
@@ -759,14 +1046,36 @@ function syncEnemySummary() {
   state.enemyX = target ? target.x : ENEMY_SPAWN_X;
 }
 
-function showDamage(amount, target) {
+function showDamage(amount, target, options = {}) {
+  const critical = Boolean(options.critical);
   const damage = document.createElement("span");
-  damage.className = "damage-number";
-  damage.textContent = `-${amount}`;
+  damage.className = `damage-number${critical ? " is-critical" : ""}`;
+  damage.textContent = critical ? `CRIT ${amount}` : `-${amount}`;
   damage.style.setProperty("--hit-x", `${target.x}%`);
   damage.style.setProperty("--hit-y", `${target.y + 92}px`);
   refs.effectLayer.appendChild(damage);
-  window.setTimeout(() => damage.remove(), 760);
+  if (critical) showCriticalBurst(target);
+  window.setTimeout(() => damage.remove(), critical ? 980 : 760);
+}
+
+function showCriticalBurst(target) {
+  const burst = document.createElement("span");
+  burst.className = "critical-burst";
+  burst.style.setProperty("--hit-x", `${target.x}%`);
+  burst.style.setProperty("--hit-y", `${target.y + 92}px`);
+  refs.effectLayer.appendChild(burst);
+  window.setTimeout(() => burst.remove(), 620);
+
+  for (let index = 0; index < 12; index += 1) {
+    const particle = document.createElement("span");
+    particle.className = "critical-particle";
+    particle.style.setProperty("--hit-x", `${target.x}%`);
+    particle.style.setProperty("--hit-y", `${target.y + 92}px`);
+    particle.style.setProperty("--particle-angle", `${index * 30 + Math.random() * 18}deg`);
+    particle.style.setProperty("--particle-distance", `${26 + Math.random() * 30}px`);
+    refs.effectLayer.appendChild(particle);
+    window.setTimeout(() => particle.remove(), 720);
+  }
 }
 
 function pulseUnit(unitId, className, duration) {
@@ -776,7 +1085,7 @@ function pulseUnit(unitId, className, duration) {
   window.setTimeout(() => ally.classList.remove(className), duration);
 }
 
-function getPlayerUnit(power = state.playerLevel) {
+function getPlayerUnit(power = getPlayerPower()) {
   return {
     id: "player",
     name: "대표",
@@ -793,15 +1102,17 @@ function getPlayerUnit(power = state.playerLevel) {
 
 function getUnits() {
   const units = [getPlayerUnit()];
-  recruits.forEach((recruit) => {
-    const count = getRecruitCount(recruit.id);
-    if (count > 0) {
-      units.push({
-        ...recruit,
-        count,
-        power: getRecruitPower(recruit) * count,
-      });
-    }
+  state.squad.forEach((recruitId, slotIndex) => {
+    const recruit = recruits.find((item) => item.id === recruitId);
+    if (!recruit) return;
+
+    units.push({
+      ...recruit,
+      id: `squad-${slotIndex}-${recruit.id}`,
+      recruitId: recruit.id,
+      count: 1,
+      power: getRecruitPower(recruit),
+    });
   });
   return units;
 }
@@ -831,11 +1142,15 @@ function getGlobalMultiplier() {
 }
 
 function getTotalDps() {
-  const recruitDps = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
-  return Math.max(1, Math.round((state.playerLevel + recruitDps) * getGlobalMultiplier()));
+  const squadPower = getUnits().reduce((sum, unit) => sum + unit.power, 0);
+  return Math.max(1, Math.round(squadPower * getGlobalMultiplier()));
 }
 
 function getTeamCount() {
+  return getUnits().length;
+}
+
+function getEmployeeCount() {
   return 1 + recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id), 0);
 }
 
@@ -845,6 +1160,53 @@ function getEnemyName() {
 
 function getProgressLabel() {
   return state.battleMode === "boss" ? `${state.chapter}-BOSS` : `${state.chapter}-${state.subStage}`;
+}
+
+function getCompanyLevelIndex(xp = state.companyXp) {
+  for (let index = companyLevels.length - 1; index >= 0; index -= 1) {
+    if (xp >= companyLevels[index].minXp) return index;
+  }
+  return 0;
+}
+
+function getCompanyProgress() {
+  const levelIndex = getCompanyLevelIndex();
+  const current = companyLevels[levelIndex];
+  const next = companyLevels[levelIndex + 1] || null;
+  if (!next) {
+    return { levelIndex, current, next, percent: 100, currentXp: state.companyXp, requiredXp: current.minXp };
+  }
+
+  const earned = state.companyXp - current.minXp;
+  const required = next.minXp - current.minXp;
+  return {
+    levelIndex,
+    current,
+    next,
+    percent: Math.max(0, Math.min(100, Math.round((earned / required) * 100))),
+    currentXp: earned,
+    requiredXp: required,
+  };
+}
+
+function getFacilityInvestmentCount() {
+  return tools.reduce((total, tool) => total + getToolLevel(tool.id), 0);
+}
+
+function deriveCompanyXp(nextState) {
+  const recruitCount = Object.values(nextState.recruits || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const facilityCount = Object.values(nextState.tools || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  return Math.max(
+    0,
+    Math.floor(Number(nextState.clearCount) || 0) +
+      recruitCount * 4 +
+      facilityCount * 6 +
+      Math.max(0, (Number(nextState.chapter) || 1) - 1) * 10
+  );
+}
+
+function addCompanyXp(amount) {
+  state.companyXp = Math.max(0, state.companyXp + Math.max(0, Number(amount) || 0));
 }
 
 function getBattleBackground() {
@@ -869,8 +1231,13 @@ function buyRecruit(id) {
 
   state.gold -= cost;
   state.recruits[id] = count + 1;
+  if (!state.squadConfigured) {
+    state.squad = normalizeSquad(state.squad, state.recruits, true);
+    lastRosterKey = "";
+  }
+  addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
-  log(`${recruit.name} 영입 완료. 전투 화면에 배치되었습니다.`);
+  log(`${recruit.name} 영입 완료. 회사 성장 경험치 +4`);
   renderAll();
 }
 
@@ -882,9 +1249,289 @@ function buyTool(id) {
 
   state.idea -= cost;
   state.tools[id] = level + 1;
+  addCompanyXp(tool.growthXp + level * 2);
   if (tool.click) state.clickPower += tool.click;
-  log(`${tool.name} 강화 완료`);
+  log(`${tool.name} 확장 완료. 회사 성장 경험치 +${tool.growthXp + level * 2}`);
   renderAll();
+}
+
+function getEquipmentDrawCost() {
+  return EQUIPMENT_DRAW_COST;
+}
+
+function drawEquipment() {
+  if (state.equipment.pending) return;
+
+  const cost = getEquipmentDrawCost();
+  if (state.gold < cost) {
+    log(`장비 뽑기에는 자금 ${cost}이 필요합니다.`);
+    return;
+  }
+
+  state.gold -= cost;
+  state.equipment.drawCount += 1;
+  state.equipment.pending = createEquipmentItem();
+  log(`${state.equipment.pending.grade} ${state.equipment.pending.name}을 뽑았습니다.`);
+  renderAll();
+}
+
+function toggleAutoDraw() {
+  if (isAutoDrawing()) {
+    stopAutoDraw("자동 뽑기를 중지했습니다.");
+    return;
+  }
+
+  if (state.equipment.pending) {
+    log("먼저 뽑힌 장비를 장착하거나 버려주세요.");
+    return;
+  }
+
+  startAutoDraw();
+}
+
+function startAutoDraw() {
+  if (isAutoDrawing()) return;
+
+  log("공격력과 스킬 공격력이 모두 증가하는 장비가 나올 때까지 자동 뽑기를 시작합니다.");
+  autoDrawTimer = window.setTimeout(runAutoDrawStep, 120);
+  renderEquipment();
+}
+
+function stopAutoDraw(message) {
+  if (autoDrawTimer) {
+    window.clearTimeout(autoDrawTimer);
+    autoDrawTimer = null;
+  }
+  if (message) log(message);
+  renderEquipment();
+}
+
+function isAutoDrawing() {
+  return Boolean(autoDrawTimer);
+}
+
+function runAutoDrawStep() {
+  autoDrawTimer = null;
+
+  if (state.equipment.pending) {
+    stopAutoDraw();
+    return;
+  }
+
+  const cost = getEquipmentDrawCost();
+  if (state.gold < cost) {
+    stopAutoDraw(`자동 뽑기를 중지했습니다. 자금 ${cost}이 필요합니다.`);
+    return;
+  }
+
+  state.gold -= cost;
+  state.equipment.drawCount += 1;
+
+  const item = createEquipmentItem();
+  const equipped = getEquippedItem(item.slot);
+  if (hasPositiveEquipmentGain(item, equipped)) {
+    state.equipment.pending = item;
+    log(`${item.grade} ${item.name}에서 공격력과 스킬 공격력 상승을 발견했습니다.`);
+    renderAll();
+    return;
+  }
+
+  state.idea += getEquipmentDiscardRefund(item);
+  log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
+  autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
+  renderAll();
+}
+
+function createEquipmentItem() {
+  const base = equipmentPool[Math.floor(Math.random() * equipmentPool.length)];
+  const grade = pickEquipmentGrade();
+  const powerBonus = rollEquipmentValue(base.power, grade.multiplier);
+  const skillBonus = rollEquipmentValue(base.skill, grade.multiplier);
+
+  return {
+    id: `${base.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    slot: base.slot,
+    name: base.name,
+    icon: base.icon,
+    image: base.image,
+    grade: grade.name,
+    gradeColor: grade.color,
+    powerBonus,
+    skillBonus,
+  };
+}
+
+function pickEquipmentGrade() {
+  const gradeLevel = getEquipmentGradeLevel();
+  const config = getEquipmentUpgradeConfig(gradeLevel);
+  const candidates = equipmentGrades
+    .slice(0, config.maxGrade + 1)
+    .map((grade, index) => ({
+      ...grade,
+      chance: getAdjustedGradeChance(grade.chance, index, gradeLevel),
+    }));
+  const chanceSum = candidates.reduce((sum, grade) => sum + grade.chance, 0);
+  const roll = Math.random();
+  let total = 0;
+  for (const grade of candidates) {
+    total += grade.chance / chanceSum;
+    if (roll <= total) return grade;
+  }
+  return candidates[0];
+}
+
+function getAdjustedGradeChance(baseChance, gradeIndex, gradeLevel) {
+  if (gradeLevel < 3) return baseChance;
+  const bonus = gradeIndex === 0 ? -0.18 : gradeIndex * 0.08;
+  return Math.max(0.05, baseChance + bonus);
+}
+
+function rollEquipmentValue(range, multiplier) {
+  const [min, max] = range;
+  const value = min + Math.floor(Math.random() * (max - min + 1));
+  return Math.max(0, Math.ceil(value * multiplier));
+}
+
+function equipPendingEquipment() {
+  if (!state.equipment.pending) return;
+
+  state.equipment.equipped[state.equipment.pending.slot] = state.equipment.pending;
+  state.equipment.pending = null;
+  log("대표 장비를 장착했습니다.");
+  renderAll();
+}
+
+function discardPendingEquipment() {
+  if (!state.equipment.pending) return;
+
+  const refund = getEquipmentDiscardRefund(state.equipment.pending);
+  state.idea += refund;
+  state.equipment.pending = null;
+  log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
+  renderAll();
+}
+
+function hasPositiveEquipmentGain(item, equipped = getEquippedItem(item.slot)) {
+  const currentPower = equipped ? equipped.powerBonus : 0;
+  const currentSkill = equipped ? equipped.skillBonus : 0;
+  return item.powerBonus > currentPower && item.skillBonus > currentSkill;
+}
+
+function getEquipmentDiscardRefund(item) {
+  return Math.max(1, Math.floor(getEquipmentScore(item) / 2));
+}
+
+function getMaxEquipmentUpgradeLevel() {
+  return equipmentUpgradeConfigs[equipmentUpgradeConfigs.length - 1].level;
+}
+
+function getEquipmentGradeLevel() {
+  return Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(state.equipment.gradeLevel) || 1));
+}
+
+function getEquipmentUpgradeConfig(level = getEquipmentGradeLevel()) {
+  return equipmentUpgradeConfigs.find((config) => config.level === level) || equipmentUpgradeConfigs[0];
+}
+
+function getNextEquipmentUpgradeConfig() {
+  return equipmentUpgradeConfigs.find((config) => config.level === getEquipmentGradeLevel() + 1) || null;
+}
+
+function isEquipmentUpgrading() {
+  return Boolean(state.equipment.upgradingTo) && state.equipment.upgradeRemaining > 0;
+}
+
+function startEquipmentUpgrade() {
+  if (isEquipmentUpgrading()) return;
+
+  const nextConfig = getNextEquipmentUpgradeConfig();
+  if (!nextConfig) {
+    log("장비 연구가 최대 단계입니다.");
+    return;
+  }
+
+  if (state.idea < nextConfig.nextCost) {
+    log(`장비 연구에는 아이디어 ${nextConfig.nextCost}이 필요합니다.`);
+    return;
+  }
+
+  state.idea -= nextConfig.nextCost;
+  state.equipment.upgradingTo = nextConfig.level;
+  state.equipment.upgradeRemaining = nextConfig.duration;
+  log(`장비 연구 ${nextConfig.label} 진행을 시작했습니다.`);
+  renderAll();
+}
+
+function updateEquipmentUpgrade(delta) {
+  if (!isEquipmentUpgrading()) return;
+
+  state.equipment.upgradeRemaining = Math.max(0, state.equipment.upgradeRemaining - delta);
+  if (state.equipment.upgradeRemaining > 0) return;
+
+  completeEquipmentUpgrade();
+}
+
+function completeEquipmentUpgrade() {
+  if (!state.equipment.upgradingTo) return;
+
+  state.equipment.gradeLevel = Math.max(getEquipmentGradeLevel(), state.equipment.upgradingTo);
+  state.equipment.upgradingTo = null;
+  state.equipment.upgradeRemaining = 0;
+  log(`장비 연구가 ${getEquipmentUpgradeConfig().label}로 상승했습니다.`);
+  renderAll();
+}
+
+function useSpeedTicket() {
+  if (!isEquipmentUpgrading()) {
+    log("진행 중인 장비 연구가 없습니다.");
+    return;
+  }
+
+  if (state.equipment.speedTickets <= 0) {
+    log("사용할 가속티켓이 없습니다.");
+    return;
+  }
+
+  state.equipment.speedTickets -= 1;
+  state.equipment.upgradeRemaining = Math.max(0, state.equipment.upgradeRemaining - SPEED_TICKET_SECONDS);
+  if (state.equipment.upgradeRemaining <= 0) {
+    completeEquipmentUpgrade();
+  } else {
+    log("가속티켓을 사용해 연구 시간을 10분 단축했습니다.");
+    renderBattle();
+  }
+}
+
+function getEquippedItem(slotId) {
+  if (!state.equipment || !state.equipment.equipped) return null;
+  if (!slotId) return null;
+  return state.equipment.equipped[slotId] || null;
+}
+
+function getEquippedItems() {
+  if (!state.equipment || !state.equipment.equipped) return [];
+  return equipmentSlots.map((slot) => state.equipment.equipped[slot.id]).filter(Boolean);
+}
+
+function getPendingEquipment() {
+  return state.equipment && state.equipment.pending ? state.equipment.pending : null;
+}
+
+function getEquipmentScore(item) {
+  if (!item) return 0;
+  return item.powerBonus + item.skillBonus;
+}
+
+function getPlayerPower() {
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
+}
+
+function getPlayerSkillPower() {
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
+}
+
+function getManualPower() {
+  return state.clickPower;
 }
 
 function upgradePlayer() {
@@ -899,10 +1546,12 @@ function upgradePlayer() {
 }
 
 function switchTab(tab) {
+  activeTab = tab.dataset.tab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
     .querySelectorAll(".tab-panel")
-    .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === tab.dataset.tab));
+    .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === activeTab));
+  updatePrimaryScene();
 }
 
 function renderAll() {
@@ -913,23 +1562,211 @@ function renderAll() {
 }
 
 function renderBattle() {
-  const hpPercent = Math.max(0, Math.round((state.enemyHp / state.enemyMaxHp) * 100));
   const playerCost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
 
   refs.goldText.textContent = Math.floor(state.gold);
   refs.ideaText.textContent = Math.floor(state.idea);
   refs.stageText.textContent = getProgressLabel();
   refs.battlefield.style.setProperty("--battle-bg", `url("${getBattleBackground()}")`);
+  renderCompany();
+  updatePrimaryScene();
   setText(refs.dpsText, `초당 기여도 ${getTotalDps()}`);
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
-  setText(refs.clickPowerText, state.clickPower);
+  setText(refs.clickPowerText, getManualPower());
   setText(refs.clearCountText, `${state.clearCount}건`);
   setText(refs.playTimeText, formatTime(state.elapsed));
   setText(refs.attackTimerText, `${Math.max(0, Math.min(basicAttackCooldown, skillAttackCooldown)).toFixed(1)}초`);
   refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
   refs.upgradePlayerButton.disabled = state.gold < playerCost;
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
+  renderEquipment();
+}
+
+function renderEquipment() {
+  const pending = getPendingEquipment();
+  const equipped = pending ? getEquippedItem(pending.slot) : null;
+  const cost = getEquipmentDrawCost();
+
+  refs.equipmentDrawCost.textContent = `${cost} 자금`;
+  refs.equipmentDrawButton.disabled = Boolean(pending) || isAutoDrawing();
+  refs.equipmentDrawButton.classList.toggle("is-unaffordable", state.gold < cost && !pending);
+  refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
+  refs.autoDrawButton.textContent = isAutoDrawing() ? "자동 중지" : "자동 뽑기";
+  refs.autoDrawButton.disabled = Boolean(pending);
+  refs.autoDrawButton.classList.toggle("is-running", isAutoDrawing());
+  renderEquippedItems();
+  renderEquipmentUpgrade();
+
+  refs.equipmentChoice.classList.toggle("is-hidden", !pending);
+  if (!pending) return;
+
+  refs.equipmentIcon.textContent = pending.icon;
+  refs.equipmentIcon.style.setProperty("--equipment-color", pending.gradeColor);
+  refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
+  refs.equipmentName.style.color = pending.gradeColor;
+  refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
+}
+
+function renderEquippedItems() {
+  const equippedItems = getEquippedItems();
+  const totalPower = equippedItems.reduce((sum, item) => sum + item.powerBonus, 0);
+  const totalSkill = equippedItems.reduce((sum, item) => sum + item.skillBonus, 0);
+
+  refs.equippedItemPanel.classList.toggle("is-empty", equippedItems.length === 0);
+  refs.equippedItemPanel.classList.toggle("is-collapsed", !equipmentPanelExpanded);
+  refs.equippedItemPanel.setAttribute("aria-expanded", String(equipmentPanelExpanded));
+  refs.equippedItemStats.textContent = `공격력 +${totalPower} / 스킬 공격력 +${totalSkill}`;
+  refs.equippedGradeBlocks.innerHTML = equipmentSlots
+    .map((slot) => {
+      const item = getEquippedItem(slot.id);
+      const color = item ? item.gradeColor : "rgba(74, 43, 23, 0.28)";
+      const label = item ? item.grade : "비어있음";
+      return `<span class="equipped-grade-block" title="${slot.name}: ${label}" style="--equipment-color: ${color};"></span>`;
+    })
+    .join("");
+  refs.equippedItemList.innerHTML = equipmentSlots
+    .map((slot) => {
+      const item = getEquippedItem(slot.id);
+      if (!item) {
+        return `
+          <div class="equipped-tile is-empty">
+            <span class="equipped-tile-image">${slot.name.slice(0, 1)}</span>
+            <span class="equipped-tile-grade">비어있음</span>
+            <strong>${slot.name}</strong>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="equipped-tile" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
+          <span class="equipped-tile-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-tile-grade">${item.grade}</span>
+          <strong>${item.name}</strong>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderEquipmentUpgrade() {
+  const currentConfig = getEquipmentUpgradeConfig();
+  const nextConfig = getNextEquipmentUpgradeConfig();
+  const upgrading = isEquipmentUpgrading();
+
+  refs.equipmentGradeText.textContent = `${currentConfig.label} · ${currentConfig.desc}`;
+  refs.equipmentUpgradePanel.classList.toggle("is-upgrading", upgrading);
+
+  if (upgrading) {
+    refs.equipmentUpgradeTimer.textContent = `${getEquipmentUpgradeConfig(state.equipment.upgradingTo).label} 완료까지 ${formatTime(state.equipment.upgradeRemaining)}`;
+  } else if (nextConfig) {
+    refs.equipmentUpgradeTimer.textContent = `${nextConfig.label} 연구: 아이디어 ${nextConfig.nextCost} · ${formatTime(nextConfig.duration)}`;
+  } else {
+    refs.equipmentUpgradeTimer.textContent = "최대 연구 단계입니다.";
+  }
+
+  refs.equipmentUpgradeButton.textContent = upgrading ? "연구 진행 중" : nextConfig ? "등급 업그레이드" : "최대 단계";
+  refs.equipmentUpgradeButton.disabled = upgrading || !nextConfig || state.idea < nextConfig.nextCost;
+  refs.speedTicketButton.disabled = !upgrading || state.equipment.speedTickets <= 0;
+  refs.speedTicketText.textContent = `보유 ${state.equipment.speedTickets}장 · 1장당 10분`;
+}
+
+function formatEquipmentBonus(item, equipped) {
+  const slot = equipmentSlots.find((equipmentSlot) => equipmentSlot.id === item.slot);
+  const currentPower = equipped ? equipped.powerBonus : 0;
+  const currentSkill = equipped ? equipped.skillBonus : 0;
+  const powerDiff = item.powerBonus - currentPower;
+  const skillDiff = item.skillBonus - currentSkill;
+  return `${slot ? slot.name : "장비"} · 공격력 <span class="stat-positive">+${item.powerBonus}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${item.skillBonus}</span> (${formatDiff(skillDiff)})`;
+}
+
+function formatDiff(value) {
+  if (value > 0) return `<span class="stat-positive">+${value}</span>`;
+  if (value < 0) return `<span class="stat-negative">${value}</span>`;
+  return `<span class="stat-neutral">0</span>`;
+}
+
+function updatePrimaryScene() {
+  const isCompanyTab = activeTab === "tools";
+  refs.battlefield.classList.toggle("is-hidden", isCompanyTab);
+  refs.companyScene.classList.toggle("is-hidden", !isCompanyTab);
+  refs.battleStatusItems.forEach((element) => element.classList.toggle("is-hidden", isCompanyTab));
+  refs.companyStatusStrip.classList.toggle("is-hidden", !isCompanyTab);
+
+  if (isCompanyTab) {
+    const companyLevel = companyLevels[getCompanyLevelIndex()];
+    setText(refs.companyLocationText, `회사 규모: ${companyLevel.name}`);
+  } else {
+    setText(refs.companyLocationText, "위치: 사무실 1층");
+  }
+}
+
+function renderCompany() {
+  const progress = getCompanyProgress();
+  const levelNumber = progress.levelIndex + 1;
+  const facilityCount = getFacilityInvestmentCount();
+  const visualTier = Math.min(6, Math.floor(progress.levelIndex / 2) + 1);
+  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}`;
+
+  setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
+  setText(refs.companySceneName, progress.current.name);
+  setText(refs.companySceneDesc, progress.current.desc);
+  setText(refs.companyEmployeeText, `${getEmployeeCount()}명`);
+  setText(refs.companyFacilityText, `${facilityCount}회`);
+
+  const companyValue = Math.floor(
+    state.gold + state.idea * 5 + state.companyXp * 12 + getEmployeeCount() * 120 + facilityCount * 80
+  );
+  setText(refs.companyValueText, `${companyValue.toLocaleString("ko-KR")} 가치`);
+
+  if (progress.next) {
+    setText(refs.companySceneProgressText, `다음 성장까지 ${progress.requiredXp - progress.currentXp} EXP`);
+  } else {
+    setText(refs.companySceneProgressText, "최고 성장 단계 달성");
+  }
+
+  refs.companySceneProgressFill.style.width = `${progress.percent}%`;
+  refs.companySceneProgressFill.parentElement.setAttribute("aria-valuenow", String(progress.percent));
+
+  if (visualKey !== lastCompanyVisualKey) {
+    const isFirstRender = !lastCompanyVisualKey;
+    lastCompanyVisualKey = visualKey;
+    refs.companyCampus.dataset.companyTier = String(visualTier);
+    refs.companyBuilding.style.setProperty("--building-width", `${160 + visualTier * 20}px`);
+    refs.companyBuilding.style.setProperty("--building-height", `${96 + visualTier * 6}px`);
+    renderCompanyFloors(visualTier, progress.levelIndex);
+    renderCompanyEmployees();
+
+    if (!isFirstRender) {
+      refs.companyBuilding.classList.remove("is-leveling-up");
+      window.requestAnimationFrame(() => refs.companyBuilding.classList.add("is-leveling-up"));
+      window.setTimeout(() => refs.companyBuilding.classList.remove("is-leveling-up"), 720);
+    }
+  }
+
+}
+
+function renderCompanyFloors(visualTier, levelIndex) {
+  const floorCount = visualTier + 1;
+  const windowCount = Math.min(4, 1 + Math.ceil(visualTier / 2));
+  refs.companyFloors.style.setProperty("--floor-count", floorCount);
+  refs.companyFloors.style.setProperty("--window-count", windowCount);
+  refs.companyFloors.innerHTML = Array.from({ length: floorCount }, (_, floorIndex) => {
+    const windows = Array.from({ length: windowCount }, (_, windowIndex) => {
+      const lit = (floorIndex + windowIndex + levelIndex) % 3 !== 0;
+      return `<span class="office-window${lit ? " is-lit" : ""}"></span>`;
+    }).join("");
+    return `<div class="building-floor">${windows}</div>`;
+  }).join("");
+}
+
+function renderCompanyEmployees() {
+  const colors = ["#315f78", "#b05b45", "#6a6fa6", "#3c7c58", "#c4893f", "#805b86"];
+  const visibleEmployees = Math.min(12, getEmployeeCount());
+  refs.employeeCrowd.innerHTML = Array.from({ length: visibleEmployees }, (_, index) => {
+    return `<span class="scene-employee" style="--employee-color: ${colors[index % colors.length]}"></span>`;
+  }).join("");
+  refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getEmployeeCount()}명`);
 }
 
 function renderEnemies() {
@@ -981,11 +1818,11 @@ function renderAllies() {
 
 function getAllyPosition(index) {
   const positions = [
-    { x: 15, y: 64 },
-    { x: 24, y: 42 },
-    { x: 24, y: 106 },
-    { x: 32, y: 72 },
-    { x: 20, y: 138 },
+    { x: 8, y: 82 },
+    { x: 34, y: 34 },
+    { x: 34, y: 134 },
+    { x: 21, y: 34 },
+    { x: 21, y: 134 },
   ];
   return positions[index] || { x: 16 + index * 5, y: 42 + (index % 3) * 46 };
 }
@@ -1011,13 +1848,92 @@ function renderShop() {
     .map((tool) => {
       const level = getToolLevel(tool.id);
       const cost = costFor(tool.baseCost, level);
+      const growthXp = tool.growthXp + level * 2;
       return `
-        <div class="shop-item">
-          <div>
+        <div class="facility-card">
+          <span class="facility-icon">${tool.icon}</span>
+          <div class="facility-copy">
             <strong>${tool.name} Lv.${level}</strong>
-            <span class="shop-meta">${tool.desc}</span>
+            <span>${tool.desc}</span>
           </div>
-          <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>${cost} 아이디어</button>
+          <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>
+            ${cost} 아이디어 · 성장 +${growthXp}
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+
+  renderSquadManagement();
+}
+
+function renderSquadManagement() {
+  const positionNames = ["전열 A", "전열 B", "지원 A", "지원 B"];
+  const deployedCounts = state.squad.reduce((counts, id) => {
+    if (id) counts[id] = (counts[id] || 0) + 1;
+    return counts;
+  }, {});
+
+  const leaderMarkup = `
+    <div class="squad-leader">
+      <span class="squad-avatar" style="--squad-color: #059669;">C</span>
+      <div>
+        <strong>대표</strong>
+        <small>리더 · 고정 배치</small>
+      </div>
+    </div>
+  `;
+
+  const slotMarkup = state.squad
+    .map((recruitId, slotIndex) => {
+      const assigned = recruits.find((recruit) => recruit.id === recruitId);
+      const options = recruits
+        .map((recruit) => {
+          const owned = getRecruitCount(recruit.id);
+          const deployedElsewhere = state.squad.reduce(
+            (count, id, index) => count + (index !== slotIndex && id === recruit.id ? 1 : 0),
+            0
+          );
+          const unavailable = recruit.id !== recruitId && deployedElsewhere >= owned;
+          return `<option value="${recruit.id}" ${recruit.id === recruitId ? "selected" : ""} ${
+            unavailable ? "disabled" : ""
+          }>${recruit.name} · 보유 ${owned}</option>`;
+        })
+        .join("");
+      const color = assigned ? assigned.color : "#9a8b77";
+      const mark = assigned ? assigned.mark : "+";
+
+      return `
+        <label class="squad-slot${assigned ? " is-filled" : ""}">
+          <span class="squad-position">${positionNames[slotIndex]}</span>
+          <span class="squad-slot-body">
+            <span class="squad-avatar" style="--squad-color: ${color};">${mark}</span>
+            <span>
+              <strong>${assigned ? assigned.name : "빈 위치"}</strong>
+              <small>${slotIndex + 1}번 배치 슬롯</small>
+            </span>
+          </span>
+          <select data-squad-slot="${slotIndex}" aria-label="${positionNames[slotIndex]} 동료 선택">
+            <option value="" ${assigned ? "" : "selected"}>비워두기</option>
+            ${options}
+          </select>
+        </label>
+      `;
+    })
+    .join("");
+
+  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup;
+  refs.squadRoster.innerHTML = recruits
+    .map((recruit) => {
+      const owned = getRecruitCount(recruit.id);
+      const deployed = deployedCounts[recruit.id] || 0;
+      return `
+        <div class="squad-roster-item${owned ? "" : " is-unowned"}">
+          <span class="squad-avatar" style="--squad-color: ${recruit.color};">${recruit.mark}</span>
+          <div>
+            <strong>${recruit.name}</strong>
+            <small>보유 ${owned} · 배치 ${deployed}</small>
+          </div>
         </div>
       `;
     })
