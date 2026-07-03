@@ -105,6 +105,10 @@ const equipmentGrades = [
   { name: "희귀", chance: 0.3, multiplier: 1.45, color: "#238b65" },
   { name: "영웅", chance: 0.12, multiplier: 2.1, color: "#7c3aed" },
   { name: "전설", chance: 0.03, multiplier: 3.2, color: "#b85c22" },
+  { name: "신화", chance: 0.012, multiplier: 4.6, color: "#db2777" },
+  { name: "고대", chance: 0.006, multiplier: 6.2, color: "#0891b2" },
+  { name: "초월", chance: 0.003, multiplier: 8.5, color: "#4f46e5" },
+  { name: "유일", chance: 0.001, multiplier: 12, color: "#facc15" },
 ];
 
 const equipmentUpgradeConfigs = [
@@ -112,7 +116,11 @@ const equipmentUpgradeConfigs = [
   { level: 2, label: "2단계", maxGrade: 2, nextCost: 45, duration: 180, desc: "영웅 장비 등장" },
   { level: 3, label: "3단계", maxGrade: 2, nextCost: 90, duration: 420, desc: "희귀 이상 확률 상승" },
   { level: 4, label: "4단계", maxGrade: 3, nextCost: 160, duration: 900, desc: "전설 장비 등장" },
-  { level: 5, label: "5단계", maxGrade: 3, nextCost: 0, duration: 0, desc: "최대 연구 단계" },
+  { level: 5, label: "5단계", maxGrade: 4, nextCost: 280, duration: 1800, desc: "신화 장비 등장" },
+  { level: 6, label: "6단계", maxGrade: 4, nextCost: 450, duration: 3600, desc: "신화 확률 상승" },
+  { level: 7, label: "7단계", maxGrade: 5, nextCost: 700, duration: 7200, desc: "고대 장비 등장" },
+  { level: 8, label: "8단계", maxGrade: 6, nextCost: 1100, duration: 14400, desc: "초월 장비 등장" },
+  { level: 9, label: "9단계", maxGrade: 7, nextCost: 0, duration: 0, desc: "유일 장비 등장" },
 ];
 
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
@@ -1185,8 +1193,10 @@ function pickEquipmentGrade() {
 
 function getAdjustedGradeChance(baseChance, gradeIndex, gradeLevel) {
   if (gradeLevel < 3) return baseChance;
-  const bonus = gradeIndex === 0 ? -0.18 : gradeIndex * 0.08;
-  return Math.max(0.05, baseChance + bonus);
+
+  const highGradeBoost = 1 + Math.max(0, gradeLevel - 2) * 0.18 + gradeIndex * 0.08;
+  const lowGradePenalty = gradeIndex === 0 ? Math.max(0.38, 1 - (gradeLevel - 2) * 0.08) : 1;
+  return Math.max(0.001, baseChance * highGradeBoost * lowGradePenalty);
 }
 
 function rollEquipmentValue(range, multiplier) {
