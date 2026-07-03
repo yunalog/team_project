@@ -7,6 +7,8 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
+const CRITICAL_CHANCE = 0.16;
+const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
 const BGM_TRACKS = {
@@ -953,9 +955,11 @@ function damageEnemy(enemyId, amount, manual) {
   const target = state.enemies.find((enemy) => enemy.id === enemyId) || getTargetEnemy();
   if (!target) return;
 
-  const finalAmount = Math.max(1, Math.round(amount * getGlobalMultiplier()));
+  const critical = Math.random() < CRITICAL_CHANCE;
+  const multiplier = getGlobalMultiplier() * (critical ? CRITICAL_MULTIPLIER : 1);
+  const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
-  showDamage(finalAmount, target);
+  showDamage(finalAmount, target, { critical });
   pulseEnemy(target.id);
 
   if (target.hp <= 0) {
@@ -1042,14 +1046,36 @@ function syncEnemySummary() {
   state.enemyX = target ? target.x : ENEMY_SPAWN_X;
 }
 
-function showDamage(amount, target) {
+function showDamage(amount, target, options = {}) {
+  const critical = Boolean(options.critical);
   const damage = document.createElement("span");
-  damage.className = "damage-number";
-  damage.textContent = `-${amount}`;
+  damage.className = `damage-number${critical ? " is-critical" : ""}`;
+  damage.textContent = critical ? `CRIT ${amount}` : `-${amount}`;
   damage.style.setProperty("--hit-x", `${target.x}%`);
   damage.style.setProperty("--hit-y", `${target.y + 92}px`);
   refs.effectLayer.appendChild(damage);
-  window.setTimeout(() => damage.remove(), 760);
+  if (critical) showCriticalBurst(target);
+  window.setTimeout(() => damage.remove(), critical ? 980 : 760);
+}
+
+function showCriticalBurst(target) {
+  const burst = document.createElement("span");
+  burst.className = "critical-burst";
+  burst.style.setProperty("--hit-x", `${target.x}%`);
+  burst.style.setProperty("--hit-y", `${target.y + 92}px`);
+  refs.effectLayer.appendChild(burst);
+  window.setTimeout(() => burst.remove(), 620);
+
+  for (let index = 0; index < 12; index += 1) {
+    const particle = document.createElement("span");
+    particle.className = "critical-particle";
+    particle.style.setProperty("--hit-x", `${target.x}%`);
+    particle.style.setProperty("--hit-y", `${target.y + 92}px`);
+    particle.style.setProperty("--particle-angle", `${index * 30 + Math.random() * 18}deg`);
+    particle.style.setProperty("--particle-distance", `${26 + Math.random() * 30}px`);
+    refs.effectLayer.appendChild(particle);
+    window.setTimeout(() => particle.remove(), 720);
+  }
 }
 
 function pulseUnit(unitId, className, duration) {
