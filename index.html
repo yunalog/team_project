@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>스튜디오 크루 RPG</title>
     <link rel="stylesheet" href="style.css" />
-  </head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
+</head>
   <body>
     <section class="start-screen" id="startScreen" aria-label="게임 시작 화면">
       <div class="start-scene">
@@ -183,7 +184,48 @@
         </article>
 
         <article class="tab-panel" data-panel="recruit">
-          <div class="shop-list" id="recruitList"></div>
+          <div class="recruit-board">
+            <section class="recruit-board__left">
+              <h2 class="section-heading">영입</h2>
+              <div class="shop-list" id="recruitList"></div>
+            </section>
+            <section class="recruit-board__right">
+              <h2 class="section-heading">성장</h2>
+              <div class="growth-grid">
+                <div class="growth-card">
+                  <span>작업처리능력</span>
+                  <strong id="growthProcessValue">1</strong>
+                  <small class="growth-subtext">기본 공격력</small>
+                  <button class="growth-upgrade-button" type="button" data-upgrade-growth="process">강화</button>
+                </div>
+                <div class="growth-card">
+                  <span>실수 감소</span>
+                  <strong id="growthCriticalValue">0%</strong>
+                  <small class="growth-subtext">치명타 확률</small>
+                  <button class="growth-upgrade-button" type="button" data-upgrade-growth="critical">강화</button>
+                </div>
+                <div class="growth-card">
+                  <span>새로운 아이디어</span>
+                  <strong id="growthSkillValue">1</strong>
+                  <small class="growth-subtext">스킬 피해량</small>
+                  <button class="growth-upgrade-button" type="button" data-upgrade-growth="skill">강화</button>
+                </div>
+                <div class="growth-card">
+                  <span>작업 속도</span>
+                  <strong id="growthSpeedValue">1</strong>
+                  <small class="growth-subtext">공격 속도</small>
+                  <button class="growth-upgrade-button" type="button" data-upgrade-growth="speed">강화</button>
+                </div>
+                <div class="growth-card">
+                  <span>야근 버티기</span>
+                  <strong id="growthHpValue">100</strong>
+                  <small class="growth-subtext">HP</small>
+                  <button class="growth-upgrade-button" type="button" data-upgrade-growth="hp">강화</button>
+                </div>
+              </div>
+              <p class="growth-note">영입한 직군과 대표 역량을 함께 성장시키면 전투력이 빨라집니다.</p>
+            </section>
+          </div>
         </article>
 
         <article class="tab-panel" data-panel="tools">
@@ -221,18 +263,6 @@
           </div>
         </article>
 
-        <article class="tab-panel" data-panel="timer">
-          <div class="timer-board">
-            <div>
-              <span>오늘 업무 시간</span>
-              <strong id="playTimeText">00:00</strong>
-            </div>
-            <div>
-              <span>다음 자동 처리</span>
-              <strong id="attackTimerText">1.0초</strong>
-            </div>
-          </div>
-        </article>
 
         <article class="tab-panel" data-panel="settings">
           <div class="settings-row">
@@ -254,9 +284,8 @@
 
       <nav class="bottom-tabs" aria-label="게임 메뉴">
         <button class="tab-button is-active" type="button" data-tab="battle">업무</button>
-        <button class="tab-button" type="button" data-tab="recruit">직군영입</button>
-        <button class="tab-button" type="button" data-tab="tools">회사 타이쿤</button>
-        <button class="tab-button" type="button" data-tab="timer">타이머</button>
+        <button class="tab-button" type="button" data-tab="recruit">동료 영입</button>
+        <button class="tab-button" type="button" data-tab="tools">회사</button>
         <button class="tab-button" type="button" data-tab="settings">설정</button>
       </nav>
     </main>

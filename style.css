@@ -1,3 +1,5 @@
+@import url('https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css');
+
 :root {
   color-scheme: light;
   --ink: #2d2119;
@@ -24,7 +26,7 @@ body {
     radial-gradient(circle at 50% 0, rgba(242, 184, 75, 0.32), transparent 34%),
     linear-gradient(180deg, #354f43 0%, #1f2d2a 100%);
   color: var(--ink);
-  font-family: Arial, "Noto Sans KR", sans-serif;
+  font-family: "NeoDunggeunmo", "Neo둥근모", "DungGeunMo", monospace;
 }
 
 button {
@@ -2409,7 +2411,7 @@ h1 {
   --ui-green-deep: #1c5f48;
   --ui-gold: #f2b84b;
   --ui-shadow: rgba(45, 33, 25, 0.34);
-  --pixel-font: "Neo둥근모", "DungGeunMo", "Galmuri11", "DOSGothic", "Noto Sans KR", monospace;
+  --pixel-font: "NeoDunggeunmo", "Neo둥근모", "DungGeunMo", "Galmuri11", "DOSGothic", monospace;
 }
 
 body,
@@ -2700,4 +2702,171 @@ h3,
     right: 7px;
     bottom: 5px;
   }
+}
+
+
+/* =========================================================
+   Final tab/button interaction patch
+   - 타이머 탭 제거 후 하단 4탭을 정확히 25%씩 분배
+   - hover/active에서 버튼 위치가 크게 움직이지 않도록 보정
+   ========================================================= */
+.bottom-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+}
+
+.tab-button {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+button:hover:not(:disabled),
+#manualWorkButton:hover:not(:disabled),
+.action-row button:hover:not(:disabled),
+.settings-row button:hover:not(:disabled),
+.mute-button:hover:not(:disabled),
+.title-return-button:hover:not(:disabled),
+.shop-item button:hover:not(:disabled),
+.facility-card button:hover:not(:disabled),
+.growth-upgrade-button:hover:not(:disabled),
+.equipment-actions button:hover:not(:disabled),
+.equipment-upgrade-actions button:hover:not(:disabled),
+.tab-button:hover:not(:disabled) {
+  filter: brightness(1.05) saturate(1.04);
+  transform: none;
+}
+
+.start-button:hover {
+  filter: brightness(1.05) saturate(1.04);
+  transform: translateX(-50%);
+}
+
+.equipment-draw-button:hover:not(:disabled),
+.auto-draw-button:hover:not(:disabled) {
+  filter: brightness(1.05) saturate(1.04);
+  transform: translateX(-50%);
+}
+
+button:active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.action-row button:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.mute-button:active:not(:disabled),
+.title-return-button:active:not(:disabled),
+.shop-item button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.equipment-actions button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled),
+.tab-button:active:not(:disabled) {
+  filter: brightness(0.98);
+  transform: none;
+  box-shadow: 0 2px 0 var(--ui-accent-deep, rgba(74, 43, 23, 0.55)), 2px 2px 0 rgba(255, 255, 255, 0.14) inset;
+}
+
+.start-button:active {
+  filter: brightness(0.98);
+  transform: translateX(-50%);
+  box-shadow: 0 5px 0 rgba(74, 43, 23, 0.62), 0 0 14px rgba(255, 217, 121, 0.28);
+}
+
+.equipment-draw-button:active:not(:disabled),
+.auto-draw-button:active:not(:disabled) {
+  filter: brightness(0.98);
+  transform: translateX(-50%);
+}
+
+
+/* =========================================================
+   Start/equipment button final movement lock
+   - 위치 이동 없이 밝기 변화만으로 hover/active 표시
+   ========================================================= */
+.start-button,
+.start-button:hover,
+.start-button:focus-visible,
+.start-button:active {
+  transform: translateX(-50%) !important;
+}
+
+.start-button:hover {
+  filter: brightness(1.05) saturate(1.04) !important;
+  box-shadow: 0 7px 0 rgba(74, 43, 23, 0.72), 0 0 18px rgba(255, 217, 121, 0.35) !important;
+}
+
+.start-button:active {
+  filter: brightness(0.96) saturate(0.98) !important;
+  box-shadow: 0 7px 0 rgba(74, 43, 23, 0.72), 0 0 18px rgba(255, 217, 121, 0.35) !important;
+}
+
+.equipment-draw-button,
+.equipment-draw-button:hover:not(:disabled),
+.equipment-draw-button:focus-visible,
+.equipment-draw-button:active:not(:disabled),
+.auto-draw-button,
+.auto-draw-button:hover:not(:disabled),
+.auto-draw-button:focus-visible,
+.auto-draw-button:active:not(:disabled) {
+  transform: translateX(-50%) !important;
+}
+
+.equipment-draw-button:hover:not(:disabled),
+.auto-draw-button:hover:not(:disabled) {
+  filter: brightness(1.05) saturate(1.04) !important;
+}
+
+.equipment-draw-button:active:not(:disabled),
+.auto-draw-button:active:not(:disabled) {
+  filter: brightness(0.96) saturate(0.98) !important;
+}
+
+
+/* 전체 게임 폰트 강제 적용: Neo둥근모 */
+html, body, button, input, select, textarea, .app, .phone, .game-shell, .screen, .panel, .tab, .tab-button, .btn {
+  font-family: "NeoDunggeunmo", "Neo둥근모", "DungGeunMo", monospace !important;
+}
+
+* {
+  font-family: inherit;
+}
+
+/* =========================================================
+   FINAL FONT LOCK: 게임 전체 Neo둥근모 강제 적용
+   - JS로 생성되는 설명/카드 텍스트, pseudo 요소, SVG text까지 포함
+   - 기존 굴림/맑은고딕/브라우저 기본 폰트가 섞이지 않도록 최하단에서 덮어씀
+   ========================================================= */
+@import url('https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css');
+
+:root {
+  --pixel-font: "NeoDunggeunmo", "Neo둥근모", "DungGeunMo", "Galmuri11", "DOSGothic", monospace;
+}
+
+html,
+body,
+body *,
+body *::before,
+body *::after,
+button,
+input,
+select,
+textarea,
+option,
+optgroup,
+svg,
+svg *,
+[role="button"],
+[contenteditable="true"] {
+  font-family: var(--pixel-font) !important;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit !important;
+  letter-spacing: inherit;
+}
+
+/* Neo둥근모는 굵기 종류가 제한적이라, 브라우저가 굴림/기본폰트로 대체하지 않게 고정 */
+html, body {
+  font-family: var(--pixel-font) !important;
+  font-synthesis-weight: auto;
 }
