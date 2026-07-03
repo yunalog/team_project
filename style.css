@@ -329,8 +329,8 @@ h1 {
 
 .ally-state-sprite {
   display: block;
-  width: 72px;
-  height: 72px;
+  width: 120px;
+  height: 77px;
   background-image: var(--idle-url);
   background-repeat: no-repeat;
   background-size: contain;
@@ -834,6 +834,146 @@ h1 {
 .shop-list {
   display: grid;
   gap: 8px;
+}
+
+.recruit-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.recruit-board__left,
+.recruit-board__right {
+  display: grid;
+  gap: 12px;
+}
+
+.recruit-category {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(45, 33, 25, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.recruit-category__heading {
+  padding-bottom: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-strong);
+  border-bottom: 1px solid rgba(45, 33, 25, 0.12);
+}
+
+.recruit-category__list {
+  display: grid;
+  gap: 8px;
+}
+
+.recruit-placeholder {
+  padding: 12px;
+  border: 1px dashed rgba(45, 33, 25, 0.24);
+  border-radius: 8px;
+  background: rgba(243, 239, 226, 0.9);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.section-heading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.growth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.growth-card,
+.shop-item,
+.timer-board div,
+.stat-grid div {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.growth-card span,
+.shop-meta {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.growth-card strong,
+.stat-grid strong,
+.timer-board strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 20px;
+}
+
+.growth-subtext {
+  margin-top: 6px;
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.growth-upgrade-button {
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 2px solid #4a2b17;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffd780 0%, #b85c22 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.growth-upgrade-button:hover {
+  background: linear-gradient(180deg, #ffe79b 0%, #7f3518 100%);
+}
+
+.growth-action {
+  margin-top: 6px;
+}
+
+.growth-action button {
+  width: 100%;
+  min-height: 42px;
+  border: 2px solid #4a2b17;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #376f56 0%, #1f4636 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 3px 0 rgba(45, 33, 25, 0.38);
+}
+
+.growth-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 680px) {
+  .recruit-board {
+    grid-template-columns: 1fr;
+  }
+
+  .growth-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .shop-item {

@@ -25,14 +25,15 @@ const recruits = [
     mark: "P",
     color: "#f59e0b",
     desc: "요구사항을 정리해 자동 기여도를 올립니다.",
+    category: "기획직군",
     baseCost: 25,
     dps: 1,
     attackType: "plan",
     skill: { type: "chain", name: "일정 공유", targets: 3, multiplier: 1.2 },
     sprites: {
-      idle: "Anim/Player_2/GD_Idle.png",
-      attack: "Anim/Player_2/GD_ATK.png",
-      skill: "Anim/Player_2/GD_Skill.png",
+      idle: "Anim/Player_CP/CP_Idle.png",
+      attack: "Anim/Player_CP/CP_Atk.png",
+      skill: "Anim/Player_CP/CP_Skill.png",
     },
   },
   {
@@ -42,10 +43,16 @@ const recruits = [
     mark: "D",
     color: "#2563eb",
     desc: "핵심 기능을 빠르게 구현합니다.",
+    category: "개발직군",
     baseCost: 55,
     dps: 3,
     attackType: "code",
     skill: { type: "aoe", name: "빌드 폭발", radius: 14, multiplier: 1.45 },
+    sprites: {
+      idle: "Anim/Player_DG/DG_Idle.png",
+      attack: "Anim/Player_DG/DG_ATK.png",
+      skill: "Anim/Player_DG/DG_Skill.png",
+    },
   },
   {
     id: "artist",
@@ -54,10 +61,34 @@ const recruits = [
     mark: "A",
     color: "#ec4899",
     desc: "펜으로 근접 베기 공격을 합니다.",
+    category: "아트직군",
     baseCost: 90,
     dps: 5,
     attackType: "slash",
     skill: { type: "cleave", name: "잉크 소용돌이", targets: 2, multiplier: 1.9 },
+    sprites: {
+      idle: "Anim/Player_ART/ART_Idle.png",
+      attack: "Anim/Player_ART/ART_Atk.png",
+      skill: "Anim/Player_ART/ART_Skill.png",
+    },
+  },
+  {
+    id: "business",
+    name: "사업 운영자",
+    shortName: "사업",
+    mark: "B",
+    color: "#f97316",
+    desc: "사업과 운영을 관리해 팀의 성장을 지원합니다.",
+    category: "사업/운영직군",
+    baseCost: 80,
+    dps: 4,
+    attackType: "plan",
+    skill: { type: "chain", name: "협업 조율", targets: 2, multiplier: 1.3 },
+    sprites: {
+      idle: "Anim/Player_BG/BG_Idle.png",
+      attack: "Anim/Player_BG/BG_Atk.png",
+      skill: "Anim/Player_BG/BG_Skill.png",
+    },
   },
   {
     id: "qa",
@@ -66,12 +97,76 @@ const recruits = [
     mark: "Q",
     color: "#7c3aed",
     desc: "버그를 발견해 적 체력을 꾸준히 깎습니다.",
+    category: "QA직군",
     baseCost: 140,
     dps: 8,
     attackType: "qa",
     skill: { type: "all", name: "전체 회귀 테스트", multiplier: 0.9 },
+    sprites: {
+      idle: "Anim/Player_QA/QA_Idle.png",
+      attack: "Anim/Player_QA/QA_Atk.png",
+      skill: "Anim/Player_QA/QA_Skill.png",
+    },
   },
 ];
+
+const recruitCategories = [
+  "개발직군",
+  "아트직군",
+  "기획직군",
+  "사업/운영직군",
+  "QA직군",
+];
+
+const recruitRankNames = {
+  developer: [
+    "코딩 뉴비",
+    "주니어 개발자",
+    "시니어 개발자",
+    "테크 리드",
+    "코드 마법사",
+    "전설의 개발 CTO",
+  ],
+  artist: [
+    "낙서장인",
+    "컨셉 아티스트",
+    "비주얼 메이커",
+    "연출 마스터",
+    "아트 디렉터",
+    "전설의 신의 손",
+  ],
+  planner: [
+    "기획 인턴",
+    "주니어 기획자",
+    "시스템 설계자",
+    "메인 설계자",
+    "디렉터",
+    "전설의 갓 디렉터",
+  ],
+  business: [
+    "민원 해결사",
+    "이벤트 기획자",
+    "운영 전문가",
+    "라이브 PM",
+    "사업 총괄자",
+    "전설의 매출의 신",
+  ],
+  qa: [
+    "버그 탐지기",
+    "버그 사냥꾼",
+    "QA 전문가",
+    "디버깅 장인",
+    "품질 수호자",
+    "전설의 버그 슬레이어",
+  ],
+};
+
+function getRecruitRankLabel(recruit, count) {
+  const rankNames = recruitRankNames[recruit.id];
+  if (!rankNames) return recruit.name;
+  const tier = Math.min(5, Math.floor(count / 10));
+  return rankNames[tier];
+}
 
 const tools = [
   { id: "engine", name: "게임 엔진", desc: "클릭 기여도 +1", baseCost: 35, click: 1 },
@@ -79,6 +174,14 @@ const tools = [
   { id: "tablet", name: "드로잉 태블릿", desc: "일러스트레이터 효율 +2", baseCost: 120, target: "artist", dps: 2 },
   { id: "testKit", name: "테스트 키트", desc: "QA 효율 +3", baseCost: 160, target: "qa", dps: 3 },
 ];
+
+const growthConfigs = {
+  process: { label: "작업처리능력", baseCost: 18 },
+  critical: { label: "실수 감소", baseCost: 20 },
+  skill: { label: "새로운 아이디어", baseCost: 22 },
+  speed: { label: "작업 속도", baseCost: 16 },
+  hp: { label: "야근 버티기", baseCost: 24 },
+};
 
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
 
@@ -99,6 +202,13 @@ const defaultState = {
   elapsed: 0,
   recruits: {},
   tools: {},
+  growthLevels: {
+    process: 0,
+    critical: 0,
+    skill: 0,
+    speed: 0,
+    hp: 0,
+  },
 };
 
 let state;
@@ -150,6 +260,13 @@ function initGame() {
     toolList: document.querySelector("#toolList"),
     manualWorkButton: document.querySelector("#manualWorkButton"),
     upgradePlayerButton: document.querySelector("#upgradePlayerButton"),
+    upgradePlayerRecruitButton: document.querySelector("#upgradePlayerRecruitButton"),
+    playerLevelText: document.querySelector("#playerLevelText"),
+    growthProcessValue: document.querySelector("#growthProcessValue"),
+    growthCriticalValue: document.querySelector("#growthCriticalValue"),
+    growthSkillValue: document.querySelector("#growthSkillValue"),
+    growthSpeedValue: document.querySelector("#growthSpeedValue"),
+    growthHpValue: document.querySelector("#growthHpValue"),
     nextStageButton: document.querySelector("#nextStageButton"),
     saveButton: document.querySelector("#saveButton"),
     resetButton: document.querySelector("#resetButton"),
@@ -185,12 +302,17 @@ function bindEvents() {
     if (tab) switchTab(tab);
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
     if (toolButton) buyTool(toolButton.dataset.buyTool);
+    const growthButton = event.target.closest("[data-upgrade-growth]");
+    if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
     attackUnit(getPlayerUnit(state.clickPower), { manual: true });
   });
   refs.upgradePlayerButton.addEventListener("click", upgradePlayer);
+  if (refs.upgradePlayerRecruitButton) {
+    refs.upgradePlayerRecruitButton.addEventListener("click", upgradePlayer);
+  }
   refs.nextStageButton.addEventListener("click", () => {
     if (state.battleMode !== "boss") advanceBattleLayer();
     spawnWave();
@@ -412,6 +534,16 @@ function normalizeState(nextState) {
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
+    growthLevels:
+      nextState.growthLevels && typeof nextState.growthLevels === "object"
+        ? {
+            process: Math.max(0, Number(nextState.growthLevels.process) || 0),
+            critical: Math.max(0, Number(nextState.growthLevels.critical) || 0),
+            skill: Math.max(0, Number(nextState.growthLevels.skill) || 0),
+            speed: Math.max(0, Number(nextState.growthLevels.speed) || 0),
+            hp: Math.max(0, Number(nextState.growthLevels.hp) || 0),
+          }
+        : cloneDefaultState().growthLevels,
   };
 }
 
@@ -870,7 +1002,8 @@ function buyRecruit(id) {
   state.gold -= cost;
   state.recruits[id] = count + 1;
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
-  log(`${recruit.name} 영입 완료. 전투 화면에 배치되었습니다.`);
+  const rankLabel = getRecruitRankLabel(recruit, count + 1);
+  log(`${rankLabel} 영입 완료. 전투 화면에 배치되었습니다.`);
   renderAll();
 }
 
@@ -895,6 +1028,46 @@ function upgradePlayer() {
   state.playerLevel += 1;
   state.clickPower += 1;
   log("대표 역량이 강화되었습니다.");
+  renderAll();
+}
+
+function getGrowthValue(type) {
+  const level = state.growthLevels[type] || 0;
+  switch (type) {
+    case "process":
+      return 1 + level;
+    case "critical":
+      return `${(1 + 0.1 * level).toFixed(1)}%`;
+    case "skill":
+      return 1 + 0.2 * level;
+    case "speed":
+      return 1 + 0.05 * level;
+    case "hp":
+      return 100 + 20 * level;
+    default:
+      return 0;
+  }
+}
+
+function formatGrowthValue(type, value) {
+  if (type === "critical") return value;
+  if (type === "skill" || type === "speed") return value.toFixed(1);
+  return value;
+}
+
+function getGrowthCost(type) {
+  const base = growthConfigs[type]?.baseCost || 20;
+  const level = state.growthLevels[type] || 0;
+  return Math.floor(base * Math.pow(1.25, level));
+}
+
+function upgradeGrowth(type) {
+  if (!growthConfigs[type]) return;
+  const cost = getGrowthCost(type);
+  if (state.gold < cost) return;
+  state.gold -= cost;
+  state.growthLevels[type] = (state.growthLevels[type] || 0) + 1;
+  log(`${growthConfigs[type].label} 강화 완료!`);
   renderAll();
 }
 
@@ -927,8 +1100,26 @@ function renderBattle() {
   setText(refs.clearCountText, `${state.clearCount}건`);
   setText(refs.playTimeText, formatTime(state.elapsed));
   setText(refs.attackTimerText, `${Math.max(0, Math.min(basicAttackCooldown, skillAttackCooldown)).toFixed(1)}초`);
-  refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
-  refs.upgradePlayerButton.disabled = state.gold < playerCost;
+  setText(refs.playerLevelText, `${state.playerLevel}`);
+  setText(refs.growthProcessValue, formatGrowthValue("process", getGrowthValue("process")));
+  setText(refs.growthCriticalValue, formatGrowthValue("critical", getGrowthValue("critical")));
+  setText(refs.growthSkillValue, formatGrowthValue("skill", getGrowthValue("skill")));
+  setText(refs.growthSpeedValue, formatGrowthValue("speed", getGrowthValue("speed")));
+  setText(refs.growthHpValue, formatGrowthValue("hp", getGrowthValue("hp")));
+  if (refs.upgradePlayerButton) {
+    refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
+    refs.upgradePlayerButton.disabled = state.gold < playerCost;
+  }
+  if (refs.upgradePlayerRecruitButton) {
+    refs.upgradePlayerRecruitButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
+    refs.upgradePlayerRecruitButton.disabled = state.gold < playerCost;
+  }
+  document.querySelectorAll("[data-upgrade-growth]").forEach((button) => {
+    const type = button.dataset.upgradeGrowth;
+    const cost = getGrowthCost(type);
+    button.textContent = `강화 (${cost} 자금)`;
+    button.disabled = state.gold < cost;
+  });
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
 }
 
@@ -961,7 +1152,7 @@ function renderAllies() {
   refs.allyLayer.innerHTML = units
     .map((unit, index) => {
       const position = getAllyPosition(index);
-      const countText = unit.count > 1 ? ` x${unit.count}` : "";
+      const label = unit.id !== "player" && typeof unit.count === "number" ? getRecruitRankLabel(unit, unit.count) : unit.shortName;
       const spriteMarkup = unit.sprites
         ? `<span class="ally-state-sprite" role="img" aria-label="${unit.name}" style="--idle-url: url('${unit.sprites.idle}'); --attack-url: url('${unit.sprites.attack}'); --skill-url: url('${unit.sprites.skill}')"></span>`
         : unit.spriteSheet
@@ -972,7 +1163,7 @@ function renderAllies() {
       return `
         <div class="ally" data-unit-id="${unit.id}" style="--ally-x: ${position.x}%; --ally-y: ${position.y}px; --ally-color: ${unit.color};">
           ${spriteMarkup}
-          <span class="ally-role">${unit.shortName}${countText}</span>
+          <span class="ally-role">${label}</span>
         </div>
       `;
     })
@@ -991,17 +1182,36 @@ function getAllyPosition(index) {
 }
 
 function renderShop() {
-  refs.recruitList.innerHTML = recruits
-    .map((recruit) => {
-      const count = getRecruitCount(recruit.id);
-      const cost = costFor(recruit.baseCost, count);
+  refs.recruitList.innerHTML = recruitCategories
+    .map((category) => {
+      const categoryItems = recruits.filter((recruit) => recruit.category === category);
+      const itemsHtml = categoryItems.length
+        ? categoryItems
+            .map((recruit) => {
+              const count = getRecruitCount(recruit.id);
+              const cost = costFor(recruit.baseCost, count);
+              const label = getRecruitRankLabel(recruit, count);
+              return `
+                <div class="shop-item">
+                  <div>
+                    <strong>${label} Lv.${count}</strong>
+                    <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
+                  </div>
+                  <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+                </div>
+              `;
+            })
+            .join("")
+        : `
+            <div class="recruit-placeholder">
+              <span>현재 영입 가능한 ${category} 항목이 없습니다.</span>
+            </div>
+          `;
+
       return `
-        <div class="shop-item">
-          <div>
-            <strong>${recruit.name} Lv.${count}</strong>
-            <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
-          </div>
-          <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+        <div class="recruit-category">
+          <div class="recruit-category__heading">${category}</div>
+          <div class="recruit-category__list">${itemsHtml}</div>
         </div>
       `;
     })
