@@ -2036,12 +2036,14 @@ h1 {
 
 .bottom-tabs {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border-top: 2px solid var(--ink);
   background: #d0a56c;
 }
 
 .tab-button {
+  min-width: 0;
+  width: 100%;
   min-height: 56px;
   border-width: 0 1px 0 0;
   border-color: var(--ink);
@@ -2278,4 +2280,447 @@ h1 {
     padding: 4px 2px;
     font-size: 12px;
   }
+}
+
+
+/* Merged: Jinbeom recruit/growth panel + 4-tab cleanup */
+.recruit-board {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+  gap: 14px;
+}
+
+.recruit-board__left,
+.recruit-board__right {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.section-heading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--ink, #2d2119);
+}
+
+.recruit-category {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line, rgba(45, 33, 25, 0.14));
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.recruit-category__heading {
+  padding-bottom: 4px;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--accent-strong, #7f3518);
+  border-bottom: 1px solid rgba(45, 33, 25, 0.12);
+}
+
+.recruit-category__list {
+  display: grid;
+  gap: 8px;
+}
+
+.recruit-placeholder {
+  padding: 12px;
+  border: 1px dashed rgba(45, 33, 25, 0.24);
+  border-radius: 10px;
+  background: rgba(243, 239, 226, 0.9);
+  color: var(--muted, #7c6b5e);
+  font-size: 13px;
+}
+
+.growth-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.growth-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line, rgba(45, 33, 25, 0.14));
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.growth-card span,
+.growth-subtext {
+  color: var(--muted, #7c6b5e);
+  font-size: 12px;
+}
+
+.growth-card strong {
+  font-size: 22px;
+  color: var(--ink, #2d2119);
+}
+
+.growth-upgrade-button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffd780 0%, #b85c22 100%);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.growth-upgrade-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+  opacity: 0.55;
+}
+
+.growth-note {
+  margin: 0;
+  color: var(--muted, #7c6b5e);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .recruit-board { grid-template-columns: 1fr; }
+  .growth-grid { grid-template-columns: 1fr; }
+}
+
+/* =========================================================
+   Pixel UI polish patch: 4-tab balance + retro dev board feel
+   - 기능 코드/HTML 구조는 유지하고, 시각 스타일만 덮어씁니다.
+   ========================================================= */
+:root {
+  --ui-ink: #2d2119;
+  --ui-board: #243d35;
+  --ui-board-2: #1b2f2a;
+  --ui-paper: #eadbbd;
+  --ui-panel: #fff7e5;
+  --ui-panel-2: #f2dfb9;
+  --ui-line: #7b5a34;
+  --ui-line-soft: #b58a51;
+  --ui-accent: #b85c22;
+  --ui-accent-deep: #743419;
+  --ui-green: #2f8a67;
+  --ui-green-deep: #1c5f48;
+  --ui-gold: #f2b84b;
+  --ui-shadow: rgba(45, 33, 25, 0.34);
+  --pixel-font: "Neo둥근모", "DungGeunMo", "Galmuri11", "DOSGothic", "Noto Sans KR", monospace;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: var(--pixel-font);
+}
+
+body {
+  background:
+    radial-gradient(circle at 50% -12%, rgba(242, 184, 75, 0.28), transparent 32%),
+    linear-gradient(180deg, var(--ui-board) 0%, var(--ui-board-2) 100%);
+}
+
+.game-shell {
+  background: var(--ui-paper);
+  border-inline: 2px solid #6c4b2e;
+  box-shadow: 0 0 0 3px rgba(16, 28, 24, 0.4), 0 18px 42px rgba(0, 0, 0, 0.32);
+}
+
+.top-bar,
+.message-line {
+  border-color: var(--ui-ink);
+  background:
+    linear-gradient(180deg, rgba(255, 247, 229, 0.92), rgba(224, 190, 128, 0.92)),
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(45, 33, 25, 0.035) 7px 8px);
+}
+
+.panel-area {
+  background:
+    repeating-linear-gradient(0deg, rgba(45, 33, 25, 0.025) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, #e3c184 0%, #cfaa6e 100%);
+}
+
+.tab-panel {
+  padding: 12px;
+}
+
+.stat-grid div,
+.timer-board div,
+.shop-item,
+.audio-control,
+.squad-management,
+.company-status-strip > div,
+.facility-card,
+.growth-card,
+.recruit-category,
+.recruit-placeholder,
+.equipped-item-panel,
+.equipment-upgrade-panel,
+.equipment-choice {
+  border: 2px solid var(--ui-line);
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 248, 232, 0.96), rgba(239, 216, 176, 0.96));
+  box-shadow: 3px 3px 0 var(--ui-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+}
+
+.resource-row span,
+.combat-power,
+.facility-icon,
+.squad-leader,
+.squad-slot,
+.squad-roster-item,
+.squad-slot select,
+.volume-control input {
+  border-radius: 3px;
+}
+
+button,
+#manualWorkButton,
+.action-row button,
+.settings-row button,
+.mute-button,
+.title-return-button,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.auto-draw-button {
+  border: 2px solid var(--ui-ink);
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--ui-gold) 0%, var(--ui-accent) 100%);
+  color: #fff7e5;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-shadow: 1px 1px 0 rgba(45, 33, 25, 0.72);
+  box-shadow: 0 4px 0 var(--ui-accent-deep), 2px 2px 0 rgba(255, 255, 255, 0.18) inset;
+  transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+}
+
+button:hover:not(:disabled),
+#manualWorkButton:hover:not(:disabled),
+.action-row button:hover:not(:disabled),
+.settings-row button:hover:not(:disabled),
+.mute-button:hover:not(:disabled),
+.title-return-button:hover:not(:disabled),
+.shop-item button:hover:not(:disabled),
+.facility-card button:hover:not(:disabled),
+.growth-upgrade-button:hover:not(:disabled),
+.equipment-actions button:hover:not(:disabled),
+.equipment-upgrade-actions button:hover:not(:disabled),
+.auto-draw-button:hover:not(:disabled) {
+  filter: brightness(1.06) saturate(1.08);
+  transform: translateY(-1px);
+}
+
+button:active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.action-row button:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.mute-button:active:not(:disabled),
+.title-return-button:active:not(:disabled),
+.shop-item button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.equipment-actions button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled),
+.auto-draw-button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--ui-accent-deep), 2px 2px 0 rgba(255, 255, 255, 0.16) inset;
+}
+
+button:disabled {
+  filter: grayscale(0.45);
+  opacity: 0.58;
+  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.28);
+}
+
+.shop-item button,
+.facility-card button,
+.equipment-upgrade-actions button:last-child,
+.equipment-actions button:last-child,
+.auto-draw-button,
+.mute-button.is-muted {
+  background: linear-gradient(180deg, #3e8062 0%, #234a3a 100%);
+  box-shadow: 0 4px 0 #183329, 2px 2px 0 rgba(255, 255, 255, 0.16) inset;
+}
+
+/* 하단 4탭: 동일 너비, 동일 높이, 동일 폰트/간격 */
+.bottom-tabs {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  align-items: stretch;
+  min-height: 58px;
+  border-top: 2px solid var(--ui-ink);
+  background: #8b643c;
+  box-shadow: 0 -3px 0 rgba(45, 33, 25, 0.22);
+}
+
+.tab-button {
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 58px;
+  min-height: 58px;
+  padding: 0 4px !important;
+  border: 0;
+  border-right: 2px solid var(--ui-ink);
+  border-radius: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(45, 33, 25, 0.04) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #fff1cf 0%, #d4ab70 100%);
+  color: var(--ui-ink);
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.46);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.48);
+}
+
+.tab-button:last-child {
+  border-right: 0;
+}
+
+.tab-button::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 5px;
+  border: 1px solid currentColor;
+  background: currentColor;
+  box-shadow: 2px 2px 0 rgba(45, 33, 25, 0.18);
+  transform: translateY(-1px);
+}
+
+.tab-button.is-active {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, var(--ui-green) 0%, var(--ui-green-deep) 100%);
+  color: #fff7e5;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.42);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.2), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+}
+
+.tab-button.is-active::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 6px;
+  height: 3px;
+  background: #f2b84b;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.28);
+}
+
+input,
+select,
+textarea {
+  border: 2px solid var(--ui-line);
+  border-radius: 4px;
+  background: #fff8e9;
+  color: var(--ui-ink);
+  font-weight: 800;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible {
+  outline: 2px solid #f2b84b;
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+.section-heading,
+.facility-heading h2,
+.recruit-category__heading {
+  letter-spacing: -0.04em;
+}
+
+.section-kicker,
+.squad-position {
+  color: #27624c;
+}
+
+@media (max-width: 560px) {
+  .bottom-tabs {
+    min-height: 54px;
+  }
+
+  .tab-button {
+    height: 54px;
+    min-height: 54px;
+    padding: 0 2px !important;
+    font-size: 11px !important;
+    letter-spacing: -0.07em;
+  }
+
+  .tab-button::before {
+    width: 5px;
+    height: 5px;
+    margin-right: 4px;
+  }
+
+  .tab-button.is-active::after {
+    left: 7px;
+    right: 7px;
+    bottom: 5px;
+  }
+}
+
+/* =========================================================
+   Button hover movement fix
+   - 가운데 정렬용 translateX(-50%)를 hover/active가 덮어쓰지 않게 보정
+   - 게임 시작 / 장비 뽑기 / 자동 뽑기 버튼의 튐을 최소화
+   ========================================================= */
+.start-button,
+.equipment-draw-button,
+.auto-draw-button {
+  will-change: transform, filter, box-shadow;
+}
+
+.start-button:hover:not(:disabled) {
+  transform: translateX(-50%) translateY(-1px) !important;
+  filter: brightness(1.04) saturate(1.04);
+}
+
+.start-button:active:not(:disabled) {
+  transform: translateX(-50%) translateY(1px) !important;
+  box-shadow: 0 5px 0 rgba(74, 43, 23, 0.62), 0 0 14px rgba(255, 217, 121, 0.28) !important;
+}
+
+.equipment-draw-button:hover:not(:disabled) {
+  transform: translateX(-50%) translateY(-1px) !important;
+  filter: brightness(1.04) saturate(1.04);
+}
+
+.equipment-draw-button:active:not(:disabled) {
+  transform: translateX(-50%) translateY(1px) !important;
+  box-shadow: 0 5px 0 rgba(74, 43, 23, 0.5), 0 0 14px rgba(242, 184, 75, 0.45) !important;
+}
+
+.auto-draw-button:hover:not(:disabled) {
+  transform: translateX(-50%) translateY(-1px) !important;
+  filter: brightness(1.04) saturate(1.04);
+}
+
+.auto-draw-button:active:not(:disabled) {
+  transform: translateX(-50%) translateY(1px) !important;
+  box-shadow: 0 3px 0 rgba(74, 43, 23, 0.38) !important;
 }
