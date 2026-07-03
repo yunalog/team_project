@@ -258,27 +258,13 @@ h1 {
   top: 10px;
   left: 10px;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
-  align-items: center;
   gap: 8px;
-  width: min(250px, calc(100% - 20px));
+  width: min(310px, calc(100% - 20px));
   padding: 8px;
   border: 2px solid #4a2b17;
   border-radius: 8px;
   background: rgba(255, 247, 229, 0.88);
   box-shadow: 0 6px 18px rgba(45, 33, 25, 0.22);
-}
-
-.equipped-item-icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border: 2px solid #4a2b17;
-  border-radius: 50%;
-  background: var(--equipment-color, #8b9b92);
-  color: #fff;
-  font-weight: 900;
 }
 
 .equipped-item-label,
@@ -308,6 +294,68 @@ h1 {
 
 .equipped-item-panel.is-empty {
   opacity: 0.78;
+}
+
+.equipped-item-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.equipped-tile {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-content: end;
+  min-height: 66px;
+  padding: 5px;
+  border: 2px solid var(--equipment-color, #8b9b92);
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(45, 33, 25, 0.58)),
+    var(--equipment-image),
+    radial-gradient(circle at 50% 30%, var(--equipment-color, #8b9b92), #4a2b17);
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+  text-shadow: 0 1px 1px rgba(45, 33, 25, 0.85);
+}
+
+.equipped-tile.is-empty {
+  border-color: rgba(74, 43, 23, 0.55);
+  background: linear-gradient(180deg, rgba(255, 247, 229, 0.75), rgba(139, 155, 146, 0.72));
+  color: var(--muted);
+  text-shadow: none;
+}
+
+.equipped-tile-image {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 247, 229, 0.86);
+  color: var(--equipment-color, #4a2b17);
+  font-size: 13px;
+  font-weight: 900;
+  transform: translateX(-50%);
+}
+
+.equipped-tile-grade {
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.equipped-tile strong {
+  overflow: hidden;
+  display: block;
+  color: inherit;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .equipment-draw-button {
@@ -1246,8 +1294,19 @@ h1 {
   .equipped-item-panel {
     top: 8px;
     left: 8px;
-    width: min(230px, calc(100% - 16px));
+    width: min(300px, calc(100% - 16px));
     padding: 7px;
+  }
+
+  .equipped-tile {
+    min-height: 58px;
+    padding: 4px;
+  }
+
+  .equipped-tile-image {
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
   }
 
   .equipment-choice {
@@ -1256,9 +1315,9 @@ h1 {
   }
 
   .equipment-upgrade-panel {
-    top: 70px;
+    top: 136px;
     right: 8px;
-    width: min(230px, calc(100% - 16px));
+    width: min(300px, calc(100% - 16px));
     padding: 7px;
   }
 

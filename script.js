@@ -82,12 +82,20 @@ const tools = [
   { id: "testKit", name: "테스트 키트", desc: "QA 효율 +3", baseCost: 160, target: "qa", dps: 3 },
 ];
 
+const equipmentSlots = [
+  { id: "eyewear", name: "안경" },
+  { id: "chair", name: "의자" },
+  { id: "keyboard", name: "키보드" },
+  { id: "deskItem", name: "사무용품" },
+  { id: "notebook", name: "노트" },
+];
+
 const equipmentPool = [
-  { id: "glasses", name: "집중 안경", icon: "안", power: [1, 4], skill: [1, 3] },
-  { id: "chair", name: "인체공학 의자", icon: "의", power: [2, 5], skill: [1, 4] },
-  { id: "keyboard", name: "기계식 키보드", icon: "키", power: [1, 6], skill: [2, 5] },
-  { id: "mug", name: "야근 머그컵", icon: "컵", power: [3, 7], skill: [1, 3] },
-  { id: "notebook", name: "아이디어 노트", icon: "노", power: [2, 4], skill: [2, 6] },
+  { id: "glasses", slot: "eyewear", name: "집중 안경", icon: "안", image: "", power: [1, 4], skill: [1, 3] },
+  { id: "chair", slot: "chair", name: "인체공학 의자", icon: "의", image: "", power: [2, 5], skill: [1, 4] },
+  { id: "keyboard", slot: "keyboard", name: "기계식 키보드", icon: "키", image: "", power: [1, 6], skill: [2, 5] },
+  { id: "mug", slot: "deskItem", name: "야근 머그컵", icon: "컵", image: "", power: [3, 7], skill: [1, 3] },
+  { id: "notebook", slot: "notebook", name: "아이디어 노트", icon: "노", image: "", power: [2, 4], skill: [2, 6] },
 ];
 
 const equipmentGrades = [
@@ -125,7 +133,7 @@ const defaultState = {
   recruits: {},
   tools: {},
   equipment: {
-    equipped: null,
+    equipped: {},
     pending: null,
     drawCount: 0,
     gradeLevel: 1,
@@ -190,8 +198,7 @@ function initGame() {
     equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
     autoDrawButton: document.querySelector("#autoDrawButton"),
     equippedItemPanel: document.querySelector("#equippedItemPanel"),
-    equippedItemIcon: document.querySelector("#equippedItemIcon"),
-    equippedItemName: document.querySelector("#equippedItemName"),
+    equippedItemList: document.querySelector("#equippedItemList"),
     equippedItemStats: document.querySelector("#equippedItemStats"),
     equipmentUpgradePanel: document.querySelector("#equipmentUpgradePanel"),
     equipmentGradeText: document.querySelector("#equipmentGradeText"),
@@ -480,7 +487,7 @@ function normalizeState(nextState) {
 function normalizeEquipment(equipment) {
   const safeEquipment = equipment && typeof equipment === "object" ? equipment : {};
   return {
-    equipped: normalizeEquipmentItem(safeEquipment.equipped),
+    equipped: normalizeEquippedItems(safeEquipment.equipped),
     pending: normalizeEquipmentItem(safeEquipment.pending),
     drawCount: Math.max(0, Number(safeEquipment.drawCount) || 0),
     gradeLevel: Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(safeEquipment.gradeLevel) || 1)),
@@ -490,18 +497,47 @@ function normalizeEquipment(equipment) {
   };
 }
 
+function normalizeEquippedItems(equipped) {
+  const normalized = {};
+  if (!equipped || typeof equipped !== "object") return normalized;
+
+  if ("powerBonus" in equipped || "skillBonus" in equipped || "clickBonus" in equipped) {
+    const legacyItem = normalizeEquipmentItem(equipped);
+    if (legacyItem) normalized[legacyItem.slot] = legacyItem;
+    return normalized;
+  }
+
+  equipmentSlots.forEach((slot) => {
+    const item = normalizeEquipmentItem(equipped[slot.id]);
+    if (item) normalized[slot.id] = item;
+  });
+  return normalized;
+}
+
 function normalizeEquipmentItem(item) {
   if (!item || typeof item !== "object") return null;
 
+  const slot = getEquipmentSlotId(item.slot || inferEquipmentSlot(item.id));
   return {
     id: String(item.id || "unknown"),
+    slot,
     name: String(item.name || "이름 없는 장비"),
     icon: String(item.icon || "?"),
+    image: String(item.image || ""),
     grade: String(item.grade || "일반"),
     gradeColor: String(item.gradeColor || "#6f6251"),
     powerBonus: Math.max(0, Number(item.powerBonus) || 0),
     skillBonus: Math.max(0, Number(item.skillBonus ?? item.clickBonus) || 0),
   };
+}
+
+function inferEquipmentSlot(id) {
+  const base = equipmentPool.find((item) => item.id === id || String(id || "").startsWith(`${item.id}-`));
+  return base ? base.slot : equipmentSlots[0].id;
+}
+
+function getEquipmentSlotId(slotId) {
+  return equipmentSlots.some((slot) => slot.id === slotId) ? slotId : equipmentSlots[0].id;
 }
 
 function saveState(message) {
@@ -1050,7 +1086,7 @@ function runAutoDrawStep() {
   state.equipment.drawCount += 1;
 
   const item = createEquipmentItem();
-  const equipped = getEquippedItem();
+  const equipped = getEquippedItem(item.slot);
   if (hasPositiveEquipmentGain(item, equipped)) {
     state.equipment.pending = item;
     log(`${item.grade} ${item.name}에서 공격력과 스킬 공격력 상승을 발견했습니다.`);
@@ -1072,8 +1108,10 @@ function createEquipmentItem() {
 
   return {
     id: `${base.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    slot: base.slot,
     name: base.name,
     icon: base.icon,
+    image: base.image,
     grade: grade.name,
     gradeColor: grade.color,
     powerBonus,
@@ -1115,7 +1153,7 @@ function rollEquipmentValue(range, multiplier) {
 function equipPendingEquipment() {
   if (!state.equipment.pending) return;
 
-  state.equipment.equipped = state.equipment.pending;
+  state.equipment.equipped[state.equipment.pending.slot] = state.equipment.pending;
   state.equipment.pending = null;
   log("대표 장비를 장착했습니다.");
   renderAll();
@@ -1131,7 +1169,7 @@ function discardPendingEquipment() {
   renderAll();
 }
 
-function hasPositiveEquipmentGain(item, equipped = getEquippedItem()) {
+function hasPositiveEquipmentGain(item, equipped = getEquippedItem(item.slot)) {
   const currentPower = equipped ? equipped.powerBonus : 0;
   const currentSkill = equipped ? equipped.skillBonus : 0;
   return item.powerBonus > currentPower && item.skillBonus > currentSkill;
@@ -1222,8 +1260,15 @@ function useSpeedTicket() {
   }
 }
 
-function getEquippedItem() {
-  return state.equipment && state.equipment.equipped ? state.equipment.equipped : null;
+function getEquippedItem(slotId) {
+  if (!state.equipment || !state.equipment.equipped) return null;
+  if (!slotId) return null;
+  return state.equipment.equipped[slotId] || null;
+}
+
+function getEquippedItems() {
+  if (!state.equipment || !state.equipment.equipped) return [];
+  return equipmentSlots.map((slot) => state.equipment.equipped[slot.id]).filter(Boolean);
 }
 
 function getPendingEquipment() {
@@ -1236,13 +1281,11 @@ function getEquipmentScore(item) {
 }
 
 function getPlayerPower() {
-  const equipped = getEquippedItem();
-  return state.playerLevel + (equipped ? equipped.powerBonus : 0);
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
 }
 
 function getPlayerSkillPower() {
-  const equipped = getEquippedItem();
-  return state.playerLevel + (equipped ? equipped.skillBonus : 0);
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
 }
 
 function getManualPower() {
@@ -1297,7 +1340,7 @@ function renderBattle() {
 
 function renderEquipment() {
   const pending = getPendingEquipment();
-  const equipped = getEquippedItem();
+  const equipped = pending ? getEquippedItem(pending.slot) : null;
   const cost = getEquipmentDrawCost();
 
   refs.equipmentDrawCost.textContent = `${cost} 자금`;
@@ -1307,7 +1350,7 @@ function renderEquipment() {
   refs.autoDrawButton.textContent = isAutoDrawing() ? "자동 중지" : "자동 뽑기";
   refs.autoDrawButton.disabled = Boolean(pending);
   refs.autoDrawButton.classList.toggle("is-running", isAutoDrawing());
-  renderEquippedItem(equipped);
+  renderEquippedItems();
   renderEquipmentUpgrade();
 
   refs.equipmentChoice.classList.toggle("is-hidden", !pending);
@@ -1320,23 +1363,35 @@ function renderEquipment() {
   refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
 }
 
-function renderEquippedItem(equipped) {
-  refs.equippedItemPanel.classList.toggle("is-empty", !equipped);
+function renderEquippedItems() {
+  const equippedItems = getEquippedItems();
+  const totalPower = equippedItems.reduce((sum, item) => sum + item.powerBonus, 0);
+  const totalSkill = equippedItems.reduce((sum, item) => sum + item.skillBonus, 0);
 
-  if (!equipped) {
-    refs.equippedItemIcon.textContent = "-";
-    refs.equippedItemIcon.style.removeProperty("--equipment-color");
-    refs.equippedItemName.textContent = "없음";
-    refs.equippedItemName.style.removeProperty("color");
-    refs.equippedItemStats.textContent = "공격력 +0 / 스킬 공격력 +0";
-    return;
-  }
+  refs.equippedItemPanel.classList.toggle("is-empty", equippedItems.length === 0);
+  refs.equippedItemStats.textContent = `공격력 +${totalPower} / 스킬 공격력 +${totalSkill}`;
+  refs.equippedItemList.innerHTML = equipmentSlots
+    .map((slot) => {
+      const item = getEquippedItem(slot.id);
+      if (!item) {
+        return `
+          <div class="equipped-tile is-empty">
+            <span class="equipped-tile-image">${slot.name.slice(0, 1)}</span>
+            <span class="equipped-tile-grade">비어있음</span>
+            <strong>${slot.name}</strong>
+          </div>
+        `;
+      }
 
-  refs.equippedItemIcon.textContent = equipped.icon;
-  refs.equippedItemIcon.style.setProperty("--equipment-color", equipped.gradeColor);
-  refs.equippedItemName.textContent = `${equipped.grade} ${equipped.name}`;
-  refs.equippedItemName.style.color = equipped.gradeColor;
-  refs.equippedItemStats.textContent = `공격력 +${equipped.powerBonus} / 스킬 공격력 +${equipped.skillBonus}`;
+      return `
+        <div class="equipped-tile" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
+          <span class="equipped-tile-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-tile-grade">${item.grade}</span>
+          <strong>${item.name}</strong>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 function renderEquipmentUpgrade() {
@@ -1362,11 +1417,12 @@ function renderEquipmentUpgrade() {
 }
 
 function formatEquipmentBonus(item, equipped) {
+  const slot = equipmentSlots.find((equipmentSlot) => equipmentSlot.id === item.slot);
   const currentPower = equipped ? equipped.powerBonus : 0;
   const currentSkill = equipped ? equipped.skillBonus : 0;
   const powerDiff = item.powerBonus - currentPower;
   const skillDiff = item.skillBonus - currentSkill;
-  return `공격력 <span class="stat-positive">+${item.powerBonus}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${item.skillBonus}</span> (${formatDiff(skillDiff)})`;
+  return `${slot ? slot.name : "장비"} · 공격력 <span class="stat-positive">+${item.powerBonus}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${item.skillBonus}</span> (${formatDiff(skillDiff)})`;
 }
 
 function formatDiff(value) {
