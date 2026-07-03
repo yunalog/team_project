@@ -83,11 +83,11 @@ const tools = [
 ];
 
 const equipmentPool = [
-  { id: "glasses", name: "집중 안경", icon: "안", power: [1, 4], click: [0, 2] },
-  { id: "chair", name: "인체공학 의자", icon: "의", power: [2, 5], click: [1, 3] },
-  { id: "keyboard", name: "기계식 키보드", icon: "키", power: [1, 6], click: [2, 4] },
-  { id: "mug", name: "야근 머그컵", icon: "컵", power: [3, 7], click: [0, 2] },
-  { id: "notebook", name: "아이디어 노트", icon: "노", power: [2, 4], click: [2, 5] },
+  { id: "glasses", name: "집중 안경", icon: "안", power: [1, 4], skill: [1, 3] },
+  { id: "chair", name: "인체공학 의자", icon: "의", power: [2, 5], skill: [1, 4] },
+  { id: "keyboard", name: "기계식 키보드", icon: "키", power: [1, 6], skill: [2, 5] },
+  { id: "mug", name: "야근 머그컵", icon: "컵", power: [3, 7], skill: [1, 3] },
+  { id: "notebook", name: "아이디어 노트", icon: "노", power: [2, 4], skill: [2, 6] },
 ];
 
 const equipmentGrades = [
@@ -149,6 +149,7 @@ let currentBgmKey = "title";
 let hasStartedGame = false;
 let titleBgmUnlockArmed = false;
 let audioSettings = { ...defaultAudioSettings };
+let autoDrawTimer = null;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -187,6 +188,7 @@ function initGame() {
     nextStageButton: document.querySelector("#nextStageButton"),
     equipmentDrawButton: document.querySelector("#equipmentDrawButton"),
     equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
+    autoDrawButton: document.querySelector("#autoDrawButton"),
     equippedItemPanel: document.querySelector("#equippedItemPanel"),
     equippedItemIcon: document.querySelector("#equippedItemIcon"),
     equippedItemName: document.querySelector("#equippedItemName"),
@@ -249,6 +251,7 @@ function bindEvents() {
     renderAll();
   });
   refs.equipmentDrawButton.addEventListener("click", drawEquipment);
+  refs.autoDrawButton.addEventListener("click", toggleAutoDraw);
   refs.equipItemButton.addEventListener("click", equipPendingEquipment);
   refs.discardItemButton.addEventListener("click", discardPendingEquipment);
   refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
@@ -497,7 +500,7 @@ function normalizeEquipmentItem(item) {
     grade: String(item.grade || "일반"),
     gradeColor: String(item.gradeColor || "#6f6251"),
     powerBonus: Math.max(0, Number(item.powerBonus) || 0),
-    clickBonus: Math.max(0, Number(item.clickBonus) || 0),
+    skillBonus: Math.max(0, Number(item.skillBonus ?? item.clickBonus) || 0),
   };
 }
 
@@ -678,7 +681,8 @@ function castSkill(unit, from) {
   playSkillEffect(unit, targets);
 
   targets.forEach((target, index) => {
-    const damage = Math.ceil(unit.power * unit.skill.multiplier + state.playerLevel * 0.6);
+    const skillPower = unit.id === "player" ? getPlayerSkillPower() : unit.power;
+    const damage = Math.ceil(skillPower * unit.skill.multiplier + state.playerLevel * 0.6);
     window.setTimeout(() => damageEnemy(target.id, damage, false), 120 + index * 70);
   });
 
@@ -978,6 +982,8 @@ function getEquipmentDrawCost() {
 }
 
 function drawEquipment() {
+  if (state.equipment.pending) return;
+
   const cost = getEquipmentDrawCost();
   if (state.gold < cost) {
     log(`장비 뽑기에는 자금 ${cost}이 필요합니다.`);
@@ -991,11 +997,78 @@ function drawEquipment() {
   renderAll();
 }
 
+function toggleAutoDraw() {
+  if (isAutoDrawing()) {
+    stopAutoDraw("자동 뽑기를 중지했습니다.");
+    return;
+  }
+
+  if (state.equipment.pending) {
+    log("먼저 뽑힌 장비를 장착하거나 버려주세요.");
+    return;
+  }
+
+  startAutoDraw();
+}
+
+function startAutoDraw() {
+  if (isAutoDrawing()) return;
+
+  log("공격력과 스킬 공격력이 모두 증가하는 장비가 나올 때까지 자동 뽑기를 시작합니다.");
+  autoDrawTimer = window.setTimeout(runAutoDrawStep, 120);
+  renderEquipment();
+}
+
+function stopAutoDraw(message) {
+  if (autoDrawTimer) {
+    window.clearTimeout(autoDrawTimer);
+    autoDrawTimer = null;
+  }
+  if (message) log(message);
+  renderEquipment();
+}
+
+function isAutoDrawing() {
+  return Boolean(autoDrawTimer);
+}
+
+function runAutoDrawStep() {
+  autoDrawTimer = null;
+
+  if (state.equipment.pending) {
+    stopAutoDraw();
+    return;
+  }
+
+  const cost = getEquipmentDrawCost();
+  if (state.gold < cost) {
+    stopAutoDraw(`자동 뽑기를 중지했습니다. 자금 ${cost}이 필요합니다.`);
+    return;
+  }
+
+  state.gold -= cost;
+  state.equipment.drawCount += 1;
+
+  const item = createEquipmentItem();
+  const equipped = getEquippedItem();
+  if (hasPositiveEquipmentGain(item, equipped)) {
+    state.equipment.pending = item;
+    log(`${item.grade} ${item.name}에서 공격력과 스킬 공격력 상승을 발견했습니다.`);
+    renderAll();
+    return;
+  }
+
+  state.idea += getEquipmentDiscardRefund(item);
+  log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
+  autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
+  renderAll();
+}
+
 function createEquipmentItem() {
   const base = equipmentPool[Math.floor(Math.random() * equipmentPool.length)];
   const grade = pickEquipmentGrade();
   const powerBonus = rollEquipmentValue(base.power, grade.multiplier);
-  const clickBonus = rollEquipmentValue(base.click, grade.multiplier);
+  const skillBonus = rollEquipmentValue(base.skill, grade.multiplier);
 
   return {
     id: `${base.id}-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -1004,7 +1077,7 @@ function createEquipmentItem() {
     grade: grade.name,
     gradeColor: grade.color,
     powerBonus,
-    clickBonus,
+    skillBonus,
   };
 }
 
@@ -1051,11 +1124,21 @@ function equipPendingEquipment() {
 function discardPendingEquipment() {
   if (!state.equipment.pending) return;
 
-  const refund = Math.max(1, Math.floor(getEquipmentScore(state.equipment.pending) / 2));
+  const refund = getEquipmentDiscardRefund(state.equipment.pending);
   state.idea += refund;
   state.equipment.pending = null;
   log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
   renderAll();
+}
+
+function hasPositiveEquipmentGain(item, equipped = getEquippedItem()) {
+  const currentPower = equipped ? equipped.powerBonus : 0;
+  const currentSkill = equipped ? equipped.skillBonus : 0;
+  return item.powerBonus > currentPower && item.skillBonus > currentSkill;
+}
+
+function getEquipmentDiscardRefund(item) {
+  return Math.max(1, Math.floor(getEquipmentScore(item) / 2));
 }
 
 function getMaxEquipmentUpgradeLevel() {
@@ -1149,7 +1232,7 @@ function getPendingEquipment() {
 
 function getEquipmentScore(item) {
   if (!item) return 0;
-  return item.powerBonus + item.clickBonus;
+  return item.powerBonus + item.skillBonus;
 }
 
 function getPlayerPower() {
@@ -1157,9 +1240,13 @@ function getPlayerPower() {
   return state.playerLevel + (equipped ? equipped.powerBonus : 0);
 }
 
-function getManualPower() {
+function getPlayerSkillPower() {
   const equipped = getEquippedItem();
-  return state.clickPower + (equipped ? equipped.clickBonus : 0);
+  return state.playerLevel + (equipped ? equipped.skillBonus : 0);
+}
+
+function getManualPower() {
+  return state.clickPower;
 }
 
 function upgradePlayer() {
@@ -1214,9 +1301,12 @@ function renderEquipment() {
   const cost = getEquipmentDrawCost();
 
   refs.equipmentDrawCost.textContent = `${cost} 자금`;
-  refs.equipmentDrawButton.disabled = Boolean(pending);
+  refs.equipmentDrawButton.disabled = Boolean(pending) || isAutoDrawing();
   refs.equipmentDrawButton.classList.toggle("is-unaffordable", state.gold < cost && !pending);
   refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
+  refs.autoDrawButton.textContent = isAutoDrawing() ? "자동 중지" : "자동 뽑기";
+  refs.autoDrawButton.disabled = Boolean(pending);
+  refs.autoDrawButton.classList.toggle("is-running", isAutoDrawing());
   renderEquippedItem(equipped);
   renderEquipmentUpgrade();
 
@@ -1227,7 +1317,7 @@ function renderEquipment() {
   refs.equipmentIcon.style.setProperty("--equipment-color", pending.gradeColor);
   refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
   refs.equipmentName.style.color = pending.gradeColor;
-  refs.equipmentBonus.textContent = formatEquipmentBonus(pending, equipped);
+  refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
 }
 
 function renderEquippedItem(equipped) {
@@ -1238,7 +1328,7 @@ function renderEquippedItem(equipped) {
     refs.equippedItemIcon.style.removeProperty("--equipment-color");
     refs.equippedItemName.textContent = "없음";
     refs.equippedItemName.style.removeProperty("color");
-    refs.equippedItemStats.textContent = "자동 공격 +0 / 직접 처리 +0";
+    refs.equippedItemStats.textContent = "공격력 +0 / 스킬 공격력 +0";
     return;
   }
 
@@ -1246,7 +1336,7 @@ function renderEquippedItem(equipped) {
   refs.equippedItemIcon.style.setProperty("--equipment-color", equipped.gradeColor);
   refs.equippedItemName.textContent = `${equipped.grade} ${equipped.name}`;
   refs.equippedItemName.style.color = equipped.gradeColor;
-  refs.equippedItemStats.textContent = `자동 공격 +${equipped.powerBonus} / 직접 처리 +${equipped.clickBonus}`;
+  refs.equippedItemStats.textContent = `공격력 +${equipped.powerBonus} / 스킬 공격력 +${equipped.skillBonus}`;
 }
 
 function renderEquipmentUpgrade() {
@@ -1273,15 +1363,16 @@ function renderEquipmentUpgrade() {
 
 function formatEquipmentBonus(item, equipped) {
   const currentPower = equipped ? equipped.powerBonus : 0;
-  const currentClick = equipped ? equipped.clickBonus : 0;
+  const currentSkill = equipped ? equipped.skillBonus : 0;
   const powerDiff = item.powerBonus - currentPower;
-  const clickDiff = item.clickBonus - currentClick;
-  return `자동 공격 +${item.powerBonus} (${formatDiff(powerDiff)}) / 직접 처리 +${item.clickBonus} (${formatDiff(clickDiff)})`;
+  const skillDiff = item.skillBonus - currentSkill;
+  return `공격력 <span class="stat-positive">+${item.powerBonus}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${item.skillBonus}</span> (${formatDiff(skillDiff)})`;
 }
 
 function formatDiff(value) {
-  if (value > 0) return `+${value}`;
-  return String(value);
+  if (value > 0) return `<span class="stat-positive">+${value}</span>`;
+  if (value < 0) return `<span class="stat-negative">${value}</span>`;
+  return `<span class="stat-neutral">0</span>`;
 }
 
 function renderEnemies() {

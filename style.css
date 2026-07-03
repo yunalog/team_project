@@ -350,6 +350,29 @@ h1 {
   animation: equipment-pulse 0.8s ease-in-out infinite alternate;
 }
 
+.auto-draw-button {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  min-width: 92px;
+  min-height: 30px;
+  padding: 5px 10px;
+  border: 2px solid #4a2b17;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #376f56 0%, #1f4636 100%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.6);
+  transform: translateX(-50%);
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.42);
+  pointer-events: auto;
+}
+
+.auto-draw-button.is-running {
+  background: linear-gradient(180deg, #f2b84b 0%, #b85c22 100%);
+}
+
 .equipment-choice {
   position: absolute;
   left: 50%;
@@ -464,6 +487,21 @@ h1 {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.stat-positive {
+  color: #15803d;
+  font-weight: 900;
+}
+
+.stat-negative {
+  color: #b91c1c;
+  font-weight: 900;
+}
+
+.stat-neutral {
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .equipment-actions {
@@ -1193,9 +1231,16 @@ h1 {
   }
 
   .equipment-draw-button {
-    bottom: 24px;
+    bottom: 28px;
     width: 68px;
     height: 68px;
+  }
+
+  .auto-draw-button {
+    bottom: 4px;
+    min-width: 84px;
+    min-height: 28px;
+    font-size: 11px;
   }
 
   .equipped-item-panel {
