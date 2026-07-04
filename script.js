@@ -29,6 +29,7 @@ const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
   boss: "Resource/Sound/BGM_Boss.mp3",
+  tycoon: "Resource/Sound/BGM_Tycoon.mp3",
 };
 const defaultAudioSettings = {
   volume: 0.45,
@@ -497,7 +498,7 @@ function startGame() {
   hasStartedGame = true;
   refs.startScreen.classList.add("is-hidden");
   refs.gameShell.classList.remove("is-hidden");
-  playBgm(getBattleBgmKey());
+  playBgm(getActiveBgmKey());
   renderAll();
   startLoop();
 }
@@ -636,6 +637,11 @@ function handleSquadChange(event) {
 
 function getBattleBgmKey() {
   return state.battleMode === "boss" ? "boss" : "field";
+}
+
+function getActiveBgmKey() {
+  if (!hasStartedGame) return "title";
+  return activeTab === "tools" ? "tycoon" : getBattleBgmKey();
 }
 
 function toggleEquipmentPanel() {
@@ -884,7 +890,7 @@ function spawnWave() {
   isSpawningNext = false;
   basicAttackCooldown = 0.35;
   skillAttackCooldown = SKILL_ATTACK_RATE;
-  if (hasStartedGame) playBgm(getBattleBgmKey());
+  if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
 }
 
@@ -1765,6 +1771,7 @@ function switchTab(tab) {
     .querySelectorAll(".tab-panel")
     .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === activeTab));
   updatePrimaryScene();
+  if (hasStartedGame) playBgm(getActiveBgmKey(), { silentFail: true });
 }
 
 function renderAll() {
