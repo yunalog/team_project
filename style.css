@@ -1138,8 +1138,7 @@ h1 {
   white-space: nowrap;
 }
 
-.nameplate,
-.enemy-card {
+.nameplate {
   width: 100%;
   padding: 7px;
   border: 2px solid var(--ink);
@@ -1148,8 +1147,7 @@ h1 {
   text-align: center;
 }
 
-.nameplate span,
-.enemy-card small {
+.nameplate span {
   display: block;
   margin-top: 3px;
   color: var(--muted);
@@ -1196,11 +1194,6 @@ h1 {
   filter: drop-shadow(0 9px 0 rgba(0, 0, 0, 0.18));
 }
 
-.enemy.is-boss .enemy-card {
-  border-width: 3px;
-  background: rgba(255, 247, 237, 0.95);
-}
-
 .enemy:nth-child(2n) .enemy-sprite {
   animation-delay: 0.16s;
 }
@@ -1209,16 +1202,25 @@ h1 {
   animation-delay: 0.32s;
 }
 
-.hp-bar {
+.enemy-hp-bar {
   overflow: hidden;
-  height: 10px;
-  margin-top: 6px;
-  border: 1px solid #111827;
+  width: 74px;
+  height: 7px;
+  margin-bottom: 3px;
+  border: 1px solid rgba(17, 24, 39, 0.9);
   border-radius: 999px;
-  background: #fee2e2;
+  background: rgba(254, 226, 226, 0.86);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62), 0 2px 5px rgba(17, 24, 39, 0.22);
 }
 
-.hp-bar span {
+.enemy.is-boss .enemy-hp-bar {
+  width: 112px;
+  height: 9px;
+  margin-bottom: 4px;
+  border-width: 2px;
+}
+
+.enemy-hp-bar span {
   display: block;
   width: 100%;
   height: 100%;
@@ -2171,6 +2173,14 @@ h1 {
   .enemy.is-boss .enemy-sprite {
     width: 123px;
     height: 123px;
+  }
+
+  .enemy-hp-bar {
+    width: 84px;
+  }
+
+  .enemy.is-boss .enemy-hp-bar {
+    width: 126px;
   }
 
   .ally {

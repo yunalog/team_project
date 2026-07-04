@@ -1999,14 +1999,10 @@ function renderEnemies() {
       const imageSrc = enemy.image || getMonsterImage(enemy);
       return `
         <div class="enemy${enemy.isBoss ? " is-boss" : ""}" data-enemy-id="${enemy.id}" style="--enemy-x: ${enemy.x}%; --enemy-y: ${enemy.y}px;">
-          <img src="${imageSrc}" alt="${enemy.isBoss ? "보스 몬스터" : "일반 몬스터"}" class="enemy-sprite" />
-          <div class="enemy-card">
-            <strong>${enemy.name}</strong>
-            <div class="hp-bar" aria-label="상대 체력">
-              <span style="width: ${hpPercent}%"></span>
-            </div>
-            <small>${Math.ceil(enemy.hp)} / ${enemy.maxHp}</small>
+          <div class="enemy-hp-bar" aria-label="상대 체력">
+            <span style="width: ${hpPercent}%"></span>
           </div>
+          <img src="${imageSrc}" alt="${enemy.isBoss ? "보스 몬스터" : "일반 몬스터"}" class="enemy-sprite" />
         </div>
       `;
     })
