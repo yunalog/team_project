@@ -83,11 +83,14 @@
             </div>
             <small id="speedTicketText">보유 0장 · 1장당 10분</small>
           </div>
-          <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
-            <span>장비</span>
-            <strong id="equipmentDrawCost">10</strong>
-          </button>
-          <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
+          <div class="draw-machine-panel" aria-label="장비 뽑기">
+            <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
+            <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
+              <span>장비 뽑기</span>
+              <strong id="equipmentDrawCost">10</strong>
+            </button>
+            <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
+          </div>
           <div id="equipmentChoice" class="equipment-choice is-hidden">
             <div class="equipment-card">
               <span id="equipmentIcon" class="equipment-icon">?</span>
