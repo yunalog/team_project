@@ -11,6 +11,20 @@ const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
+const NORMAL_MONSTER_IMAGES = [
+  "Resource/Monster/Normal_Monster/Field_Monster1.png",
+  "Resource/Monster/Normal_Monster/Field_Monster2.png",
+  "Resource/Monster/Normal_Monster/Field_Monster3.png",
+  "Resource/Monster/Normal_Monster/Field_Monster4.png",
+  "Resource/Monster/Normal_Monster/Field_Monster5.png",
+  "Resource/Monster/Normal_Monster/Field_Monster6.png",
+];
+const BOSS_MONSTER_IMAGES = [
+  "Resource/Monster/Boss_Monster/Stage1_Boss.png",
+  "Resource/Monster/Boss_Monster/Stage2_Boss.png",
+  "Resource/Monster/Boss_Monster/Stage3_Boss.png",
+  "Resource/Monster/Boss_Monster/Stage4_Boss.png",
+];
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
@@ -855,6 +869,7 @@ function normalizeEnemies(enemies) {
       y: Number(enemy.y) || getEnemyLaneY(index),
       lane: Number(enemy.lane) || index,
       isBoss: Boolean(enemy.isBoss),
+      image: enemy.image || getMonsterImage({ ...enemy, lane: Number(enemy.lane) || index, isBoss: Boolean(enemy.isBoss) }),
     }))
     .filter((enemy) => enemy.hp > 0);
 }
@@ -875,16 +890,22 @@ function spawnWave() {
 function createNormalWave() {
   const count = getWaveEnemyCount();
   const hp = getEnemyHp();
-  return Array.from({ length: count }, (_, index) => ({
-    id: `enemy-${Date.now()}-${enemySeq++}`,
-    name: getEnemyName(),
-    hp,
-    maxHp: hp,
-    x: ENEMY_SPAWN_X + index * 4,
-    y: getEnemyLaneY(index),
-    lane: index,
-    isBoss: false,
-  }));
+  return Array.from({ length: count }, (_, index) => {
+    const enemy = {
+      id: `enemy-${Date.now()}-${enemySeq++}`,
+      name: getEnemyName(),
+      hp,
+      maxHp: hp,
+      x: ENEMY_SPAWN_X + index * 4,
+      y: getEnemyLaneY(index),
+      lane: index,
+      isBoss: false,
+    };
+    return {
+      ...enemy,
+      image: getMonsterImage(enemy),
+    };
+  });
 }
 
 function createBossWave() {
@@ -899,8 +920,18 @@ function createBossWave() {
       y: 72,
       lane: 0,
       isBoss: true,
+      image: getMonsterImage({ isBoss: true }),
     },
   ];
+}
+
+function getMonsterImage(enemy) {
+  if (enemy.isBoss) {
+    return BOSS_MONSTER_IMAGES[(state.chapter - 1) % BOSS_MONSTER_IMAGES.length];
+  }
+
+  const index = (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_IMAGES.length;
+  return NORMAL_MONSTER_IMAGES[index];
 }
 
 function getWaveEnemyCount() {
@@ -1965,9 +1996,10 @@ function renderEnemies() {
   refs.enemyLayer.innerHTML = state.enemies
     .map((enemy) => {
       const hpPercent = Math.max(0, Math.round((enemy.hp / enemy.maxHp) * 100));
+      const imageSrc = enemy.image || getMonsterImage(enemy);
       return `
         <div class="enemy${enemy.isBoss ? " is-boss" : ""}" data-enemy-id="${enemy.id}" style="--enemy-x: ${enemy.x}%; --enemy-y: ${enemy.y}px;">
-          <img src="assets/enemy.svg" alt="버그 몬스터" class="enemy-sprite" />
+          <img src="${imageSrc}" alt="${enemy.isBoss ? "보스 몬스터" : "일반 몬스터"}" class="enemy-sprite" />
           <div class="enemy-card">
             <strong>${enemy.name}</strong>
             <div class="hp-bar" aria-label="상대 체력">

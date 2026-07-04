@@ -1183,15 +1183,16 @@ h1 {
 }
 
 .enemy-sprite {
-  width: 66px;
-  height: 66px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
   filter: drop-shadow(0 6px 0 rgba(0, 0, 0, 0.14));
   animation: enemy-walk 0.72s ease-in-out infinite;
 }
 
 .enemy.is-boss .enemy-sprite {
-  width: 104px;
-  height: 104px;
+  width: 108px;
+  height: 108px;
   filter: drop-shadow(0 9px 0 rgba(0, 0, 0, 0.18));
 }
 
@@ -2165,6 +2166,11 @@ h1 {
   .enemy-sprite {
     width: 82px;
     height: 82px;
+  }
+
+  .enemy.is-boss .enemy-sprite {
+    width: 123px;
+    height: 123px;
   }
 
   .ally {
