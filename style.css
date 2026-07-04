@@ -3166,6 +3166,61 @@ textarea {
   opacity: 0.62;
 }
 
+.battle-equipment-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.92fr);
+  align-items: start;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.battle-equipment-section .equipped-item-panel,
+.battle-equipment-section .equipment-upgrade-panel {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  right: auto !important;
+  left: auto !important;
+  z-index: auto;
+  width: 100% !important;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.battle-equipment-section .equipped-item-panel {
+  padding: 10px;
+}
+
+.battle-equipment-section .equipped-item-panel.is-collapsed {
+  width: 100% !important;
+}
+
+.equipped-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.equipment-panel-toggle {
+  flex: 0 0 auto;
+  min-width: 82px;
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 2px solid var(--ui-ink);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #376f56 0%, #1f4636 100%);
+  color: #fff7e5;
+  font-size: 12px;
+  font-weight: 900;
+  text-shadow: 1px 1px 0 rgba(45, 33, 25, 0.72);
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.42), 2px 2px 0 rgba(255, 255, 255, 0.18) inset;
+}
+
+.battle-equipment-section .equipped-item-list {
+  margin-top: 2px;
+}
+
 @media (max-width: 560px) {
   .draw-machine-panel {
     bottom: 5px;
@@ -3179,5 +3234,11 @@ textarea {
   .draw-machine-panel .equipment-draw-button strong,
   .draw-machine-panel .auto-draw-button {
     font-size: 8px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  .battle-equipment-section {
+    grid-template-columns: 1fr;
   }
 }

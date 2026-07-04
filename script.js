@@ -410,6 +410,7 @@ function initGame() {
     equipmentDrawCost: document.querySelector("#equipmentDrawCost"),
     autoDrawButton: document.querySelector("#autoDrawButton"),
     equippedItemPanel: document.querySelector("#equippedItemPanel"),
+    equipmentPanelToggleButton: document.querySelector("#equipmentPanelToggleButton"),
     equippedGradeBlocks: document.querySelector("#equippedGradeBlocks"),
     equippedItemList: document.querySelector("#equippedItemList"),
     equippedItemStats: document.querySelector("#equippedItemStats"),
@@ -474,7 +475,7 @@ function bindEvents() {
   });
   refs.equipmentDrawButton.addEventListener("click", drawEquipment);
   refs.autoDrawButton.addEventListener("click", toggleAutoDraw);
-  refs.equippedItemPanel.addEventListener("click", toggleEquipmentPanel);
+  refs.equipmentPanelToggleButton.addEventListener("click", toggleEquipmentPanel);
   refs.equipItemButton.addEventListener("click", equipPendingEquipment);
   refs.discardItemButton.addEventListener("click", discardPendingEquipment);
   refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
@@ -1839,6 +1840,8 @@ function renderEquippedItems() {
   refs.equippedItemPanel.classList.toggle("is-empty", equippedItems.length === 0);
   refs.equippedItemPanel.classList.toggle("is-collapsed", !equipmentPanelExpanded);
   refs.equippedItemPanel.setAttribute("aria-expanded", String(equipmentPanelExpanded));
+  refs.equipmentPanelToggleButton.textContent = equipmentPanelExpanded ? "최소화" : "목록 보기";
+  refs.equipmentPanelToggleButton.setAttribute("aria-expanded", String(equipmentPanelExpanded));
   refs.equippedItemStats.textContent = `공격력 +${totalPower} / 스킬 공격력 +${totalSkill}`;
   refs.equippedGradeBlocks.innerHTML = equipmentSlots
     .map((slot) => {
