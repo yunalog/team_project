@@ -29,14 +29,15 @@ const recruits = [
     mark: "P",
     color: "#f59e0b",
     desc: "요구사항을 정리해 자동 기여도를 올립니다.",
+    category: "기획직군",
     baseCost: 25,
     dps: 1,
     attackType: "plan",
     skill: { type: "chain", name: "일정 공유", targets: 3, multiplier: 1.2 },
     sprites: {
-      idle: "Anim/Player_2/GD_Idle.png",
-      attack: "Anim/Player_2/GD_ATK.png",
-      skill: "Anim/Player_2/GD_Skill.png",
+      idle: "Anim/Player_CP/CP_Idle.png",
+      attack: "Anim/Player_CP/CP_Atk.png",
+      skill: "Anim/Player_CP/CP_Skill.png",
     },
   },
   {
@@ -46,10 +47,16 @@ const recruits = [
     mark: "D",
     color: "#2563eb",
     desc: "핵심 기능을 빠르게 구현합니다.",
+    category: "개발직군",
     baseCost: 55,
     dps: 3,
     attackType: "code",
     skill: { type: "aoe", name: "빌드 폭발", radius: 14, multiplier: 1.45 },
+    sprites: {
+      idle: "Anim/Player_DG/DG_Idle.png",
+      attack: "Anim/Player_DG/DG_ATK.png",
+      skill: "Anim/Player_DG/DG_Skill.png",
+    },
   },
   {
     id: "artist",
@@ -58,10 +65,34 @@ const recruits = [
     mark: "A",
     color: "#ec4899",
     desc: "펜으로 근접 베기 공격을 합니다.",
+    category: "아트직군",
     baseCost: 90,
     dps: 5,
     attackType: "slash",
     skill: { type: "cleave", name: "잉크 소용돌이", targets: 2, multiplier: 1.9 },
+    sprites: {
+      idle: "Anim/Player_ART/ART_Idle.png",
+      attack: "Anim/Player_ART/ART_Atk.png",
+      skill: "Anim/Player_ART/ART_Skill.png",
+    },
+  },
+  {
+    id: "business",
+    name: "사업 운영자",
+    shortName: "사업",
+    mark: "B",
+    color: "#f97316",
+    desc: "사업과 운영을 관리해 팀의 성장을 지원합니다.",
+    category: "사업/운영직군",
+    baseCost: 80,
+    dps: 4,
+    attackType: "plan",
+    skill: { type: "chain", name: "협업 조율", targets: 2, multiplier: 1.3 },
+    sprites: {
+      idle: "Anim/Player_BG/BG_Idle.png",
+      attack: "Anim/Player_BG/BG_Atk.png",
+      skill: "Anim/Player_BG/BG_Skill.png",
+    },
   },
   {
     id: "qa",
@@ -70,18 +101,131 @@ const recruits = [
     mark: "Q",
     color: "#7c3aed",
     desc: "버그를 발견해 적 체력을 꾸준히 깎습니다.",
+    category: "QA직군",
     baseCost: 140,
     dps: 8,
     attackType: "qa",
     skill: { type: "all", name: "전체 회귀 테스트", multiplier: 0.9 },
+    sprites: {
+      idle: "Anim/Player_QA/QA_Idle.png",
+      attack: "Anim/Player_QA/QA_Atk.png",
+      skill: "Anim/Player_QA/QA_Skill.png",
+    },
   },
 ];
 
+const recruitCategories = [
+  "개발직군",
+  "아트직군",
+  "기획직군",
+  "사업/운영직군",
+  "QA직군",
+];
+
+const recruitRankNames = {
+  developer: [
+    "코딩 뉴비",
+    "주니어 개발자",
+    "시니어 개발자",
+    "테크 리드",
+    "코드 마법사",
+    "전설의 개발 CTO",
+  ],
+  artist: [
+    "낙서장인",
+    "컨셉 아티스트",
+    "비주얼 메이커",
+    "연출 마스터",
+    "아트 디렉터",
+    "전설의 신의 손",
+  ],
+  planner: [
+    "기획 인턴",
+    "주니어 기획자",
+    "시스템 설계자",
+    "메인 설계자",
+    "디렉터",
+    "전설의 갓 디렉터",
+  ],
+  business: [
+    "민원 해결사",
+    "이벤트 기획자",
+    "운영 전문가",
+    "라이브 PM",
+    "사업 총괄자",
+    "전설의 매출의 신",
+  ],
+  qa: [
+    "버그 탐지기",
+    "버그 사냥꾼",
+    "QA 전문가",
+    "디버깅 장인",
+    "품질 수호자",
+    "전설의 버그 슬레이어",
+  ],
+};
+
+function getRecruitRankLabel(recruit, count) {
+  const rankNames = recruitRankNames[recruit.id];
+  if (!rankNames) return recruit.name;
+  const tier = Math.min(5, Math.floor(count / 10));
+  return rankNames[tier];
+}
+
+const companyLevels = [
+  { name: "1인 창업실", minXp: 0, desc: "작은 책상에서 첫 프로젝트를 시작했습니다.", benefit: "창문과 업무 공간 확장" },
+  { name: "작은 작업실", minXp: 24, desc: "동료를 맞이할 작은 작업실이 생겼습니다.", benefit: "두 번째 업무 공간 개방" },
+  { name: "프로젝트 팀", minXp: 60, desc: "각자의 역할을 갖춘 팀이 자리를 잡았습니다.", benefit: "사무실 간판과 휴게 공간" },
+  { name: "초기 스타트업", minXp: 114, desc: "정식 회사의 모습을 갖추기 시작합니다.", benefit: "2층 오피스로 이전" },
+  { name: "성장 스타트업", minXp: 186, desc: "입소문을 타고 더 큰 의뢰가 들어옵니다.", benefit: "회의실과 조경 추가" },
+  { name: "전문 스튜디오", minXp: 282, desc: "전문 제작 조직으로 업계에 이름을 알립니다.", benefit: "전문 부서층 개방" },
+  { name: "소형 기업", minXp: 408, desc: "안정적인 조직과 여러 프로젝트를 운영합니다.", benefit: "독립 사옥 착공" },
+  { name: "확장 오피스", minXp: 570, desc: "새 사옥에서 더 많은 인재와 함께합니다.", benefit: "대형 로비와 편의 시설" },
+  { name: "중견 기업", minXp: 774, desc: "시장을 이끄는 탄탄한 회사로 성장했습니다.", benefit: "도심 타워로 확장" },
+  { name: "멀티 스튜디오", minXp: 1032, desc: "여러 제작팀이 동시에 성과를 만들어냅니다.", benefit: "브랜드 네온 사인" },
+  { name: "대형 기업", minXp: 1350, desc: "도시를 대표하는 대형 스튜디오가 되었습니다.", benefit: "글로벌 캠퍼스 개방" },
+  { name: "글로벌 기업", minXp: 1740, desc: "전 세계가 주목하는 글로벌 기업입니다.", benefit: "최고 단계 달성" },
+];
+
 const tools = [
-  { id: "engine", name: "게임 엔진", desc: "클릭 기여도 +1", baseCost: 35, click: 1 },
-  { id: "aiTool", name: "AI 보조도구", desc: "전체 자동 기여도 +15%", baseCost: 85, multiplier: 0.15 },
-  { id: "tablet", name: "드로잉 태블릿", desc: "일러스트레이터 효율 +2", baseCost: 120, target: "artist", dps: 2 },
-  { id: "testKit", name: "테스트 키트", desc: "QA 효율 +3", baseCost: 160, target: "qa", dps: 3 },
+  {
+    id: "engine",
+    name: "개발 랩",
+    icon: "DEV",
+    desc: "개발 장비를 확충해 업무 지원 기여도 +1",
+    baseCost: 35,
+    click: 1,
+    growthXp: 5,
+  },
+  {
+    id: "aiTool",
+    name: "자동화 서버실",
+    icon: "AI",
+    desc: "반복 업무를 자동화해 전체 기여도 +15%",
+    baseCost: 85,
+    multiplier: 0.15,
+    growthXp: 7,
+  },
+  {
+    id: "tablet",
+    name: "크리에이티브 스튜디오",
+    icon: "ART",
+    desc: "전용 제작실로 일러스트레이터 효율 +2",
+    baseCost: 120,
+    target: "artist",
+    dps: 2,
+    growthXp: 9,
+  },
+  {
+    id: "testKit",
+    name: "QA 센터",
+    icon: "QA",
+    desc: "검증 환경을 구축해 QA 효율 +3",
+    baseCost: 160,
+    target: "qa",
+    dps: 3,
+    growthXp: 11,
+  },
 ];
 
 const equipmentSlots = [
@@ -125,6 +269,14 @@ const equipmentUpgradeConfigs = [
 
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
 
+const growthConfigs = {
+  process: { label: "작업처리능력", baseCost: 18 },
+  critical: { label: "실수 감소", baseCost: 20 },
+  skill: { label: "새로운 아이디어", baseCost: 22 },
+  speed: { label: "작업 속도", baseCost: 16 },
+  hp: { label: "야근 버티기", baseCost: 24 },
+};
+
 const defaultState = {
   gold: 0,
   idea: 0,
@@ -139,9 +291,19 @@ const defaultState = {
   clickPower: 1,
   playerLevel: 1,
   clearCount: 0,
+  companyXp: 0,
   elapsed: 0,
   recruits: {},
+  squad: [null, null, null, null],
+  squadConfigured: false,
   tools: {},
+  growthLevels: {
+    process: 0,
+    critical: 0,
+    skill: 0,
+    speed: 0,
+    hp: 0,
+  },
   equipment: {
     equipped: {},
     pending: null,
@@ -167,6 +329,8 @@ let currentBgmKey = "title";
 let hasStartedGame = false;
 let titleBgmUnlockArmed = false;
 let audioSettings = { ...defaultAudioSettings };
+let activeTab = "battle";
+let lastCompanyVisualKey = "";
 let autoDrawTimer = null;
 let equipmentPanelExpanded = false;
 
@@ -187,6 +351,24 @@ function initGame() {
     titleVolumeValue: document.querySelector("#titleVolumeValue"),
     headerTitleButton: document.querySelector("#headerTitleButton"),
     battlefield: document.querySelector("#battlefield"),
+    companyScene: document.querySelector("#companyScene"),
+    companyLocationText: document.querySelector("#companyLocationText"),
+    companyLevelChip: document.querySelector("#companyLevelChip"),
+    companySceneName: document.querySelector("#companySceneName"),
+    companySceneDesc: document.querySelector("#companySceneDesc"),
+    companyCampus: document.querySelector("#companyCampus"),
+    companyBuilding: document.querySelector("#companyBuilding"),
+    companyFloors: document.querySelector("#companyFloors"),
+    employeeCrowd: document.querySelector("#employeeCrowd"),
+    companySceneProgressText: document.querySelector("#companySceneProgressText"),
+    companySceneProgressFill: document.querySelector("#companySceneProgressFill"),
+    companyValueText: document.querySelector("#companyValueText"),
+    companyEmployeeText: document.querySelector("#companyEmployeeText"),
+    companyFacilityText: document.querySelector("#companyFacilityText"),
+    companyStatusStrip: document.querySelector("#companyStatusStrip"),
+    battleStatusItems: [...document.querySelectorAll(".battle-status-item")],
+    squadFormation: document.querySelector("#squadFormation"),
+    squadRoster: document.querySelector("#squadRoster"),
     effectLayer: document.querySelector("#effectLayer"),
     goldText: document.querySelector("#goldText"),
     ideaText: document.querySelector("#ideaText"),
@@ -201,6 +383,11 @@ function initGame() {
     attackTimerText: document.querySelector("#attackTimerText"),
     saveStateText: document.querySelector("#saveStateText"),
     recruitList: document.querySelector("#recruitList"),
+    growthProcessValue: document.querySelector("#growthProcessValue"),
+    growthCriticalValue: document.querySelector("#growthCriticalValue"),
+    growthSkillValue: document.querySelector("#growthSkillValue"),
+    growthSpeedValue: document.querySelector("#growthSpeedValue"),
+    growthHpValue: document.querySelector("#growthHpValue"),
     toolList: document.querySelector("#toolList"),
     manualWorkButton: document.querySelector("#manualWorkButton"),
     upgradePlayerButton: document.querySelector("#upgradePlayerButton"),
@@ -254,10 +441,12 @@ function bindEvents() {
     const tab = event.target.closest("[data-tab]");
     const recruitButton = event.target.closest("[data-buy-recruit]");
     const toolButton = event.target.closest("[data-buy-tool]");
+    const growthButton = event.target.closest("[data-upgrade-growth]");
 
     if (tab) switchTab(tab);
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
     if (toolButton) buyTool(toolButton.dataset.buyTool);
+    if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -286,6 +475,7 @@ function bindEvents() {
   });
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
+  document.addEventListener("change", handleSquadChange);
 }
 
 function startGame() {
@@ -400,6 +590,35 @@ function handleAudioInput(event) {
   if (!audioSettings.muted) playBgm(currentBgmKey || "title", { silentFail: true });
 }
 
+function handleSquadChange(event) {
+  const select = event.target.closest("[data-squad-slot]");
+  if (!select) return;
+
+  const slotIndex = Number(select.dataset.squadSlot);
+  if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= state.squad.length) return;
+
+  const nextId = select.value || null;
+  if (nextId) {
+    const owned = getRecruitCount(nextId);
+    const deployedElsewhere = state.squad.reduce(
+      (count, id, index) => count + (index !== slotIndex && id === nextId ? 1 : 0),
+      0
+    );
+    if (!recruits.some((recruit) => recruit.id === nextId) || deployedElsewhere >= owned) {
+      log("보유한 동료 수보다 많이 배치할 수 없습니다.");
+      renderSquadManagement();
+      return;
+    }
+  }
+
+  state.squad[slotIndex] = nextId;
+  state.squadConfigured = true;
+  lastRosterKey = "";
+  const recruit = recruits.find((item) => item.id === nextId);
+  log(recruit ? `${slotIndex + 1}번 위치에 ${recruit.name} 배치 완료` : `${slotIndex + 1}번 위치를 비웠습니다.`);
+  renderAll();
+}
+
 function getBattleBgmKey() {
   return state.battleMode === "boss" ? "boss" : "field";
 }
@@ -495,11 +714,54 @@ function normalizeState(nextState) {
     clickPower: Math.max(1, Number(nextState.clickPower) || 1),
     playerLevel: Math.max(1, Number(nextState.playerLevel) || 1),
     clearCount: Math.max(0, Number(nextState.clearCount) || 0),
+    companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
+    squad: normalizeSquad(nextState.squad, nextState.recruits, !nextState.squadConfigured),
+    squadConfigured: Boolean(nextState.squadConfigured),
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
+    growthLevels:
+      nextState.growthLevels && typeof nextState.growthLevels === "object"
+        ? {
+            process: Math.max(0, Number(nextState.growthLevels.process) || 0),
+            critical: Math.max(0, Number(nextState.growthLevels.critical) || 0),
+            skill: Math.max(0, Number(nextState.growthLevels.skill) || 0),
+            speed: Math.max(0, Number(nextState.growthLevels.speed) || 0),
+            hp: Math.max(0, Number(nextState.growthLevels.hp) || 0),
+          }
+        : cloneDefaultState().growthLevels,
     equipment: normalizeEquipment(nextState.equipment),
   };
+}
+
+function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
+  const normalized = [null, null, null, null];
+  const used = {};
+  const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
+
+  if (Array.isArray(savedSquad)) {
+    savedSquad.slice(0, normalized.length).forEach((id, index) => {
+      const owned = Math.max(0, Number(ownedRoster[id]) || 0);
+      if (!recruits.some((recruit) => recruit.id === id) || (used[id] || 0) >= owned) return;
+      normalized[index] = id;
+      used[id] = (used[id] || 0) + 1;
+    });
+  }
+
+  if (autoFill) {
+    recruits.forEach((recruit) => {
+      let remaining = Math.max(0, Number(ownedRoster[recruit.id]) || 0) - (used[recruit.id] || 0);
+      while (remaining > 0) {
+        const emptyIndex = normalized.indexOf(null);
+        if (emptyIndex < 0) return;
+        normalized[emptyIndex] = recruit.id;
+        used[recruit.id] = (used[recruit.id] || 0) + 1;
+        remaining -= 1;
+      }
+    });
+  }
+
+  return normalized;
 }
 
 function normalizeEquipment(equipment) {
@@ -575,6 +837,7 @@ function resetGame() {
   }
   state = cloneDefaultState();
   lastRosterKey = "";
+  lastCompanyVisualKey = "";
   spawnWave();
   renderAll();
   saveState("초기화 완료");
@@ -827,7 +1090,8 @@ function damageEnemy(enemyId, amount, manual) {
   const target = state.enemies.find((enemy) => enemy.id === enemyId) || getTargetEnemy();
   if (!target) return;
 
-  const critical = Math.random() < CRITICAL_CHANCE;
+  const growthCriticalBonus = Math.min(0.3, (state.growthLevels?.critical || 0) * 0.001);
+  const critical = Math.random() < Math.min(0.6, CRITICAL_CHANCE + growthCriticalBonus);
   const multiplier = getGlobalMultiplier() * (critical ? CRITICAL_MULTIPLIER : 1);
   const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
@@ -849,6 +1113,7 @@ function defeatEnemy(enemyId, manual) {
   state.gold += goldGain;
   state.idea += ideaGain;
   state.clearCount += 1;
+  addCompanyXp(1);
 
   if (!state.enemies.length) completeWave(manual);
 }
@@ -860,6 +1125,7 @@ function completeWave(manual) {
   const clearedBoss = state.battleMode === "boss";
   const bonusIdea = clearedBoss ? 8 + state.chapter * 2 : manual ? 1 : 2;
   state.idea += bonusIdea;
+  addCompanyXp(clearedBoss ? 6 : 2);
   log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}` : `${getProgressLabel()} 클리어!`);
 
   window.setTimeout(() => {
@@ -972,15 +1238,17 @@ function getPlayerUnit(power = getPlayerPower()) {
 
 function getUnits() {
   const units = [getPlayerUnit()];
-  recruits.forEach((recruit) => {
-    const count = getRecruitCount(recruit.id);
-    if (count > 0) {
-      units.push({
-        ...recruit,
-        count,
-        power: getRecruitPower(recruit) * count,
-      });
-    }
+  state.squad.forEach((recruitId, slotIndex) => {
+    const recruit = recruits.find((item) => item.id === recruitId);
+    if (!recruit) return;
+
+    units.push({
+      ...recruit,
+      id: `squad-${slotIndex}-${recruit.id}`,
+      recruitId: recruit.id,
+      count: 1,
+      power: getRecruitPower(recruit),
+    });
   });
   return units;
 }
@@ -1010,11 +1278,15 @@ function getGlobalMultiplier() {
 }
 
 function getTotalDps() {
-  const recruitDps = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
-  return Math.max(1, Math.round((getPlayerPower() + recruitDps) * getGlobalMultiplier()));
+  const squadPower = getUnits().reduce((sum, unit) => sum + unit.power, 0);
+  return Math.max(1, Math.round(squadPower * getGlobalMultiplier()));
 }
 
 function getTeamCount() {
+  return getUnits().length;
+}
+
+function getEmployeeCount() {
   return 1 + recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id), 0);
 }
 
@@ -1024,6 +1296,53 @@ function getEnemyName() {
 
 function getProgressLabel() {
   return state.battleMode === "boss" ? `${state.chapter}-BOSS` : `${state.chapter}-${state.subStage}`;
+}
+
+function getCompanyLevelIndex(xp = state.companyXp) {
+  for (let index = companyLevels.length - 1; index >= 0; index -= 1) {
+    if (xp >= companyLevels[index].minXp) return index;
+  }
+  return 0;
+}
+
+function getCompanyProgress() {
+  const levelIndex = getCompanyLevelIndex();
+  const current = companyLevels[levelIndex];
+  const next = companyLevels[levelIndex + 1] || null;
+  if (!next) {
+    return { levelIndex, current, next, percent: 100, currentXp: state.companyXp, requiredXp: current.minXp };
+  }
+
+  const earned = state.companyXp - current.minXp;
+  const required = next.minXp - current.minXp;
+  return {
+    levelIndex,
+    current,
+    next,
+    percent: Math.max(0, Math.min(100, Math.round((earned / required) * 100))),
+    currentXp: earned,
+    requiredXp: required,
+  };
+}
+
+function getFacilityInvestmentCount() {
+  return tools.reduce((total, tool) => total + getToolLevel(tool.id), 0);
+}
+
+function deriveCompanyXp(nextState) {
+  const recruitCount = Object.values(nextState.recruits || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const facilityCount = Object.values(nextState.tools || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  return Math.max(
+    0,
+    Math.floor(Number(nextState.clearCount) || 0) +
+      recruitCount * 4 +
+      facilityCount * 6 +
+      Math.max(0, (Number(nextState.chapter) || 1) - 1) * 10
+  );
+}
+
+function addCompanyXp(amount) {
+  state.companyXp = Math.max(0, state.companyXp + Math.max(0, Number(amount) || 0));
 }
 
 function getBattleBackground() {
@@ -1048,8 +1367,14 @@ function buyRecruit(id) {
 
   state.gold -= cost;
   state.recruits[id] = count + 1;
+  if (!state.squadConfigured) {
+    state.squad = normalizeSquad(state.squad, state.recruits, true);
+    lastRosterKey = "";
+  }
+  addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
-  log(`${recruit.name} 영입 완료. 전투 화면에 배치되었습니다.`);
+  const rankLabel = getRecruitRankLabel(recruit, count + 1);
+  log(`${rankLabel} 영입 완료. 회사 성장 경험치 +4`);
   renderAll();
 }
 
@@ -1061,8 +1386,9 @@ function buyTool(id) {
 
   state.idea -= cost;
   state.tools[id] = level + 1;
+  addCompanyXp(tool.growthXp + level * 2);
   if (tool.click) state.clickPower += tool.click;
-  log(`${tool.name} 강화 완료`);
+  log(`${tool.name} 확장 완료. 회사 성장 경험치 +${tool.growthXp + level * 2}`);
   renderAll();
 }
 
@@ -1344,7 +1670,7 @@ function getPlayerSkillPower() {
 }
 
 function getManualPower() {
-  return state.clickPower;
+  return state.clickPower + Math.max(0, (state.growthLevels?.process || 0));
 }
 
 function upgradePlayer() {
@@ -1358,11 +1684,55 @@ function upgradePlayer() {
   renderAll();
 }
 
+function getGrowthValue(type) {
+  const level = state.growthLevels?.[type] || 0;
+  switch (type) {
+    case "process":
+      return 1 + level;
+    case "critical":
+      return `${(CRITICAL_CHANCE * 100 + 0.1 * level).toFixed(1)}%`;
+    case "skill":
+      return 1 + 0.2 * level;
+    case "speed":
+      return 1 + 0.05 * level;
+    case "hp":
+      return 100 + 20 * level;
+    default:
+      return 0;
+  }
+}
+
+function formatGrowthValue(type, value) {
+  if (type === "critical") return value;
+  if (type === "skill" || type === "speed") return Number(value).toFixed(1);
+  return value;
+}
+
+function getGrowthCost(type) {
+  const base = growthConfigs[type]?.baseCost || 20;
+  const level = state.growthLevels?.[type] || 0;
+  return Math.floor(base * Math.pow(1.25, level));
+}
+
+function upgradeGrowth(type) {
+  if (!growthConfigs[type]) return;
+  const cost = getGrowthCost(type);
+  if (state.gold < cost) return;
+  state.gold -= cost;
+  state.growthLevels[type] = (state.growthLevels[type] || 0) + 1;
+  if (type === "process") state.clickPower += 1;
+  log(`${growthConfigs[type].label} 강화 완료!`);
+  renderAll();
+}
+
+
 function switchTab(tab) {
+  activeTab = tab.dataset.tab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
     .querySelectorAll(".tab-panel")
-    .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === tab.dataset.tab));
+    .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === activeTab));
+  updatePrimaryScene();
 }
 
 function renderAll() {
@@ -1373,13 +1743,14 @@ function renderAll() {
 }
 
 function renderBattle() {
-  const hpPercent = Math.max(0, Math.round((state.enemyHp / state.enemyMaxHp) * 100));
   const playerCost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
 
   refs.goldText.textContent = Math.floor(state.gold);
   refs.ideaText.textContent = Math.floor(state.idea);
   refs.stageText.textContent = getProgressLabel();
   refs.battlefield.style.setProperty("--battle-bg", `url("${getBattleBackground()}")`);
+  renderCompany();
+  updatePrimaryScene();
   setText(refs.dpsText, `초당 기여도 ${getTotalDps()}`);
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
@@ -1387,6 +1758,17 @@ function renderBattle() {
   setText(refs.clearCountText, `${state.clearCount}건`);
   setText(refs.playTimeText, formatTime(state.elapsed));
   setText(refs.attackTimerText, `${Math.max(0, Math.min(basicAttackCooldown, skillAttackCooldown)).toFixed(1)}초`);
+  setText(refs.growthProcessValue, formatGrowthValue("process", getGrowthValue("process")));
+  setText(refs.growthCriticalValue, formatGrowthValue("critical", getGrowthValue("critical")));
+  setText(refs.growthSkillValue, formatGrowthValue("skill", getGrowthValue("skill")));
+  setText(refs.growthSpeedValue, formatGrowthValue("speed", getGrowthValue("speed")));
+  setText(refs.growthHpValue, formatGrowthValue("hp", getGrowthValue("hp")));
+  document.querySelectorAll("[data-upgrade-growth]").forEach((button) => {
+    const type = button.dataset.upgradeGrowth;
+    const cost = getGrowthCost(type);
+    button.textContent = `강화 (${cost} 자금)`;
+    button.disabled = state.gold < cost;
+  });
   refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
   refs.upgradePlayerButton.disabled = state.gold < playerCost;
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
@@ -1496,6 +1878,89 @@ function formatDiff(value) {
   return `<span class="stat-neutral">0</span>`;
 }
 
+function updatePrimaryScene() {
+  const isCompanyTab = activeTab === "tools";
+  refs.battlefield.classList.toggle("is-hidden", isCompanyTab);
+  refs.companyScene.classList.toggle("is-hidden", !isCompanyTab);
+  refs.battleStatusItems.forEach((element) => element.classList.toggle("is-hidden", isCompanyTab));
+  refs.companyStatusStrip.classList.toggle("is-hidden", !isCompanyTab);
+
+  if (isCompanyTab) {
+    const companyLevel = companyLevels[getCompanyLevelIndex()];
+    setText(refs.companyLocationText, `회사 규모: ${companyLevel.name}`);
+  } else {
+    setText(refs.companyLocationText, "위치: 사무실 1층");
+  }
+}
+
+function renderCompany() {
+  const progress = getCompanyProgress();
+  const levelNumber = progress.levelIndex + 1;
+  const facilityCount = getFacilityInvestmentCount();
+  const visualTier = Math.min(6, Math.floor(progress.levelIndex / 2) + 1);
+  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}`;
+
+  setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
+  setText(refs.companySceneName, progress.current.name);
+  setText(refs.companySceneDesc, progress.current.desc);
+  setText(refs.companyEmployeeText, `${getEmployeeCount()}명`);
+  setText(refs.companyFacilityText, `${facilityCount}회`);
+
+  const companyValue = Math.floor(
+    state.gold + state.idea * 5 + state.companyXp * 12 + getEmployeeCount() * 120 + facilityCount * 80
+  );
+  setText(refs.companyValueText, `${companyValue.toLocaleString("ko-KR")} 가치`);
+
+  if (progress.next) {
+    setText(refs.companySceneProgressText, `다음 성장까지 ${progress.requiredXp - progress.currentXp} EXP`);
+  } else {
+    setText(refs.companySceneProgressText, "최고 성장 단계 달성");
+  }
+
+  refs.companySceneProgressFill.style.width = `${progress.percent}%`;
+  refs.companySceneProgressFill.parentElement.setAttribute("aria-valuenow", String(progress.percent));
+
+  if (visualKey !== lastCompanyVisualKey) {
+    const isFirstRender = !lastCompanyVisualKey;
+    lastCompanyVisualKey = visualKey;
+    refs.companyCampus.dataset.companyTier = String(visualTier);
+    refs.companyBuilding.style.setProperty("--building-width", `${160 + visualTier * 20}px`);
+    refs.companyBuilding.style.setProperty("--building-height", `${96 + visualTier * 6}px`);
+    renderCompanyFloors(visualTier, progress.levelIndex);
+    renderCompanyEmployees();
+
+    if (!isFirstRender) {
+      refs.companyBuilding.classList.remove("is-leveling-up");
+      window.requestAnimationFrame(() => refs.companyBuilding.classList.add("is-leveling-up"));
+      window.setTimeout(() => refs.companyBuilding.classList.remove("is-leveling-up"), 720);
+    }
+  }
+
+}
+
+function renderCompanyFloors(visualTier, levelIndex) {
+  const floorCount = visualTier + 1;
+  const windowCount = Math.min(4, 1 + Math.ceil(visualTier / 2));
+  refs.companyFloors.style.setProperty("--floor-count", floorCount);
+  refs.companyFloors.style.setProperty("--window-count", windowCount);
+  refs.companyFloors.innerHTML = Array.from({ length: floorCount }, (_, floorIndex) => {
+    const windows = Array.from({ length: windowCount }, (_, windowIndex) => {
+      const lit = (floorIndex + windowIndex + levelIndex) % 3 !== 0;
+      return `<span class="office-window${lit ? " is-lit" : ""}"></span>`;
+    }).join("");
+    return `<div class="building-floor">${windows}</div>`;
+  }).join("");
+}
+
+function renderCompanyEmployees() {
+  const colors = ["#315f78", "#b05b45", "#6a6fa6", "#3c7c58", "#c4893f", "#805b86"];
+  const visibleEmployees = Math.min(12, getEmployeeCount());
+  refs.employeeCrowd.innerHTML = Array.from({ length: visibleEmployees }, (_, index) => {
+    return `<span class="scene-employee" style="--employee-color: ${colors[index % colors.length]}"></span>`;
+  }).join("");
+  refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getEmployeeCount()}명`);
+}
+
 function renderEnemies() {
   refs.enemyLayer.innerHTML = state.enemies
     .map((enemy) => {
@@ -1545,27 +2010,46 @@ function renderAllies() {
 
 function getAllyPosition(index) {
   const positions = [
-    { x: 15, y: 64 },
-    { x: 24, y: 42 },
-    { x: 24, y: 106 },
-    { x: 32, y: 72 },
-    { x: 20, y: 138 },
+    { x: 8, y: 82 },
+    { x: 34, y: 34 },
+    { x: 34, y: 134 },
+    { x: 21, y: 34 },
+    { x: 21, y: 134 },
   ];
   return positions[index] || { x: 16 + index * 5, y: 42 + (index % 3) * 46 };
 }
 
 function renderShop() {
-  refs.recruitList.innerHTML = recruits
-    .map((recruit) => {
-      const count = getRecruitCount(recruit.id);
-      const cost = costFor(recruit.baseCost, count);
+  refs.recruitList.innerHTML = recruitCategories
+    .map((category) => {
+      const categoryItems = recruits.filter((recruit) => recruit.category === category);
+      const itemsHtml = categoryItems.length
+        ? categoryItems
+            .map((recruit) => {
+              const count = getRecruitCount(recruit.id);
+              const cost = costFor(recruit.baseCost, count);
+              const label = getRecruitRankLabel(recruit, count);
+              return `
+                <div class="shop-item">
+                  <div>
+                    <strong>${label} Lv.${count}</strong>
+                    <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
+                  </div>
+                  <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+                </div>
+              `;
+            })
+            .join("")
+        : `
+            <div class="recruit-placeholder">
+              <span>현재 영입 가능한 ${category} 항목이 없습니다.</span>
+            </div>
+          `;
+
       return `
-        <div class="shop-item">
-          <div>
-            <strong>${recruit.name} Lv.${count}</strong>
-            <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
-          </div>
-          <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+        <div class="recruit-category">
+          <div class="recruit-category__heading">${category}</div>
+          <div class="recruit-category__list">${itemsHtml}</div>
         </div>
       `;
     })
@@ -1575,13 +2059,92 @@ function renderShop() {
     .map((tool) => {
       const level = getToolLevel(tool.id);
       const cost = costFor(tool.baseCost, level);
+      const growthXp = tool.growthXp + level * 2;
       return `
-        <div class="shop-item">
-          <div>
+        <div class="facility-card">
+          <span class="facility-icon">${tool.icon}</span>
+          <div class="facility-copy">
             <strong>${tool.name} Lv.${level}</strong>
-            <span class="shop-meta">${tool.desc}</span>
+            <span>${tool.desc}</span>
           </div>
-          <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>${cost} 아이디어</button>
+          <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>
+            ${cost} 아이디어 · 성장 +${growthXp}
+          </button>
+        </div>
+      `;
+    })
+    .join("");
+
+  renderSquadManagement();
+}
+
+function renderSquadManagement() {
+  const positionNames = ["전열 A", "전열 B", "지원 A", "지원 B"];
+  const deployedCounts = state.squad.reduce((counts, id) => {
+    if (id) counts[id] = (counts[id] || 0) + 1;
+    return counts;
+  }, {});
+
+  const leaderMarkup = `
+    <div class="squad-leader">
+      <span class="squad-avatar" style="--squad-color: #059669;">C</span>
+      <div>
+        <strong>대표</strong>
+        <small>리더 · 고정 배치</small>
+      </div>
+    </div>
+  `;
+
+  const slotMarkup = state.squad
+    .map((recruitId, slotIndex) => {
+      const assigned = recruits.find((recruit) => recruit.id === recruitId);
+      const options = recruits
+        .map((recruit) => {
+          const owned = getRecruitCount(recruit.id);
+          const deployedElsewhere = state.squad.reduce(
+            (count, id, index) => count + (index !== slotIndex && id === recruit.id ? 1 : 0),
+            0
+          );
+          const unavailable = recruit.id !== recruitId && deployedElsewhere >= owned;
+          return `<option value="${recruit.id}" ${recruit.id === recruitId ? "selected" : ""} ${
+            unavailable ? "disabled" : ""
+          }>${recruit.name} · 보유 ${owned}</option>`;
+        })
+        .join("");
+      const color = assigned ? assigned.color : "#9a8b77";
+      const mark = assigned ? assigned.mark : "+";
+
+      return `
+        <label class="squad-slot${assigned ? " is-filled" : ""}">
+          <span class="squad-position">${positionNames[slotIndex]}</span>
+          <span class="squad-slot-body">
+            <span class="squad-avatar" style="--squad-color: ${color};">${mark}</span>
+            <span>
+              <strong>${assigned ? assigned.name : "빈 위치"}</strong>
+              <small>${slotIndex + 1}번 배치 슬롯</small>
+            </span>
+          </span>
+          <select data-squad-slot="${slotIndex}" aria-label="${positionNames[slotIndex]} 동료 선택">
+            <option value="" ${assigned ? "" : "selected"}>비워두기</option>
+            ${options}
+          </select>
+        </label>
+      `;
+    })
+    .join("");
+
+  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup;
+  refs.squadRoster.innerHTML = recruits
+    .map((recruit) => {
+      const owned = getRecruitCount(recruit.id);
+      const deployed = deployedCounts[recruit.id] || 0;
+      return `
+        <div class="squad-roster-item${owned ? "" : " is-unowned"}">
+          <span class="squad-avatar" style="--squad-color: ${recruit.color};">${recruit.mark}</span>
+          <div>
+            <strong>${recruit.name}</strong>
+            <small>보유 ${owned} · 배치 ${deployed}</small>
+          </div>
         </div>
       `;
     })
