@@ -3075,8 +3075,8 @@ textarea {
 .draw-machine-panel {
   position: absolute;
   left: 50%;
-  bottom: 10px;
-  width: 154px;
+  bottom: 8px;
+  width: 112px;
   aspect-ratio: 1 / 1;
   transform: translateX(-50%);
   pointer-events: auto;
@@ -3118,39 +3118,40 @@ textarea {
 }
 
 .draw-machine-panel .equipment-draw-button {
-  top: 54% !important;
+  top: 50% !important;
   display: grid !important;
   justify-items: center !important;
-  gap: 1px !important;
+  gap: 0 !important;
   padding: 0 !important;
 }
 
 .draw-machine-panel .equipment-draw-button span {
-  font-size: 12px !important;
+  font-size: 10px !important;
   font-weight: 900 !important;
   line-height: 1.05 !important;
   white-space: nowrap;
 }
 
 .draw-machine-panel .equipment-draw-button strong {
-  padding: 2px 7px;
-  border: 1px solid rgba(255, 247, 204, 0.8);
+  padding: 1px 6px;
+  border: 1px solid rgba(255, 247, 204, 0.75);
   border-radius: 999px;
   background: rgba(74, 43, 23, 0.58);
   color: #ffffff;
-  font-size: 11px !important;
+  font-size: 10px !important;
   font-weight: 900 !important;
   line-height: 1.1 !important;
   white-space: nowrap;
 }
 
 .draw-machine-panel .auto-draw-button {
-  bottom: 13% !important;
-  padding: 3px 9px !important;
+  bottom: 7% !important;
+  padding: 2px 7px !important;
+  min-width: 58px !important;
   border: 1px solid rgba(255, 247, 204, 0.78) !important;
   border-radius: 999px !important;
   background: rgba(31, 70, 54, 0.72) !important;
-  font-size: 11px !important;
+  font-size: 9px !important;
   font-weight: 900 !important;
   line-height: 1.05 !important;
   white-space: nowrap;
@@ -3167,16 +3168,16 @@ textarea {
 
 @media (max-width: 560px) {
   .draw-machine-panel {
-    bottom: 6px;
-    width: 136px;
+    bottom: 5px;
+    width: 98px;
   }
 
   .draw-machine-panel .equipment-draw-button span {
-    font-size: 11px !important;
+    font-size: 9px !important;
   }
 
   .draw-machine-panel .equipment-draw-button strong,
   .draw-machine-panel .auto-draw-button {
-    font-size: 10px !important;
+    font-size: 8px !important;
   }
 }
