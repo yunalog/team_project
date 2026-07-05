@@ -7,6 +7,8 @@ function spawnWave() {
   isSpawningNext = false;
   basicAttackCooldown = 0.35;
   skillAttackCooldown = getSquadSkillInterval();
+  unitCombatTimers = {};
+  combatEffects.enemyDebuffs = [];
   if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
 }
@@ -111,19 +113,59 @@ function moveEnemies(delta) {
 function updateAutoCombat(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
-  basicAttackCooldown -= delta;
-  skillAttackCooldown -= delta;
+  updateCombatEffects(delta);
+  const units = getUnits();
+  syncUnitCombatTimers(units);
+  let nextBasic = Infinity;
+  let nextSkill = Infinity;
 
-  if (basicAttackCooldown <= 0) {
-    basicAttackCooldown += getSquadAttackInterval();
-    performAttackRound(false);
-  }
+  units.forEach((unit, index) => {
+    const timer = unitCombatTimers[unit.id];
+    timer.attack = Math.max(0, timer.attack - delta);
+    timer.skill = Math.max(0, timer.skill - delta);
 
-  if (skillAttackCooldown <= 0) {
-    skillAttackCooldown += getSquadSkillInterval();
-    performAttackRound(true);
-    log("팀 스킬 공격!");
-  }
+    if (timer.attack <= 0) {
+      timer.attack += getUnitAttackInterval(unit);
+      window.setTimeout(() => attackUnit(unit, { skill: false }), index * 90);
+    }
+
+    if (unit.skill && timer.skill <= 0) {
+      timer.skill += getUnitSkillCooldown(unit);
+      window.setTimeout(() => attackUnit(unit, { skill: true }), index * 120);
+    }
+
+    nextBasic = Math.min(nextBasic, timer.attack);
+    nextSkill = unit.skill ? Math.min(nextSkill, timer.skill) : nextSkill;
+  });
+
+  basicAttackCooldown = Number.isFinite(nextBasic) ? nextBasic : 0;
+  skillAttackCooldown = Number.isFinite(nextSkill) ? nextSkill : 0;
+}
+
+function updateCombatEffects(delta) {
+  combatEffects.buffs = (combatEffects.buffs || []).filter((effect) => {
+    effect.remaining -= delta;
+    return effect.remaining > 0;
+  });
+  combatEffects.enemyDebuffs = (combatEffects.enemyDebuffs || []).filter((effect) => {
+    effect.remaining -= delta;
+    return effect.remaining > 0;
+  });
+}
+
+function syncUnitCombatTimers(units) {
+  const activeIds = new Set(units.map((unit) => unit.id));
+  Object.keys(unitCombatTimers).forEach((id) => {
+    if (!activeIds.has(id)) delete unitCombatTimers[id];
+  });
+  units.forEach((unit) => {
+    if (!unitCombatTimers[unit.id]) {
+      unitCombatTimers[unit.id] = {
+        attack: Math.min(0.35, getUnitAttackInterval(unit)),
+        skill: getUnitSkillCooldown(unit),
+      };
+    }
+  });
 }
 
 function performAttackRound(skill) {
@@ -145,31 +187,90 @@ function attackUnit(unit, options = {}) {
     return;
   }
 
-  const damage = unit.power;
-
-  if (unit.attackType === "slash") {
-    playSlash(unit, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 140);
-  } else {
-    playProjectile(unit, from, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 240);
-  }
+  const targets = getBasicAttackTargets(unit);
+  targets.forEach((enemy, index) => {
+    if (unit.attackType === "slash") {
+      playSlash(unit, enemy, false);
+      window.setTimeout(() => damageEnemy(enemy.id, unit.power, manual, unit), 120 + index * 35);
+    } else {
+      playProjectile(unit, from, enemy, false);
+      window.setTimeout(() => damageEnemy(enemy.id, unit.power, manual, unit), 210 + index * 35);
+    }
+  });
 }
 
 function castSkill(unit, from) {
-  const targets = getSkillTargets(unit.skill);
-  if (!targets.length) return;
+  if (isSpawningNext) return;
 
   pulseUnit(unit.id, "is-skill", 520);
+  const skill = unit.skill || {};
+
+  if (skill.type === "selfBuff") {
+    combatEffects.buffs.push({
+      targetId: unit.id,
+      remaining: skill.duration || 0,
+      attackSpeed: skill.attackSpeed || 0,
+      attackPower: skill.attackPower || 0,
+      skillDamage: skill.skillDamage || 0,
+      criticalChance: skill.criticalChance || 0,
+      basicTargets: skill.basicTargets || null,
+    });
+    playSkillEffect(unit, getSkillTargets({ type: "self", targets: 1 }));
+    log(`${unit.shortName} 스킬: ${skill.name}`);
+    return;
+  }
+
+  if (skill.type === "teamBuff") {
+    combatEffects.buffs.push({
+      targetId: "all",
+      remaining: skill.duration || 0,
+      attackSpeed: skill.attackSpeed || 0,
+      attackPower: skill.attackPower || 0,
+      skillDamage: skill.skillDamage || 0,
+      criticalChance: skill.criticalChance || 0,
+    });
+    playSkillEffect(unit, getSkillTargets({ type: "all" }));
+    log(`${unit.shortName} 스킬: ${skill.name}`);
+    return;
+  }
+
+  if (skill.type === "enemyDebuff") {
+    combatEffects.enemyDebuffs.push({
+      remaining: skill.duration || 0,
+      damageTaken: skill.damageTaken || 0,
+    });
+    playSkillEffect(unit, [...state.enemies]);
+    log(`${unit.shortName} 스킬: ${skill.name}`);
+    return;
+  }
+
+  if (skill.type === "teamHeal") {
+    const heal = Math.max(1, Math.round(unit.skillPower * (skill.multiplier || 1)));
+    combatEffects.teamHp = Math.min(combatEffects.teamMaxHp || 100, (combatEffects.teamHp || 100) + heal);
+    playSkillEffect(unit, getSkillTargets({ type: "all" }));
+    log(`${unit.shortName} 스킬: ${skill.name} · 아군 회복 +${heal}`);
+    return;
+  }
+
+  if (skill.type === "resetAllyCooldowns") {
+    Object.entries(unitCombatTimers).forEach(([unitId, timer]) => {
+      if (unitId !== unit.id && unitId !== "player") timer.skill = 0;
+    });
+    playSkillEffect(unit, getSkillTargets({ type: "all" }));
+    log(`${unit.shortName} 스킬: ${skill.name}`);
+    return;
+  }
+
+  const targets = getSkillTargets(skill);
+  if (!targets.length) return;
   playSkillEffect(unit, targets);
 
   targets.forEach((target, index) => {
-    const skillPower = unit.id === "player" ? getPlayerSkillPower() : unit.power;
-    const damage = Math.ceil((skillPower * unit.skill.multiplier + state.playerLevel * 0.6) * getSquadSkillDamageMultiplier());
-    window.setTimeout(() => damageEnemy(target.id, damage, false), 120 + index * 70);
+    const damage = Math.ceil(unit.skillPower * (skill.multiplier || 1) * getUnitSkillDamageMultiplier(unit));
+    window.setTimeout(() => damageEnemy(target.id, damage, false, unit), 120 + index * 70);
   });
 
-  log(`${unit.shortName} 스킬: ${unit.skill.name}`);
+  log(`${unit.shortName} 스킬: ${skill.name}`);
 }
 
 function getSkillTargets(skill) {
@@ -178,8 +279,8 @@ function getSkillTargets(skill) {
 
   if (skill.type === "all") return [...state.enemies];
 
-  if (skill.type === "aoe") {
-    return state.enemies.filter((enemy) => Math.abs(enemy.x - target.x) <= skill.radius);
+  if (skill.type === "aoe" || skill.type === "skillAoeDamage") {
+    return state.enemies.filter((enemy) => Math.abs(enemy.x - target.x) <= (skill.radius || 12));
   }
 
   if (skill.type === "chain" || skill.type === "cleave") {
@@ -239,17 +340,19 @@ function playSkillEffect(unit, targets) {
   });
 }
 
-function damageEnemy(enemyId, amount, manual) {
+function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
   if (isSpawningNext) return;
 
   const target = state.enemies.find((enemy) => enemy.id === enemyId) || getTargetEnemy();
   if (!target) return;
 
   const growthCriticalBonus = Math.min(0.3, (state.growthLevels?.critical || 0) * 0.001);
-  const criticalBonus = getSquadSynergyValue("criticalChance");
-  const critical = Math.random() < Math.min(0.8, CRITICAL_CHANCE + growthCriticalBonus + criticalBonus);
+  const criticalBonus = getSquadSynergyValue("criticalChance") + getUnitBuffValue(sourceUnit?.id, "criticalChance");
+  const unitCritical = sourceUnit ? sourceUnit.criticalChance : CRITICAL_CHANCE;
+  const critical = Math.random() < Math.min(0.8, unitCritical + growthCriticalBonus + criticalBonus);
   const enemyTypeBonus = target.isBoss ? getSquadSynergyValue("bossDamage") : getSquadSynergyValue("normalDamage");
-  const multiplier = getGlobalMultiplier() * (1 + enemyTypeBonus) * (critical ? CRITICAL_MULTIPLIER : 1);
+  const debuffBonus = getEnemyDebuffValue("damageTaken");
+  const multiplier = getGlobalMultiplier() * (1 + enemyTypeBonus + debuffBonus) * (critical ? CRITICAL_MULTIPLIER : 1);
   const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
   showDamage(finalAmount, target, { critical });
@@ -396,7 +499,13 @@ function pulseUnit(unitId, className, duration) {
 }
 
 function getPlayerUnit(power = getPlayerPower()) {
-  return {
+  const baseStats = {
+    attackPower: Math.max(1, power),
+    skillPower: Math.max(1, getPlayerSkillPower()),
+    attackInterval: 1.6,
+    criticalChance: CRITICAL_CHANCE,
+  };
+  const unit = {
     id: "player",
     name: "대표",
     shortName: "대표",
@@ -404,10 +513,11 @@ function getPlayerUnit(power = getPlayerPower()) {
     color: "#059669",
     spriteSheet: "Anim/Player_1/Motion.png",
     count: 1,
-    power: Math.max(1, Math.round(power * getSquadAttackPowerMultiplier())),
     attackType: "code",
-    skill: { type: "aoe", name: "핫픽스 배포", radius: 12, multiplier: 1.35 },
+    skill: { type: "skillAoeDamage", name: "핫픽스 배포", cooldown: 8, radius: 12, multiplier: 1.35 },
+    ...baseStats,
   };
+  return applyUnitDerivedStats(unit);
 }
 
 function getUnits() {
@@ -416,15 +526,66 @@ function getUnits() {
     const recruit = recruits.find((item) => item.id === recruitId);
     if (!recruit) return;
 
-    units.push({
+    const stats = getRecruitBattleStats(recruit);
+    units.push(applyUnitDerivedStats({
       ...recruit,
       id: `squad-${slotIndex}-${recruit.id}`,
       recruitId: recruit.id,
       count: 1,
-      power: Math.max(1, Math.round(getRecruitPower(recruit) * getSquadAttackPowerMultiplier())),
-    });
+      ...stats,
+    }));
   });
   return units;
+}
+
+function applyUnitDerivedStats(unit) {
+  const attackPowerBuff = getUnitBuffValue(unit.id, "attackPower");
+  const skillDamageBuff = getUnitBuffValue(unit.id, "skillDamage");
+  const attackPower = unit.attackPower || unit.power || 1;
+  const skillPower = unit.skillPower || attackPower;
+  return {
+    ...unit,
+    power: Math.max(1, Math.round(attackPower * getSquadAttackPowerMultiplier() * (1 + attackPowerBuff))),
+    skillPower: Math.max(1, Math.round(skillPower * getSquadSkillDamageMultiplier() * (1 + skillDamageBuff))),
+  };
+}
+
+function getBasicAttackTargets(unit) {
+  const target = getTargetEnemy();
+  if (!target) return [];
+  const buffTargetsAll = getUnitBuffValue(unit.id, "basicTargetsAll") > 0;
+  if (unit.basicTargets === "all" || buffTargetsAll) return [...state.enemies];
+  const count = Math.max(1, Number(unit.basicTargets) || 1);
+  return [...state.enemies].sort((a, b) => a.x - b.x || a.y - b.y).slice(0, count);
+}
+
+function getUnitAttackInterval(unit) {
+  const speedBonus = getSquadSynergyValue("attackSpeed") + getUnitBuffValue(unit.id, "attackSpeed");
+  return Math.max(0.35, (unit.attackInterval || BASIC_ATTACK_RATE) / (1 + speedBonus));
+}
+
+function getUnitSkillCooldown(unit) {
+  const baseCooldown = unit.skill?.cooldown || SKILL_ATTACK_RATE;
+  const reduction = Math.min(0.8, getSquadSynergyValue("skillCooldownReduction"));
+  return Math.max(0.5, baseCooldown * (1 - reduction));
+}
+
+function getUnitSkillDamageMultiplier(unit) {
+  return 1 + getUnitBuffValue(unit.id, "skillDamage");
+}
+
+function getUnitBuffValue(unitId, key) {
+  if (!unitId) return 0;
+  return (combatEffects.buffs || []).reduce((sum, effect) => {
+    const applies = effect.targetId === "all" || effect.targetId === unitId;
+    if (!applies) return sum;
+    if (key === "basicTargetsAll") return sum + (effect.basicTargets === "all" ? 1 : 0);
+    return sum + (Number(effect[key]) || 0);
+  }, 0);
+}
+
+function getEnemyDebuffValue(key) {
+  return (combatEffects.enemyDebuffs || []).reduce((sum, effect) => sum + (Number(effect[key]) || 0), 0);
 }
 
 function getUnitPosition(unitId) {

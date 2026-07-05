@@ -89,11 +89,53 @@ function getToolLevel(id) {
   return state.tools[id] || 0;
 }
 
-function getRecruitPower(recruit) {
+function getRecruitLevel(id) {
+  return Math.max(0, getRecruitCount(id));
+}
+
+function getRecruitPromotionTierByCount(count) {
+  return Math.max(0, Math.floor((Number(count) || 0) / 10));
+}
+
+function getRecruitBattleStats(recruit) {
+  const level = Math.max(1, getRecruitLevel(recruit.id));
+  const promotionTier = getRecruitPromotionTierByCount(level);
+  const base = recruit.baseStats || {
+    attackPower: recruit.dps || 1,
+    skillPower: recruit.dps || 1,
+    attackInterval: BASIC_ATTACK_RATE,
+    criticalChance: 0,
+  };
+  const levelBonus = Math.max(0, level - 1);
   const toolBonus = tools
     .filter((tool) => tool.target === recruit.id)
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
-  return recruit.dps + toolBonus + getRecruitBoostLevel(recruit.id);
+  const boostBonus = getRecruitBoostLevel(recruit.id);
+  const attackPower = base.attackPower + levelBonus * 0.12 + promotionTier * 1.2 + toolBonus + boostBonus;
+  const skillPower = (base.skillPower || base.attackPower) + levelBonus * 0.15 + promotionTier * 1.5 + Math.floor(boostBonus * 0.5);
+  const attackInterval = Math.max(0.35, (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.25, promotionTier * 0.015 + levelBonus * 0.001)));
+  const criticalChance = Math.min(0.55, (base.criticalChance || 0) + levelBonus * 0.001 + promotionTier * 0.01);
+  return {
+    attackPower,
+    skillPower,
+    attackInterval,
+    criticalChance,
+    basicTargets: recruit.basicTargets || 1,
+  };
+}
+
+function getRecruitPower(recruit) {
+  return getRecruitBattleStats(recruit).attackPower;
+}
+
+function formatRecruitStatLine(recruit) {
+  const stats = getRecruitBattleStats(recruit);
+  return `공격 ${stats.attackPower.toFixed(1)} · 스킬 ${stats.skillPower.toFixed(1)} · 속도 ${stats.attackInterval.toFixed(2)}초 · 치명 ${(stats.criticalChance * 100).toFixed(1)}%`;
+}
+
+function getRecruitSkillText(recruit) {
+  const skill = recruit.skill || {};
+  return skill.desc || skill.name || "스킬 정보 없음";
 }
 
 function renderRecruitDetailModal() {
@@ -113,13 +155,7 @@ function renderRecruitDetailModal() {
   const boostLevel = getRecruitBoostLevel(recruit.id);
   const enhancementCost = getRecruitEnhancementCost(recruit.id);
   const currentCount = getRecruitCount(recruit.id);
-  const skillText = recruit.skill?.type === "aoe"
-    ? `${recruit.skill.name} · ${recruit.skill.radius}칸 범위 공격 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
-    : recruit.skill?.type === "all"
-    ? `${recruit.skill.name} · 전체 대상 공격 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
-    : recruit.skill?.targets
-    ? `${recruit.skill.name} · ${recruit.skill.targets}명 타깃 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
-    : `${recruit.skill.name} · 단일 대상 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`;
+  const skillText = getRecruitSkillText(recruit);
 
   refs.recruitDetailModal.classList.remove("is-hidden");
   refs.recruitDetailBadge.textContent = recruit.mark;
@@ -128,7 +164,7 @@ function renderRecruitDetailModal() {
   refs.recruitDetailCategory.textContent = `${recruit.category} · 보유 ${currentCount}명`;
   refs.recruitDetailDesc.textContent = recruit.desc;
   refs.recruitDetailLevel.textContent = `Lv.${currentCount}`;
-  refs.recruitDetailDps.textContent = `${recruit.dps + boostLevel} / 초`;
+  refs.recruitDetailDps.textContent = formatRecruitStatLine(recruit);
   refs.recruitDetailBoost.textContent = `${boostLevel}단계`;
   refs.recruitDetailSkillName.textContent = recruit.skill?.name || "스킬 정보";
   refs.recruitDetailSkillText.textContent = skillText;
@@ -230,9 +266,11 @@ function getGlobalMultiplier() {
 }
 
 function getTotalDps() {
-  const squadPower = getUnits().reduce((sum, unit) => sum + unit.power, 0);
-  const attackSpeedBonus = 1 + getSquadSynergyValue("attackSpeed");
-  return Math.max(1, Math.round(squadPower * getGlobalMultiplier() * attackSpeedBonus));
+  const squadPower = getUnits().reduce((sum, unit) => {
+    const interval = typeof getUnitAttackInterval === "function" ? getUnitAttackInterval(unit) : BASIC_ATTACK_RATE;
+    return sum + unit.power / Math.max(0.35, interval);
+  }, 0);
+  return Math.max(1, Math.round(squadPower * getGlobalMultiplier()));
 }
 
 function getTeamCount() {

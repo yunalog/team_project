@@ -256,7 +256,7 @@ function renderEnemies() {
 
 function renderAllies() {
   const units = getUnits();
-  const rosterKey = units.map((unit) => `${unit.id}:${unit.count}:${unit.power}`).join("|");
+  const rosterKey = units.map((unit) => `${unit.id}:${unit.count}:${unit.power}:${unit.skillPower}:${unit.attackInterval}:${unit.criticalChance}`).join("|");
   if (rosterKey === lastRosterKey) return;
 
   lastRosterKey = rosterKey;
