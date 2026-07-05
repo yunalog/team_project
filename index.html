@@ -302,7 +302,63 @@
     </main>
 
     <audio id="bgmAudio" src="Resource/Sound/BGM_Main_Theme.mp3" preload="auto" loop></audio>
-    <script src="script.js"></script>
+    <div class="recruit-modal is-hidden" id="recruitDetailModal" role="dialog" aria-modal="true" aria-labelledby="recruitDetailTitle">
+      <div class="recruit-modal__overlay" data-close-recruit-modal></div>
+      <div class="recruit-modal__panel">
+        <button class="recruit-modal__close" type="button" data-close-recruit-modal aria-label="상세보기 닫기">×</button>
+        <div class="recruit-modal__header">
+          <span class="recruit-modal__badge" id="recruitDetailBadge">P</span>
+          <div>
+            <h3 id="recruitDetailTitle">직군명</h3>
+            <p id="recruitDetailCategory">직군 카테고리</p>
+          </div>
+        </div>
+        <p class="recruit-modal__desc" id="recruitDetailDesc"></p>
+        <div class="recruit-modal__stats">
+          <div>
+            <span>현재 보유</span>
+            <strong id="recruitDetailLevel">Lv.0</strong>
+          </div>
+          <div>
+            <span>기본 DPS</span>
+            <strong id="recruitDetailDps">0</strong>
+          </div>
+          <div>
+            <span>전문 강화</span>
+            <strong id="recruitDetailBoost">0단계</strong>
+          </div>
+        </div>
+        <div class="recruit-modal__skill">
+          <strong id="recruitDetailSkillName"></strong>
+          <p id="recruitDetailSkillText"></p>
+        </div>
+        <div class="recruit-modal__actions">
+          <button id="recruitDetailEnhanceButton" type="button">추가 강화</button>
+          <button type="button" data-close-recruit-modal>닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="recruit-evolution-modal is-hidden" id="recruitPromotionModal" role="dialog" aria-modal="true" aria-labelledby="recruitPromotionTitle">
+      <div class="recruit-evolution-modal__overlay" data-close-recruit-promotion></div>
+      <div class="recruit-evolution-modal__panel">
+        <button class="recruit-evolution-modal__close" type="button" data-close-recruit-promotion aria-label="승급 닫기">×</button>
+        <div class="recruit-evolution-modal__portrait" id="recruitPromotionAvatar"></div>
+        <h3 id="recruitPromotionTitle">직군 승급</h3>
+        <p id="recruitPromotionDesc">이 직군은 승급 준비가 완료되었습니다.</p>
+        <div class="recruit-evolution-modal__actions">
+          <button id="recruitPromotionConfirmButton" type="button">승급 진행</button>
+          <button type="button" data-close-recruit-promotion>닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/01-data.js"></script>
+    <script src="js/02-core.js"></script>
+    <script src="js/03-battle.js"></script>
+    <script src="js/04-recruits-company.js"></script>
+    <script src="js/05-equipment-growth.js"></script>
+    <script src="js/06-ui-render.js"></script>
   </body>
 </html>
 
