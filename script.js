@@ -1014,16 +1014,19 @@ function moveEnemies(delta) {
 function updateAutoCombat(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
+  const basicInterval = getGrowthBasicInterval();
+  const skillInterval = getGrowthSkillInterval();
+
   basicAttackCooldown -= delta;
   skillAttackCooldown -= delta;
 
   if (basicAttackCooldown <= 0) {
-    basicAttackCooldown += BASIC_ATTACK_RATE;
+    basicAttackCooldown += basicInterval;
     performAttackRound(false);
   }
 
   if (skillAttackCooldown <= 0) {
-    skillAttackCooldown += SKILL_ATTACK_RATE;
+    skillAttackCooldown += skillInterval;
     performAttackRound(true);
     log("팀 스킬 공격!");
   }
@@ -1048,14 +1051,14 @@ function attackUnit(unit, options = {}) {
     return;
   }
 
-  const damage = unit.power;
+  const damage = getUnitBasicDamage(unit);
 
   if (unit.attackType === "slash") {
     playSlash(unit, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 140);
+    window.setTimeout(() => damageEnemy(target.id, damage, manual, { unit }), 140);
   } else {
     playProjectile(unit, from, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 240);
+    window.setTimeout(() => damageEnemy(target.id, damage, manual, { unit }), 240);
   }
 }
 
@@ -1067,9 +1070,9 @@ function castSkill(unit, from) {
   playSkillEffect(unit, targets);
 
   targets.forEach((target, index) => {
-    const skillPower = unit.id === "player" ? getPlayerSkillPower() : unit.power;
-    const damage = Math.ceil(skillPower * unit.skill.multiplier + state.playerLevel * 0.6);
-    window.setTimeout(() => damageEnemy(target.id, damage, false), 120 + index * 70);
+    const skillPower = unit.id === "player" ? getPlayerSkillPower() : getUnitBasicDamage(unit);
+    const damage = Math.ceil(skillPower * unit.skill.multiplier * getGrowthSkillMultiplier() + state.playerLevel * 0.6);
+    window.setTimeout(() => damageEnemy(target.id, damage, false, { unit }), 120 + index * 70);
   });
 
   log(`${unit.shortName} 스킬: ${unit.skill.name}`);
@@ -1142,14 +1145,13 @@ function playSkillEffect(unit, targets) {
   });
 }
 
-function damageEnemy(enemyId, amount, manual) {
+function damageEnemy(enemyId, amount, manual, options = {}) {
   if (isSpawningNext) return;
 
   const target = state.enemies.find((enemy) => enemy.id === enemyId) || getTargetEnemy();
   if (!target) return;
 
-  const growthCriticalBonus = Math.min(0.3, (state.growthLevels?.critical || 0) * 0.001);
-  const critical = Math.random() < Math.min(0.6, CRITICAL_CHANCE + growthCriticalBonus);
+  const critical = Math.random() < getUnitCriticalChance(options.unit);
   const multiplier = getGlobalMultiplier() * (critical ? CRITICAL_MULTIPLIER : 1);
   const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
@@ -1279,6 +1281,34 @@ function pulseUnit(unitId, className, duration) {
   window.setTimeout(() => ally.classList.remove(className), duration);
 }
 
+function getGrowthBasicInterval() {
+  return Math.max(0.25, BASIC_ATTACK_RATE / (1 + (state.growthLevels?.speed || 0) * 0.08));
+}
+
+function getGrowthSkillInterval() {
+  return Math.max(0.25, SKILL_ATTACK_RATE / (1 + (state.growthLevels?.speed || 0) * 0.08));
+}
+
+function getGrowthSkillMultiplier() {
+  return 1 + (state.growthLevels?.skill || 0) * 0.2;
+}
+
+function getGrowthCriticalChance() {
+  return Math.min(0.6, CRITICAL_CHANCE + Math.min(0.3, (state.growthLevels?.critical || 0) * 0.001));
+}
+
+function getUnitCriticalChance(unit) {
+  return getGrowthCriticalChance();
+}
+
+function getUnitBasicDamage(unit) {
+  return Math.max(1, Number(unit.power || 0));
+}
+
+function getUnitMaxHp(unit) {
+  return 100 + (state.growthLevels?.hp || 0) * 20;
+}
+
 function getPlayerUnit(power = getPlayerPower()) {
   return {
     id: "player",
@@ -1291,6 +1321,8 @@ function getPlayerUnit(power = getPlayerPower()) {
     power,
     attackType: "code",
     skill: { type: "aoe", name: "핫픽스 배포", radius: 12, multiplier: 1.35 },
+    hp: getUnitMaxHp({ id: "player" }),
+    maxHp: getUnitMaxHp({ id: "player" }),
   };
 }
 
@@ -1305,6 +1337,8 @@ function getUnits() {
       recruitId: recruit.id,
       count: 1,
       power: getRecruitPower(recruit),
+      hp: getUnitMaxHp(recruit),
+      maxHp: getUnitMaxHp(recruit),
     });
   });
 
@@ -1354,7 +1388,7 @@ function getRecruitPower(recruit) {
   const toolBonus = tools
     .filter((tool) => tool.target === recruit.id)
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
-  return recruit.dps + toolBonus + getRecruitBoostLevel(recruit.id);
+  return recruit.dps + toolBonus + getRecruitBoostLevel(recruit.id) + (state.growthLevels?.process || 0);
 }
 
 function renderRecruitDetailModal() {
@@ -1873,7 +1907,7 @@ function getEquipmentScore(item) {
 }
 
 function getPlayerPower() {
-  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
+  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0) + (state.growthLevels?.process || 0);
 }
 
 function getPlayerSkillPower() {
