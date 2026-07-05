@@ -1296,10 +1296,15 @@ function getPlayerUnit(power = getPlayerPower()) {
 
 function getUnits() {
   const units = [getPlayerUnit()];
+  const seenRecruitIds = new Set();
+
   state.squad.forEach((recruitId, slotIndex) => {
+    if (!recruitId || seenRecruitIds.has(recruitId)) return;
+
     const recruit = recruits.find((item) => item.id === recruitId);
     if (!recruit) return;
 
+    seenRecruitIds.add(recruit.id);
     units.push({
       ...recruit,
       id: `squad-${slotIndex}-${recruit.id}`,
@@ -1308,6 +1313,7 @@ function getUnits() {
       power: getRecruitPower(recruit),
     });
   });
+
   return units;
 }
 
