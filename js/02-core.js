@@ -277,7 +277,7 @@ function handleAudioInput(event) {
 
 function handleSquadChange(event) {
   const select = event.target.closest("[data-squad-slot]");
-  if (!select) return;
+  if (!select || activeTab !== "tools") return;
 
   const slotIndex = Number(select.dataset.squadSlot);
   if (!Number.isInteger(slotIndex) || slotIndex < 0 || slotIndex >= state.squad.length) return;
@@ -407,7 +407,9 @@ function normalizeState(nextState) {
     companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
-    squad: normalizeSquad(nextState.squad, nextState.recruits, !nextState.squadConfigured),
+    squad: nextState.squadConfigured
+      ? normalizeSquad(nextState.squad, nextState.recruits)
+      : [...defaultState.squad],
     squadConfigured: Boolean(nextState.squadConfigured),
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
     growthLevels:
@@ -450,7 +452,7 @@ function normalizeRecruitPromotions(promotions) {
   }, {});
 }
 
-function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
+function normalizeSquad(savedSquad, ownedRecruits = {}) {
   const normalized = [null, null, null, null];
   const used = {};
   const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
@@ -461,19 +463,6 @@ function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
       if (!recruits.some((recruit) => recruit.id === id) || (used[id] || 0) >= owned) return;
       normalized[index] = id;
       used[id] = (used[id] || 0) + 1;
-    });
-  }
-
-  if (autoFill) {
-    recruits.forEach((recruit) => {
-      let remaining = Math.max(0, Number(ownedRoster[recruit.id]) || 0) - (used[recruit.id] || 0);
-      while (remaining > 0) {
-        const emptyIndex = normalized.indexOf(null);
-        if (emptyIndex < 0) return;
-        normalized[emptyIndex] = recruit.id;
-        used[recruit.id] = (used[recruit.id] || 0) + 1;
-        remaining -= 1;
-      }
     });
   }
 
