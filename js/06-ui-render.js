@@ -175,7 +175,8 @@ function renderCompany() {
   const levelNumber = progress.levelIndex + 1;
   const facilityCount = getFacilityInvestmentCount();
   const visualTier = Math.min(companyLevels.length, levelNumber);
-  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}`;
+  const squadVisualKey = state.squad.map((recruitId) => recruitId || "empty").join(",");
+  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}:${squadVisualKey}`;
 
   setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
   setText(refs.companySceneName, progress.current.name);
@@ -229,12 +230,35 @@ function renderCompanyFloors(visualTier, levelIndex) {
 }
 
 function renderCompanyEmployees() {
-  const colors = ["#315f78", "#b05b45", "#6a6fa6", "#3c7c58", "#c4893f", "#805b86"];
-  const visibleEmployees = Math.min(12, getEmployeeCount());
-  refs.employeeCrowd.innerHTML = Array.from({ length: visibleEmployees }, (_, index) => {
-    return `<span class="scene-employee" style="--employee-color: ${colors[index % colors.length]}"></span>`;
-  }).join("");
-  refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getEmployeeCount()}명`);
+  const employees = [
+    {
+      name: "대표",
+      sprite: "Anim/Player_1/Motion.png",
+      isLeader: true,
+    },
+    ...state.squad
+      .map((recruitId) => recruits.find((recruit) => recruit.id === recruitId))
+      .filter(Boolean)
+      .map((recruit) => ({
+        name: getRecruitRankLabel(recruit, getRecruitCount(recruit.id)),
+        sprite: recruit.sprites.idle,
+        isLeader: false,
+      })),
+  ];
+
+  refs.employeeCrowd.innerHTML = employees
+    .map(
+      (employee) => `
+        <span
+          class="scene-employee${employee.isLeader ? " is-leader" : ""}"
+          role="img"
+          aria-label="${employee.name}"
+          style="--employee-image: url('${employee.sprite}')"
+        ></span>
+      `
+    )
+    .join("");
+  refs.employeeCrowd.setAttribute("aria-label", `현재 업무 스쿼드 ${employees.length}명`);
 }
 
 function renderEnemies() {
