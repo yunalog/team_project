@@ -66,29 +66,6 @@
         </div>
         <div id="effectLayer" class="effect-layer" aria-hidden="true"></div>
         <div id="enemyLayer" class="enemy-layer" aria-label="상대 프로젝트"></div>
-        <div class="equipment-layer" aria-live="polite">
-          <div class="draw-machine-panel" aria-label="장비 뽑기">
-            <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
-            <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
-              <span>뽑기</span>
-              <strong id="equipmentDrawCost">10</strong>
-            </button>
-            <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
-          </div>
-          <div id="equipmentChoice" class="equipment-choice is-hidden">
-            <div class="equipment-card">
-              <span id="equipmentIcon" class="equipment-icon">?</span>
-              <div>
-                <strong id="equipmentName">장비</strong>
-                <p id="equipmentBonus">대표 능력치 상승</p>
-              </div>
-            </div>
-            <div class="equipment-actions">
-              <button id="equipItemButton" type="button">장착</button>
-              <button id="discardItemButton" type="button">버리기</button>
-            </div>
-          </div>
-        </div>
       </section>
 
       <section class="company-scene is-hidden" id="companyScene" aria-label="회사 성장 현황">
@@ -169,34 +146,59 @@
               <strong id="clearCountText">0건</strong>
             </div>
           </div>
-          <div class="action-row">
-            <button id="upgradePlayerButton" type="button">대표 역량 강화</button>
-            <button id="nextStageButton" type="button">다음 의뢰</button>
-          </div>
           <div class="battle-equipment-section">
-            <div id="equippedItemPanel" class="equipped-item-panel is-collapsed" aria-expanded="false">
-              <div class="equipped-item-header">
-                <div class="equipped-item-summary">
-                  <span class="equipped-item-label">장착 장비</span>
-                  <strong>대표 장비 슬롯</strong>
-                  <p id="equippedItemStats">공격력 +0 / 스킬 공격력 +0</p>
+            <div class="battle-equipment-column">
+              <button id="upgradePlayerButton" class="battle-column-action" type="button">대표 역량 강화</button>
+              <div id="equippedItemPanel" class="equipped-item-panel is-collapsed" aria-expanded="false">
+                <div class="equipped-item-header">
+                  <div class="equipped-item-summary">
+                    <span class="equipped-item-label">장착 장비</span>
+                    <strong>대표 장비 슬롯</strong>
+                    <p id="equippedItemStats">공격력 +0 / 스킬 공격력 +0</p>
+                  </div>
+                  <button id="equipmentPanelToggleButton" class="equipment-panel-toggle" type="button" aria-expanded="false">목록 보기</button>
                 </div>
-                <button id="equipmentPanelToggleButton" class="equipment-panel-toggle" type="button" aria-expanded="false">목록 보기</button>
+                <div id="equippedGradeBlocks" class="equipped-grade-blocks" aria-hidden="true"></div>
+                <div id="equippedItemList" class="equipped-item-list"></div>
               </div>
-              <div id="equippedGradeBlocks" class="equipped-grade-blocks" aria-hidden="true"></div>
-              <div id="equippedItemList" class="equipped-item-list"></div>
             </div>
-            <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
-              <div>
-                <span class="equipment-upgrade-label">장비 연구</span>
-                <strong id="equipmentGradeText">1단계</strong>
-                <p id="equipmentUpgradeTimer">업그레이드 대기 중</p>
+            <div class="battle-equipment-column">
+              <button id="nextStageButton" class="battle-column-action" type="button">다음 의뢰</button>
+              <div class="equipment-layer" aria-live="polite">
+                <div class="draw-machine-panel" aria-label="장비 뽑기">
+                  <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
+                  <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
+                    <span>뽑기</span>
+                    <strong id="equipmentDrawCost">10</strong>
+                  </button>
+                  <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
+                </div>
+                <div id="equipmentChoice" class="equipment-choice is-hidden">
+                  <div class="equipment-card">
+                    <span id="equipmentIcon" class="equipment-icon">?</span>
+                    <div>
+                      <strong id="equipmentName">장비</strong>
+                      <p id="equipmentBonus">대표 능력치 상승</p>
+                    </div>
+                  </div>
+                  <div class="equipment-actions">
+                    <button id="equipItemButton" type="button">장착</button>
+                    <button id="discardItemButton" type="button">버리기</button>
+                  </div>
+                </div>
               </div>
-              <div class="equipment-upgrade-actions">
-                <button id="equipmentUpgradeButton" type="button">등급 업그레이드</button>
-                <button id="speedTicketButton" type="button">가속티켓</button>
+              <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
+                <div class="equipped-item-summary">
+                  <span class="equipment-upgrade-label">장비 연구</span>
+                  <strong id="equipmentGradeText">1단계</strong>
+                  <p id="equipmentUpgradeTimer">업그레이드 대기 중</p>
+                </div>
+                <div class="equipment-upgrade-actions">
+                  <button id="equipmentUpgradeButton" type="button">등급 업그레이드</button>
+                  <button id="speedTicketButton" type="button">가속티켓</button>
+                </div>
+                <small id="speedTicketText">보유 0장 · 1장당 10분</small>
               </div>
-              <small id="speedTicketText">보유 0장 · 1장당 10분</small>
             </div>
           </div>
         </article>
