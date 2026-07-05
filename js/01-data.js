@@ -623,6 +623,6 @@ let audioSettings = { ...defaultAudioSettings };
 let activeTab = "battle";
 let lastCompanyVisualKey = "";
 let autoDrawTimer = null;
-let equipmentPanelExpanded = false;
+let equipmentPanelExpanded = true;
 let activeRecruitDetailId = null;
 let activeRecruitPromotionId = null;

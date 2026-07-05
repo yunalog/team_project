@@ -101,19 +101,27 @@ function renderEquippedItems() {
       const item = getEquippedItem(slot.id);
       if (!item) {
         return `
-          <div class="equipped-tile is-empty">
-            <span class="equipped-tile-image">${slot.name.slice(0, 1)}</span>
-            <span class="equipped-tile-grade">비어있음</span>
-            <strong>${slot.name}</strong>
+          <div class="equipped-list-item is-empty" style="--equipment-color: rgba(74, 43, 23, 0.28);">
+            <span class="equipped-list-color" aria-hidden="true"></span>
+            <span class="equipped-list-image">${slot.name.slice(0, 1)}</span>
+            <span class="equipped-list-copy">
+              <span class="equipped-list-grade">비어있음</span>
+              <strong>${slot.name}</strong>
+              <small>장비 없음</small>
+            </span>
           </div>
         `;
       }
 
       return `
-        <div class="equipped-tile" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
-          <span class="equipped-tile-image">${item.image ? "" : item.icon}</span>
-          <span class="equipped-tile-grade">${item.grade}</span>
-          <strong>${item.name}</strong>
+        <div class="equipped-list-item" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
+          <span class="equipped-list-color" aria-hidden="true"></span>
+          <span class="equipped-list-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-list-copy">
+            <span class="equipped-list-grade">${item.grade}</span>
+            <strong>${item.name}</strong>
+            <small>공격력 +${item.powerBonus} · 스킬 +${item.skillBonus}</small>
+          </span>
         </div>
       `;
     })
