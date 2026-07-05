@@ -297,6 +297,7 @@ const defaultState = {
     hp: 0,
   },
   recruitBoosts: {},
+  recruitPromotions: {},
   equipment: {
     equipped: {},
     pending: null,
@@ -327,6 +328,7 @@ let lastCompanyVisualKey = "";
 let autoDrawTimer = null;
 let equipmentPanelExpanded = false;
 let activeRecruitDetailId = null;
+let activeRecruitPromotionId = null;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -379,6 +381,11 @@ function initGame() {
     recruitList: document.querySelector("#recruitList"),
     recruitDetailModal: document.querySelector("#recruitDetailModal"),
     recruitDetailBadge: document.querySelector("#recruitDetailBadge"),
+    recruitPromotionModal: document.querySelector("#recruitPromotionModal"),
+    recruitPromotionAvatar: document.querySelector("#recruitPromotionAvatar"),
+    recruitPromotionTitle: document.querySelector("#recruitPromotionTitle"),
+    recruitPromotionDesc: document.querySelector("#recruitPromotionDesc"),
+    recruitPromotionConfirmButton: document.querySelector("#recruitPromotionConfirmButton"),
     recruitDetailTitle: document.querySelector("#recruitDetailTitle"),
     recruitDetailCategory: document.querySelector("#recruitDetailCategory"),
     recruitDetailDesc: document.querySelector("#recruitDetailDesc"),
@@ -452,15 +459,19 @@ function bindEvents() {
   document.addEventListener("click", (event) => {
       const tab = event.target.closest("[data-tab]");
     const recruitButton = event.target.closest("[data-buy-recruit]");
+    const recruitPromotionButton = event.target.closest("[data-recruit-promote]");
     const recruitDetailButton = event.target.closest("[data-recruit-detail]");
     const recruitModalDismiss = event.target.closest("[data-close-recruit-modal]");
+    const recruitPromotionDismiss = event.target.closest("[data-close-recruit-promotion]");
     const toolButton = event.target.closest("[data-buy-tool]");
     const growthButton = event.target.closest("[data-upgrade-growth]");
 
     if (tab) switchTab(tab);
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
+    if (recruitPromotionButton) openRecruitPromotion(recruitPromotionButton.dataset.recruitPromote);
     if (recruitDetailButton) openRecruitDetail(recruitDetailButton.dataset.recruitDetail);
     if (recruitModalDismiss) closeRecruitDetail();
+    if (recruitPromotionDismiss) closeRecruitPromotion();
     if (toolButton) buyTool(toolButton.dataset.buyTool);
     if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
   });
@@ -493,6 +504,7 @@ function bindEvents() {
     if (event.target.closest("[data-audio-mute]")) toggleMute();
   });
   refs.recruitDetailEnhanceButton.addEventListener("click", enhanceRecruitDetail);
+  refs.recruitPromotionConfirmButton.addEventListener("click", confirmRecruitPromotion);
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
   document.addEventListener("change", handleSquadChange);
@@ -751,6 +763,7 @@ function normalizeState(nextState) {
           }
         : cloneDefaultState().growthLevels,
     recruitBoosts: normalizeRecruitBoosts(nextState.recruitBoosts),
+    recruitPromotions: normalizeRecruitPromotions(nextState.recruitPromotions),
     equipment: normalizeEquipment(nextState.equipment),
   };
 }
@@ -759,6 +772,18 @@ function normalizeRecruitBoosts(boosts) {
   if (!boosts || typeof boosts !== "object") return {};
 
   return Object.entries(boosts).reduce((accumulator, [recruitId, value]) => {
+    const level = Number(value);
+    if (recruits.some((recruit) => recruit.id === recruitId) && Number.isFinite(level) && level > 0) {
+      accumulator[recruitId] = Math.max(0, Math.floor(level));
+    }
+    return accumulator;
+  }, {});
+}
+
+function normalizeRecruitPromotions(promotions) {
+  if (!promotions || typeof promotions !== "object") return {};
+
+  return Object.entries(promotions).reduce((accumulator, [recruitId, value]) => {
     const level = Number(value);
     if (recruits.some((recruit) => recruit.id === recruitId) && Number.isFinite(level) && level > 0) {
       accumulator[recruitId] = Math.max(0, Math.floor(level));
@@ -1303,6 +1328,21 @@ function getRecruitEnhancementCost(id) {
   return 24 + getRecruitBoostLevel(id) * 16;
 }
 
+function getRecruitPromotionCount(id) {
+  return state.recruitPromotions?.[id] || 0;
+}
+
+function getRecruitPromotionCost(recruit) {
+  const count = getRecruitCount(recruit.id);
+  return Math.max(60, Math.floor(costFor(recruit.baseCost, count) * 1.8));
+}
+
+function shouldShowRecruitPromotionButton(recruit, count = getRecruitCount(recruit.id)) {
+  const milestoneIndex = [10, 20, 30, 40, 50].indexOf(count);
+  if (milestoneIndex < 0) return false;
+  return (state.recruitPromotions?.[recruit.id] || 0) <= milestoneIndex;
+}
+
 function getToolLevel(id) {
   return state.tools[id] || 0;
 }
@@ -1365,6 +1405,66 @@ function openRecruitDetail(id) {
 function closeRecruitDetail() {
   activeRecruitDetailId = null;
   renderRecruitDetailModal();
+}
+
+function renderRecruitPromotionModal() {
+  if (!refs.recruitPromotionModal) return;
+
+  if (!activeRecruitPromotionId) {
+    refs.recruitPromotionModal.classList.add("is-hidden");
+    return;
+  }
+
+  const recruit = recruits.find((item) => item.id === activeRecruitPromotionId);
+  if (!recruit) {
+    closeRecruitPromotion();
+    return;
+  }
+
+  refs.recruitPromotionModal.classList.remove("is-hidden");
+  refs.recruitPromotionAvatar.innerHTML = recruit.sprites?.idle
+    ? `<img src="${recruit.sprites.idle}" alt="${recruit.name}" />`
+    : `<span>${recruit.mark}</span>`;
+  refs.recruitPromotionTitle.textContent = `${recruit.name} 승급`;
+  refs.recruitPromotionDesc.textContent = `${recruit.category} 직군이 진화합니다. 승급 비용은 ${getRecruitPromotionCost(recruit)} 자금입니다.`;
+  refs.recruitPromotionConfirmButton.disabled = state.gold < getRecruitPromotionCost(recruit);
+}
+
+function openRecruitPromotion(id) {
+  const recruit = recruits.find((item) => item.id === id);
+  if (!recruit) return;
+
+  activeRecruitPromotionId = recruit.id;
+  renderRecruitPromotionModal();
+}
+
+function closeRecruitPromotion() {
+  activeRecruitPromotionId = null;
+  renderRecruitPromotionModal();
+}
+
+function confirmRecruitPromotion() {
+  if (!activeRecruitPromotionId) return;
+
+  const recruit = recruits.find((item) => item.id === activeRecruitPromotionId);
+  if (!recruit) return;
+
+  const cost = getRecruitPromotionCost(recruit);
+  if (state.gold < cost) {
+    log(`${recruit.name} 승급에는 자금 ${cost}가 필요합니다.`);
+    return;
+  }
+
+  state.gold -= cost;
+  state.recruitPromotions[recruit.id] = (state.recruitPromotions[recruit.id] || 0) + 1;
+  addCompanyXp(6);
+  refs.recruitPromotionConfirmButton.disabled = true;
+  log(`${recruit.name} 승급 완료! 진화 연출이 시작됩니다.`);
+
+  window.setTimeout(() => {
+    closeRecruitPromotion();
+    renderAll();
+  }, 1100);
 }
 
 function enhanceRecruitDetail() {
@@ -1846,6 +1946,7 @@ function renderAll() {
   renderAllies();
   renderShop();
   renderRecruitDetailModal();
+  renderRecruitPromotionModal();
   renderEnemies();
   renderBattle();
 }
@@ -2137,6 +2238,12 @@ function renderShop() {
               const count = getRecruitCount(recruit.id);
               const cost = costFor(recruit.baseCost, count);
               const label = getRecruitRankLabel(recruit, count);
+              const promotionReady = shouldShowRecruitPromotionButton(recruit, count);
+              const promotionCost = getRecruitPromotionCost(recruit);
+              const actionLabel = promotionReady ? "승급" : `${cost} 자금`;
+              const actionDataset = promotionReady ? `data-recruit-promote="${recruit.id}"` : `data-buy-recruit="${recruit.id}"`;
+              const actionClass = promotionReady ? "shop-promote-button" : "";
+              const actionDisabled = promotionReady ? state.gold < promotionCost : state.gold < cost;
               return `
                 <div class="shop-item">
                   <div class="shop-item__content">
@@ -2145,7 +2252,7 @@ function renderShop() {
                   </div>
                   <div class="shop-item__actions">
                     <button class="shop-detail-button" type="button" data-recruit-detail="${recruit.id}">상세보기</button>
-                    <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+                    <button class="${actionClass}" type="button" ${actionDataset} ${actionDisabled ? "disabled" : ""}>${actionLabel}</button>
                   </div>
                 </div>
               `;

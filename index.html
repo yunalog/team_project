@@ -329,6 +329,20 @@
       </div>
     </div>
 
+    <div class="recruit-evolution-modal is-hidden" id="recruitPromotionModal" role="dialog" aria-modal="true" aria-labelledby="recruitPromotionTitle">
+      <div class="recruit-evolution-modal__overlay" data-close-recruit-promotion></div>
+      <div class="recruit-evolution-modal__panel">
+        <button class="recruit-evolution-modal__close" type="button" data-close-recruit-promotion aria-label="승급 닫기">×</button>
+        <div class="recruit-evolution-modal__portrait" id="recruitPromotionAvatar"></div>
+        <h3 id="recruitPromotionTitle">직군 승급</h3>
+        <p id="recruitPromotionDesc">이 직군은 승급 준비가 완료되었습니다.</p>
+        <div class="recruit-evolution-modal__actions">
+          <button id="recruitPromotionConfirmButton" type="button">승급 진행</button>
+          <button type="button" data-close-recruit-promotion>닫기</button>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
