@@ -296,6 +296,7 @@ const defaultState = {
     speed: 0,
     hp: 0,
   },
+  recruitBoosts: {},
   equipment: {
     equipped: {},
     pending: null,
@@ -325,6 +326,7 @@ let activeTab = "battle";
 let lastCompanyVisualKey = "";
 let autoDrawTimer = null;
 let equipmentPanelExpanded = false;
+let activeRecruitDetailId = null;
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
@@ -375,6 +377,17 @@ function initGame() {
     attackTimerText: document.querySelector("#attackTimerText"),
     saveStateText: document.querySelector("#saveStateText"),
     recruitList: document.querySelector("#recruitList"),
+    recruitDetailModal: document.querySelector("#recruitDetailModal"),
+    recruitDetailBadge: document.querySelector("#recruitDetailBadge"),
+    recruitDetailTitle: document.querySelector("#recruitDetailTitle"),
+    recruitDetailCategory: document.querySelector("#recruitDetailCategory"),
+    recruitDetailDesc: document.querySelector("#recruitDetailDesc"),
+    recruitDetailLevel: document.querySelector("#recruitDetailLevel"),
+    recruitDetailDps: document.querySelector("#recruitDetailDps"),
+    recruitDetailBoost: document.querySelector("#recruitDetailBoost"),
+    recruitDetailSkillName: document.querySelector("#recruitDetailSkillName"),
+    recruitDetailSkillText: document.querySelector("#recruitDetailSkillText"),
+    recruitDetailEnhanceButton: document.querySelector("#recruitDetailEnhanceButton"),
     growthProcessValue: document.querySelector("#growthProcessValue"),
     growthCriticalValue: document.querySelector("#growthCriticalValue"),
     growthSkillValue: document.querySelector("#growthSkillValue"),
@@ -430,13 +443,17 @@ function initGame() {
 
 function bindEvents() {
   document.addEventListener("click", (event) => {
-    const tab = event.target.closest("[data-tab]");
+      const tab = event.target.closest("[data-tab]");
     const recruitButton = event.target.closest("[data-buy-recruit]");
+    const recruitDetailButton = event.target.closest("[data-recruit-detail]");
+    const recruitModalDismiss = event.target.closest("[data-close-recruit-modal]");
     const toolButton = event.target.closest("[data-buy-tool]");
     const growthButton = event.target.closest("[data-upgrade-growth]");
 
     if (tab) switchTab(tab);
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
+    if (recruitDetailButton) openRecruitDetail(recruitDetailButton.dataset.recruitDetail);
+    if (recruitModalDismiss) closeRecruitDetail();
     if (toolButton) buyTool(toolButton.dataset.buyTool);
     if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
   });
@@ -465,6 +482,7 @@ function bindEvents() {
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-audio-mute]")) toggleMute();
   });
+  refs.recruitDetailEnhanceButton.addEventListener("click", enhanceRecruitDetail);
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
   document.addEventListener("change", handleSquadChange);
@@ -722,8 +740,21 @@ function normalizeState(nextState) {
             hp: Math.max(0, Number(nextState.growthLevels.hp) || 0),
           }
         : cloneDefaultState().growthLevels,
+    recruitBoosts: normalizeRecruitBoosts(nextState.recruitBoosts),
     equipment: normalizeEquipment(nextState.equipment),
   };
+}
+
+function normalizeRecruitBoosts(boosts) {
+  if (!boosts || typeof boosts !== "object") return {};
+
+  return Object.entries(boosts).reduce((accumulator, [recruitId, value]) => {
+    const level = Number(value);
+    if (recruits.some((recruit) => recruit.id === recruitId) && Number.isFinite(level) && level > 0) {
+      accumulator[recruitId] = Math.max(0, Math.floor(level));
+    }
+    return accumulator;
+  }, {});
 }
 
 function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
@@ -1254,6 +1285,14 @@ function getRecruitCount(id) {
   return state.recruits[id] || 0;
 }
 
+function getRecruitBoostLevel(id) {
+  return state.recruitBoosts?.[id] || 0;
+}
+
+function getRecruitEnhancementCost(id) {
+  return 24 + getRecruitBoostLevel(id) * 16;
+}
+
 function getToolLevel(id) {
   return state.tools[id] || 0;
 }
@@ -1262,7 +1301,76 @@ function getRecruitPower(recruit) {
   const toolBonus = tools
     .filter((tool) => tool.target === recruit.id)
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
-  return recruit.dps + toolBonus;
+  return recruit.dps + toolBonus + getRecruitBoostLevel(recruit.id);
+}
+
+function renderRecruitDetailModal() {
+  if (!refs.recruitDetailModal) return;
+
+  if (!activeRecruitDetailId) {
+    refs.recruitDetailModal.classList.add("is-hidden");
+    return;
+  }
+
+  const recruit = recruits.find((item) => item.id === activeRecruitDetailId);
+  if (!recruit) {
+    closeRecruitDetail();
+    return;
+  }
+
+  const boostLevel = getRecruitBoostLevel(recruit.id);
+  const enhancementCost = getRecruitEnhancementCost(recruit.id);
+  const currentCount = getRecruitCount(recruit.id);
+  const skillText = recruit.skill?.type === "aoe"
+    ? `${recruit.skill.name} · ${recruit.skill.radius}칸 범위 공격 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
+    : recruit.skill?.type === "all"
+    ? `${recruit.skill.name} · 전체 대상 공격 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
+    : recruit.skill?.targets
+    ? `${recruit.skill.name} · ${recruit.skill.targets}명 타깃 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
+    : `${recruit.skill.name} · 단일 대상 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`;
+
+  refs.recruitDetailModal.classList.remove("is-hidden");
+  refs.recruitDetailBadge.textContent = recruit.mark;
+  refs.recruitDetailBadge.style.setProperty("--recruit-badge-color", recruit.color);
+  refs.recruitDetailTitle.textContent = recruit.name;
+  refs.recruitDetailCategory.textContent = `${recruit.category} · 보유 ${currentCount}명`;
+  refs.recruitDetailDesc.textContent = recruit.desc;
+  refs.recruitDetailLevel.textContent = `Lv.${currentCount}`;
+  refs.recruitDetailDps.textContent = `${recruit.dps + boostLevel} / 초`;
+  refs.recruitDetailBoost.textContent = `${boostLevel}단계`;
+  refs.recruitDetailSkillName.textContent = recruit.skill?.name || "스킬 정보";
+  refs.recruitDetailSkillText.textContent = skillText;
+  refs.recruitDetailEnhanceButton.textContent = `추가 강화 (${enhancementCost} 자금)`;
+  refs.recruitDetailEnhanceButton.disabled = state.gold < enhancementCost;
+}
+
+function openRecruitDetail(id) {
+  const recruit = recruits.find((item) => item.id === id);
+  if (!recruit) return;
+
+  activeRecruitDetailId = recruit.id;
+  renderRecruitDetailModal();
+}
+
+function closeRecruitDetail() {
+  activeRecruitDetailId = null;
+  renderRecruitDetailModal();
+}
+
+function enhanceRecruitDetail() {
+  if (!activeRecruitDetailId) return;
+
+  const recruit = recruits.find((item) => item.id === activeRecruitDetailId);
+  if (!recruit) return;
+
+  const cost = getRecruitEnhancementCost(recruit.id);
+  if (state.gold < cost) return;
+
+  state.gold -= cost;
+  state.recruitBoosts[recruit.id] = (state.recruitBoosts[recruit.id] || 0) + 1;
+  addCompanyXp(2);
+  log(`${recruit.name} 전문성이 강화되었습니다. 회사 성장 경험치 +2`);
+  renderAll();
 }
 
 function getGlobalMultiplier() {
@@ -1728,6 +1836,7 @@ function switchTab(tab) {
 function renderAll() {
   renderAllies();
   renderShop();
+  renderRecruitDetailModal();
   renderEnemies();
   renderBattle();
 }
@@ -2021,11 +2130,14 @@ function renderShop() {
               const label = getRecruitRankLabel(recruit, count);
               return `
                 <div class="shop-item">
-                  <div>
+                  <div class="shop-item__content">
                     <strong>${label} Lv.${count}</strong>
                     <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
                   </div>
-                  <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+                  <div class="shop-item__actions">
+                    <button class="shop-detail-button" type="button" data-recruit-detail="${recruit.id}">상세보기</button>
+                    <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+                  </div>
                 </div>
               `;
             })

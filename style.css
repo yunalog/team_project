@@ -1726,9 +1726,20 @@ h1 {
 
 .shop-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
+}
+
+.shop-item__content {
+  min-width: 0;
+}
+
+.shop-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .shop-item strong {
@@ -1745,6 +1756,134 @@ h1 {
   color: #fff;
   font-weight: 700;
   box-shadow: 0 3px 0 rgba(45, 33, 25, 0.38);
+}
+
+.shop-detail-button {
+  background: linear-gradient(180deg, #f3c36b 0%, #a8581f 100%);
+}
+
+.recruit-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.recruit-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 16, 14, 0.62);
+}
+
+.recruit-modal__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  padding: 18px;
+  border: 2px solid var(--ui-line);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff8e9 0%, #f0d8aa 100%);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.24);
+}
+
+.recruit-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: #8f4c22;
+  color: #fff;
+  font-size: 18px;
+}
+
+.recruit-modal__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.recruit-modal__badge {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--recruit-badge-color, #f59e0b);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.recruit-modal__header h3 {
+  margin: 0 0 2px;
+  font-size: 20px;
+}
+
+.recruit-modal__header p,
+.recruit-modal__desc,
+.recruit-modal__skill p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.recruit-modal__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.recruit-modal__stats > div {
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.86);
+}
+
+.recruit-modal__stats span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.recruit-modal__stats strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 14px;
+}
+
+.recruit-modal__skill {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 247, 229, 0.78);
+}
+
+.recruit-modal__skill strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.recruit-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.recruit-modal__actions button {
+  min-width: 92px;
+  min-height: 38px;
 }
 
 .company-dashboard {
@@ -2271,6 +2410,10 @@ h1 {
 
   .shop-item {
     grid-template-columns: 1fr;
+  }
+
+  .shop-item__actions {
+    justify-content: stretch;
   }
 
   .shop-item button {
