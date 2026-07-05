@@ -216,6 +216,11 @@ const recruits = [
       multiplier: 1,
       desc: "전체 아군에게 스킬 피해량에 비례하는 광역 힐",
     },
+    sprites: {
+      idle: "Anim/Player_SD/SD_Idle.png",
+      attack: "Anim/Player_SD/SD_Atk.png",
+      skill: "Anim/Player_SD/SD_Skill.png",
+    },
   },
   {
     id: "director",
@@ -239,6 +244,11 @@ const recruits = [
       basicTargets: "all",
       desc: "5초 동안 공격속도 15% 증가, 기본공격이 모든 적을 타격",
     },
+    sprites: {
+      idle: "Anim/Player_PD/PD_Idle.png",
+      attack: "Anim/Player_PD/PD_Atk.png",
+      skill: "Anim/Player_PD/PD_Skill.png",
+    },
   },
   {
     id: "dataAnalyst",
@@ -257,6 +267,11 @@ const recruits = [
       name: "쿨타임 분석",
       cooldown: 15,
       desc: "본인을 제외한 아군 동료 전체 스킬 쿨타임 초기화",
+    },
+    sprites: {
+      idle: "Anim/Player_DA/DA_Idle.png",
+      attack: "Anim/Player_DA/DA_Atk.png",
+      skill: "Anim/Player_DA/DA_Skill.png",
     },
   },
 ];
