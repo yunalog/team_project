@@ -74,7 +74,7 @@ const recruits = [
     baseCost: 25,
     dps: 1,
     attackType: "plan",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 2, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 2, criticalChance: 0 },
     skill: {
       type: "teamBuff",
       name: "전략 회의",
@@ -101,7 +101,7 @@ const recruits = [
     baseCost: 55,
     dps: 5,
     attackType: "code",
-    baseStats: { attackPower: 5, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 5, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "selfBuff",
       name: "집중 코딩",
@@ -153,7 +153,7 @@ const recruits = [
     baseCost: 80,
     dps: 1,
     attackType: "plan",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "teamBuff",
       name: "라이브 운영 지원",
@@ -182,7 +182,7 @@ const recruits = [
     baseCost: 140,
     dps: 1,
     attackType: "qa",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "enemyDebuff",
       name: "취약점 리포트",
@@ -216,6 +216,11 @@ const recruits = [
       multiplier: 1,
       desc: "전체 아군에게 스킬 피해량에 비례하는 광역 힐",
     },
+    sprites: {
+      idle: "Anim/Player_SD/SD_Idle.png",
+      attack: "Anim/Player_SD/SD_Atk.png",
+      skill: "Anim/Player_SD/SD_Skill.png",
+    },
   },
   {
     id: "director",
@@ -228,7 +233,7 @@ const recruits = [
     baseCost: 210,
     dps: 3,
     attackType: "slash",
-    baseStats: { attackPower: 3, skillPower: 1, attackInterval: 2, criticalChance: 0 },
+    baseStats: { attackPower: 3, attackInterval: 2, criticalChance: 0 },
     basicTargets: 3,
     skill: {
       type: "selfBuff",
@@ -238,6 +243,11 @@ const recruits = [
       attackSpeed: 0.15,
       basicTargets: "all",
       desc: "5초 동안 공격속도 15% 증가, 기본공격이 모든 적을 타격",
+    },
+    sprites: {
+      idle: "Anim/Player_PD/PD_Idle.png",
+      attack: "Anim/Player_PD/PD_Atk.png",
+      skill: "Anim/Player_PD/PD_Skill.png",
     },
   },
   {
@@ -251,12 +261,17 @@ const recruits = [
     baseCost: 260,
     dps: 1,
     attackType: "qa",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "resetAllyCooldowns",
       name: "쿨타임 분석",
       cooldown: 15,
       desc: "본인을 제외한 아군 동료 전체 스킬 쿨타임 초기화",
+    },
+    sprites: {
+      idle: "Anim/Player_DA/DA_Idle.png",
+      attack: "Anim/Player_DA/DA_Atk.png",
+      skill: "Anim/Player_DA/DA_Skill.png",
     },
   },
 ];
@@ -325,11 +340,12 @@ const recruitRankNames = {
   ],
 };
 
-function getRecruitRankLabel(recruit, count) {
+function getRecruitRankLabel(recruit, count = getRecruitCount(recruit.id)) {
   const rankNames = recruitRankNames[recruit.id];
   if (!rankNames) return recruit.name;
-  const tier = Math.min(5, Math.floor(count / 10));
-  return rankNames[tier];
+  const achievedTier = Math.min(5, Math.floor((Number(count) || 0) / 10));
+  const promotedTier = Math.min(5, Number(state?.recruitPromotions?.[recruit.id]) || 0);
+  return rankNames[Math.min(achievedTier, promotedTier)];
 }
 
 
@@ -626,3 +642,4 @@ let autoDrawTimer = null;
 let equipmentPanelExpanded = true;
 let activeRecruitDetailId = null;
 let activeRecruitPromotionId = null;
+let activeRecruitPanelId = null;

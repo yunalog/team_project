@@ -4654,3 +4654,336 @@ textarea {
     width: 150px;
   }
 }
+/* Recruit tab redesign: card list + selected character growth panel */
+.recruit-board {
+  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
+  align-items: start;
+}
+
+.recruit-class-card.shop-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  padding: 10px;
+  border: 2px solid rgba(74, 43, 23, 0.34);
+  border-left: 6px solid var(--recruit-color, var(--accent));
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 252, 242, 0.96), rgba(255, 239, 203, 0.9));
+  cursor: pointer;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.recruit-class-card.shop-item:hover,
+.recruit-class-card.shop-item.is-selected {
+  border-color: var(--recruit-color, var(--accent));
+  box-shadow: 0 6px 0 rgba(74, 43, 23, 0.16), 0 0 0 3px color-mix(in srgb, var(--recruit-color, var(--accent)), transparent 78%);
+  transform: translateY(-2px);
+}
+
+.recruit-class-head {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+}
+
+.recruit-card-avatar,
+.recruit-focus-avatar {
+  display: grid;
+  place-items: center;
+  border: 2px solid #4a2b17;
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--recruit-color), white 45%), var(--recruit-color));
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+  image-rendering: auto;
+}
+
+.recruit-card-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.recruit-card-avatar.has-character,
+.recruit-focus-avatar.has-character {
+  background-image: var(--recruit-image);
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: color-mix(in srgb, var(--recruit-color), white 76%);
+  color: transparent;
+  text-shadow: none;
+}
+
+.recruit-class-head strong,
+.recruit-class-head span {
+  display: block;
+}
+
+.recruit-class-head strong {
+  margin: 0 0 3px;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.recruit-class-head span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.recruit-class-stats {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+  border: 1px solid rgba(169, 120, 58, 0.44);
+  border-radius: 9px;
+  background: rgba(255, 247, 229, 0.78);
+}
+
+.recruit-class-stats span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.recruit-class-stats b {
+  font-weight: 800;
+}
+
+.recruit-class-stats strong {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.recruit-focus-panel {
+  min-height: 100%;
+}
+
+.recruit-focus-empty,
+.recruit-focus-card {
+  padding: 14px;
+  border: 2px solid #4a2b17;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #fff8e9, #efd4a2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 8px 0 rgba(74, 43, 23, 0.2);
+}
+
+.recruit-focus-empty strong,
+.recruit-focus-empty p {
+  display: block;
+  margin: 0;
+}
+
+.recruit-focus-empty p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.recruit-focus-card {
+  display: grid;
+  gap: 12px;
+  border-color: var(--recruit-color, #4a2b17);
+}
+
+.recruit-focus-portrait {
+  display: grid;
+  place-items: center;
+  min-height: 210px;
+  padding: 16px;
+  border: 3px solid #4a2b17;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(74, 43, 23, 0.16)),
+    radial-gradient(circle at 50% 36%, color-mix(in srgb, var(--recruit-color), white 68%), #e6c089);
+  box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.5), inset 0 -6px 0 rgba(74, 43, 23, 0.14);
+}
+
+.recruit-focus-avatar {
+  width: 164px;
+  height: 164px;
+  border-radius: 26px;
+  font-size: 34px;
+}
+
+.recruit-focus-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.recruit-focus-role {
+  width: max-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--recruit-color), white 64%);
+  color: #4a2b17;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.recruit-focus-copy strong {
+  font-size: 19px;
+}
+
+.recruit-focus-copy p,
+.recruit-focus-skill span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.recruit-focus-skill {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid rgba(169, 120, 58, 0.5);
+  border-radius: 10px;
+  background: rgba(255, 247, 229, 0.78);
+}
+
+.recruit-focus-action {
+  width: 100%;
+  min-height: 46px;
+  border: 3px solid #4a2b17;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffd780 0%, #b85c22 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.68);
+  box-shadow: 0 5px 0 rgba(74, 43, 23, 0.5);
+}
+
+.recruit-focus-action.shop-promote-button {
+  background: linear-gradient(180deg, #ffdd72 0%, #8e3d1c 100%);
+}
+
+@media (max-width: 760px) {
+  .recruit-board {
+    grid-template-columns: 1fr;
+  }
+
+  .recruit-focus-portrait {
+    min-height: 170px;
+  }
+
+  .recruit-focus-avatar {
+    width: 130px;
+    height: 130px;
+  }
+}
+
+
+/* Recruit list cleanup: remove category wrapper look and leave only image + stat cards */
+#recruitList.shop-list {
+  gap: 8px;
+}
+
+.recruit-class-card.shop-item {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 2px solid rgba(169, 120, 58, 0.72);
+  border-left-width: 2px;
+  border-radius: 10px;
+  background: rgba(255, 247, 229, 0.86);
+  box-shadow: none;
+}
+
+.recruit-class-card.shop-item:hover,
+.recruit-class-card.shop-item.is-selected {
+  border-color: var(--recruit-color, var(--accent));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--recruit-color, var(--accent)), transparent 72%);
+  transform: none;
+}
+
+.recruit-class-head {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  gap: 0;
+}
+
+.recruit-card-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+}
+
+.recruit-class-stats {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.recruit-class-stats span {
+  font-size: 12px;
+}
+
+.recruit-class-stats strong {
+  font-size: 12px;
+}
+
+
+/* Recruit card title-top layout */
+.recruit-class-card.shop-item {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.recruit-class-title {
+  display: grid;
+  gap: 2px;
+  padding: 2px 4px 4px;
+  border-bottom: 1px solid rgba(169, 120, 58, 0.34);
+}
+
+.recruit-class-title span,
+.recruit-class-title strong {
+  display: block;
+}
+
+.recruit-class-title span {
+  color: var(--accent-strong);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.recruit-class-title strong {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.recruit-class-body {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.recruit-class-body .recruit-class-head {
+  display: grid;
+  place-items: center;
+}
+
+.recruit-class-body .recruit-class-stats {
+  min-width: 0;
+}

@@ -126,12 +126,21 @@ function getRecruitPromotionTierByCount(count) {
   return Math.max(0, Math.floor((Number(count) || 0) / 10));
 }
 
+function getRecruitPromotionTier(recruit) {
+  const achievedTier = Math.min(5, getRecruitPromotionTierByCount(getRecruitLevel(recruit.id)));
+  const promotedTier = Math.min(5, getRecruitPromotionCount(recruit.id));
+  return Math.min(achievedTier, promotedTier);
+}
+
+function hasRecruitSkillPowerStat(recruit) {
+  return recruit.id === "artist" || recruit.id === "sound";
+}
+
 function getRecruitBattleStats(recruit) {
   const level = Math.max(1, getRecruitLevel(recruit.id));
-  const promotionTier = getRecruitPromotionTierByCount(level);
+  const promotionTier = getRecruitPromotionTier(recruit);
   const base = recruit.baseStats || {
     attackPower: recruit.dps || 1,
-    skillPower: recruit.dps || 1,
     attackInterval: BASIC_ATTACK_RATE,
     criticalChance: 0,
   };
@@ -141,8 +150,13 @@ function getRecruitBattleStats(recruit) {
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
   const boostBonus = getRecruitBoostLevel(recruit.id);
   const attackPower = base.attackPower + levelBonus * 0.12 + promotionTier * 1.2 + toolBonus + boostBonus;
-  const skillPower = (base.skillPower || base.attackPower) + levelBonus * 0.15 + promotionTier * 1.5 + Math.floor(boostBonus * 0.5);
-  const attackInterval = Math.max(0.35, (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.25, promotionTier * 0.015 + levelBonus * 0.001)));
+  const skillPower = hasRecruitSkillPowerStat(recruit)
+    ? (base.skillPower || base.attackPower || 1) + levelBonus * 0.15 + promotionTier * 1.5 + Math.floor(boostBonus * 0.5)
+    : 0;
+  const attackInterval = Math.max(
+    0.35,
+    (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.25, promotionTier * 0.015 + levelBonus * 0.001))
+  );
   const criticalChance = Math.min(0.55, (base.criticalChance || 0) + levelBonus * 0.001 + promotionTier * 0.01);
   return {
     attackPower,
@@ -159,12 +173,100 @@ function getRecruitPower(recruit) {
 
 function formatRecruitStatLine(recruit) {
   const stats = getRecruitBattleStats(recruit);
-  return `공격 ${stats.attackPower.toFixed(1)} · 스킬 ${stats.skillPower.toFixed(1)} · 속도 ${stats.attackInterval.toFixed(2)}초 · 치명 ${(stats.criticalChance * 100).toFixed(1)}%`;
+  const parts = [
+    `공격 ${stats.attackPower.toFixed(1)}`,
+    `속도 ${stats.attackInterval.toFixed(2)}초`,
+    `치명 ${(stats.criticalChance * 100).toFixed(1)}%`,
+  ];
+  if (hasRecruitSkillPowerStat(recruit)) {
+    parts.splice(1, 0, `스킬 ${stats.skillPower.toFixed(1)}`);
+  }
+  return parts.join(" · ");
 }
 
 function getRecruitSkillText(recruit) {
   const skill = recruit.skill || {};
   return skill.desc || skill.name || "스킬 정보 없음";
+}
+
+
+function getRecruitSpriteSrc(recruit) {
+  return recruit?.sprites?.idle || recruit?.sprite || "";
+}
+
+function getRecruitAvatarMarkup(recruit, className = "recruit-card-avatar") {
+  const sprite = getRecruitSpriteSrc(recruit);
+  if (sprite) {
+    return `<span class="${className} has-character" role="img" aria-label="${recruit.name}" style="--recruit-image: url('${sprite}'); --recruit-color: ${recruit.color};"></span>`;
+  }
+  return `<span class="${className}" style="--recruit-color: ${recruit.color};">${recruit.mark}</span>`;
+}
+
+function formatRecruitStatRows(recruit) {
+  const stats = getRecruitBattleStats(recruit);
+  const rows = [
+    ["기본 공격력", stats.attackPower.toFixed(1)],
+    ["공격속도", `${stats.attackInterval.toFixed(2)}초`],
+    ["치명타확률", `${(stats.criticalChance * 100).toFixed(1)}%`],
+  ];
+  if (hasRecruitSkillPowerStat(recruit)) rows.push(["스킬피해량", stats.skillPower.toFixed(1)]);
+  return rows
+    .map(([label, value]) => `<span><b>${label}</b><strong>${value}</strong></span>`)
+    .join("");
+}
+
+function selectRecruitForGrowth(id) {
+  const recruit = recruits.find((item) => item.id === id);
+  if (!recruit) return;
+  activeRecruitPanelId = recruit.id;
+  renderShop();
+}
+
+function getSelectedRecruitForGrowth() {
+  return recruits.find((recruit) => recruit.id === activeRecruitPanelId) || recruits[0] || null;
+}
+
+function renderRecruitGrowthPanel() {
+  if (!refs.recruitGrowthPanel) return;
+  const recruit = getSelectedRecruitForGrowth();
+  if (!recruit) {
+    refs.recruitGrowthPanel.innerHTML = `
+      <div class="recruit-focus-empty">
+        <strong>직군을 선택하세요</strong>
+        <p>왼쪽 영입 카드에서 직군을 클릭하면 상세 성장 정보가 표시됩니다.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!activeRecruitPanelId) activeRecruitPanelId = recruit.id;
+  const count = getRecruitCount(recruit.id);
+  const rankLabel = getRecruitRankLabel(recruit, count);
+  const cost = getRecruitBuyCost(recruit, count);
+  const promotionReady = shouldShowRecruitPromotionButton(recruit, count);
+  const promotionCost = getRecruitPromotionCost(recruit);
+  const actionDataset = promotionReady ? `data-recruit-promote="${recruit.id}"` : `data-buy-recruit="${recruit.id}"`;
+  const actionClass = promotionReady ? "shop-promote-button recruit-focus-action" : "recruit-focus-action";
+  const actionDisabled = promotionReady ? state.gold < promotionCost : state.gold < cost;
+  const buttonText = promotionReady ? `승급 🪙 ${promotionCost}` : count <= 0 ? `동료 획득 🪙 ${cost}` : `레벨업 🪙 ${cost}`;
+
+  refs.recruitGrowthPanel.innerHTML = `
+    <div class="recruit-focus-card" style="--recruit-color: ${recruit.color};">
+      <div class="recruit-focus-portrait">
+        ${getRecruitAvatarMarkup(recruit, "recruit-focus-avatar")}
+      </div>
+      <div class="recruit-focus-copy">
+        <span class="recruit-focus-role">${recruit.category}</span>
+        <strong>${rankLabel} Lv.${count}</strong>
+        <p>${recruit.desc}</p>
+        <div class="recruit-focus-skill">
+          <b>${recruit.skill?.name || "스킬"}</b>
+          <span>${getRecruitSkillText(recruit)}</span>
+        </div>
+      </div>
+      <button class="${actionClass}" type="button" ${actionDataset} ${actionDisabled ? "disabled" : ""}>${buttonText}</button>
+    </div>
+  `;
 }
 
 function renderRecruitDetailModal() {
@@ -233,7 +335,7 @@ function renderRecruitPromotionModal() {
     ? `<img src="${recruit.sprites.idle}" alt="${recruit.name}" />`
     : `<span>${recruit.mark}</span>`;
   refs.recruitPromotionTitle.textContent = `${recruit.name} 승급`;
-  refs.recruitPromotionDesc.textContent = `${recruit.category} 직군이 진화합니다. 승급 비용은 ${getRecruitPromotionCost(recruit)} 자금입니다.`;
+  refs.recruitPromotionDesc.textContent = `${recruit.category} 직군이 진화합니다. 승급 완료 후 추가 능력치가 크게 상승합니다. 승급 비용은 ${getRecruitPromotionCost(recruit)} 자금입니다.`;
   refs.recruitPromotionConfirmButton.disabled = state.gold < getRecruitPromotionCost(recruit);
 }
 
@@ -263,6 +365,7 @@ function confirmRecruitPromotion() {
   }
 
   state.gold -= cost;
+  activeRecruitPanelId = recruit.id;
   state.recruitPromotions[recruit.id] = (state.recruitPromotions[recruit.id] || 0) + 1;
   addCompanyXp(6);
   refs.recruitPromotionConfirmButton.disabled = true;
@@ -395,6 +498,7 @@ function buyRecruit(id) {
 
   state.gold -= cost;
   state.recruits[id] = count + 1;
+  activeRecruitPanelId = id;
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
   const rankLabel = getRecruitRankLabel(recruit, count + 1);

@@ -12,6 +12,7 @@
 function renderAll() {
   renderAllies();
   renderShop();
+  renderRecruitGrowthPanel();
   renderRecruitDetailModal();
   renderRecruitPromotionModal();
   renderEnemies();
@@ -252,7 +253,7 @@ function renderCompanyEmployees() {
       .filter(Boolean)
       .map((recruit) => ({
         name: getRecruitRankLabel(recruit, getRecruitCount(recruit.id)),
-        sprite: recruit.sprites.idle,
+        sprite: getRecruitSpriteSrc(recruit),
         isLeader: false,
       })),
   ];
@@ -349,49 +350,31 @@ function getAllyPosition(index, unitCount = 1) {
 }
 
 function renderShop() {
-  refs.recruitList.innerHTML = recruitCategories
-    .map((category) => {
-      const categoryItems = recruits.filter((recruit) => recruit.category === category);
-      const itemsHtml = categoryItems.length
-        ? categoryItems
-            .map((recruit) => {
-              const count = getRecruitCount(recruit.id);
-              const cost = getRecruitBuyCost(recruit, count);
-              const label = getRecruitRankLabel(recruit, count);
-              const promotionReady = shouldShowRecruitPromotionButton(recruit, count);
-              const promotionCost = getRecruitPromotionCost(recruit);
-              const actionLabel = promotionReady ? "승급" : `${cost} 자금`;
-              const actionDataset = promotionReady ? `data-recruit-promote="${recruit.id}"` : `data-buy-recruit="${recruit.id}"`;
-              const actionClass = promotionReady ? "shop-promote-button" : "";
-              const actionDisabled = promotionReady ? state.gold < promotionCost : state.gold < cost;
-              return `
-                <div class="shop-item">
-                  <div class="shop-item__content">
-                    <strong>${label} Lv.${count}</strong>
-                    <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
-                  </div>
-                  <div class="shop-item__actions">
-                    <button class="shop-detail-button" type="button" data-recruit-detail="${recruit.id}">상세보기</button>
-                    <button class="${actionClass}" type="button" ${actionDataset} ${actionDisabled ? "disabled" : ""}>${actionLabel}</button>
-                  </div>
-                </div>
-              `;
-            })
-            .join("")
-        : `
-            <div class="recruit-placeholder">
-              <span>현재 영입 가능한 ${category} 항목이 없습니다.</span>
-            </div>
-          `;
+  if (!activeRecruitPanelId && recruits.length) activeRecruitPanelId = recruits[0].id;
 
+  refs.recruitList.innerHTML = recruits
+    .map((recruit) => {
+      const isSelected = recruit.id === activeRecruitPanelId;
       return `
-        <div class="recruit-category">
-          <div class="recruit-category__heading">${category}</div>
-          <div class="recruit-category__list">${itemsHtml}</div>
+        <div class="shop-item recruit-class-card${isSelected ? " is-selected" : ""}" data-select-recruit="${recruit.id}" role="button" tabindex="0" style="--recruit-color: ${recruit.color};">
+          <div class="recruit-class-title">
+            <span>${recruit.category}</span>
+            <strong>${getRecruitRankLabel(recruit, getRecruitCount(recruit.id))}</strong>
+          </div>
+          <div class="recruit-class-body">
+            <div class="recruit-class-head">
+              ${getRecruitAvatarMarkup(recruit, "recruit-card-avatar")}
+            </div>
+            <div class="recruit-class-stats">
+              ${formatRecruitStatRows(recruit)}
+            </div>
+          </div>
         </div>
       `;
     })
     .join("");
+
+  renderRecruitGrowthPanel();
 
   refs.toolList.innerHTML = tools
     .map((tool) => {
