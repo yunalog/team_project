@@ -283,7 +283,7 @@ function attackUnit(unit, options = {}) {
     window.setTimeout(() => damageEnemy(target.id, damage, manual), 140);
   } else {
     playProjectile(unit, from, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 240);
+    window.setTimeout(() => damageEnemy(target.id, damage, manual), 420);
   }
 }
 
@@ -321,7 +321,7 @@ function getSkillTargets(skill) {
 }
 
 function playProjectile(unit, from, target, skill) {
-  playAttackEffect(unit, target, { skill, from });
+  playAttackEffect(unit, target, { skill, from, motion: "projectile" });
   pulseUnit(unit.id, "is-attacking", 320);
 }
 
@@ -333,28 +333,61 @@ function playSlash(unit, target, skill) {
     window.setTimeout(() => ally.classList.remove("is-slashing"), 300);
   }
 
-  playAttackEffect(unit, target, { skill });
+  playAttackEffect(unit, target, { skill, motion: "melee" });
 }
 
 function playSkillEffect(unit, targets) {
   targets.forEach((target, index) => {
-    window.setTimeout(() => playAttackEffect(unit, target, { skill: true }), index * 55);
+    const from = getUnitPosition(unit.id);
+    const motion = unit.attackType === "slash" || unit.skill?.type === "cleave" ? "melee" : "projectile";
+    window.setTimeout(() => playAttackEffect(unit, target, { skill: true, from, motion }), index * 55);
   });
 }
 
 function playAttackEffect(unit, target, options = {}) {
   const skill = Boolean(options.skill);
+  const melee = options.motion === "melee" || unit.attackType === "slash";
   const spriteUrl = getEffectSpriteUrl(unit, skill);
   if (!spriteUrl) return;
 
+  const from = options.from || getUnitPosition(unit.id);
+  const hitPosition = getEffectHitPosition(unit, target, { skill, melee });
   const effect = document.createElement("span");
-  effect.className = `attack-sprite-effect${skill ? " is-skill" : " is-normal"} is-${getEffectKey(unit)}`;
+  effect.className = `attack-sprite-effect${skill ? " is-skill" : " is-normal"} ${
+    melee ? "is-melee" : "is-projectile"
+  } is-${getEffectKey(unit)}`;
   effect.style.setProperty("--effect-url", `url("${spriteUrl}")`);
-  effect.style.setProperty("--effect-x", `${target.x}%`);
-  effect.style.setProperty("--effect-y", `${target.y + (target.isBoss ? 84 : 72)}px`);
-  effect.style.setProperty("--effect-size", skill ? (target.isBoss ? "150px" : "126px") : target.isBoss ? "116px" : "92px");
+  effect.style.setProperty("--effect-from-x", `${melee ? hitPosition.x : from.x}%`);
+  effect.style.setProperty("--effect-from-y", `${melee ? hitPosition.y : from.y + 64}px`);
+  effect.style.setProperty("--effect-to-x", `${hitPosition.x}%`);
+  effect.style.setProperty("--effect-to-y", `${hitPosition.y}px`);
+  effect.style.setProperty("--effect-size", getEffectSize(target, { skill, melee }));
   refs.effectLayer.appendChild(effect);
-  window.setTimeout(() => effect.remove(), skill ? 620 : 460);
+  window.setTimeout(() => effect.remove(), getEffectDuration({ skill, melee }));
+}
+
+function getEffectHitPosition(unit, target, options = {}) {
+  const melee = Boolean(options.melee);
+  const skill = Boolean(options.skill);
+  const spriteCenterY = target.y + (target.isBoss ? 58 : 46);
+  const approachOffset = unit.attackType === "slash" ? 7 : 0;
+  return {
+    x: melee ? Math.max(18, target.x - approachOffset) : target.x,
+    y: spriteCenterY + (skill ? 6 : 0),
+  };
+}
+
+function getEffectSize(target, options = {}) {
+  if (options.skill) return target.isBoss ? "152px" : "124px";
+  if (options.melee) return target.isBoss ? "122px" : "98px";
+  return target.isBoss ? "104px" : "82px";
+}
+
+function getEffectDuration(options = {}) {
+  if (options.skill && !options.melee) return 660;
+  if (options.skill) return 580;
+  if (options.melee) return 440;
+  return 520;
 }
 
 function getEffectSpriteUrl(unit, skill = false) {

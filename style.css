@@ -1415,8 +1415,8 @@ h1 {
 
 .attack-sprite-effect {
   position: absolute;
-  left: var(--effect-x);
-  bottom: var(--effect-y);
+  left: var(--effect-from-x);
+  bottom: var(--effect-from-y);
   width: var(--effect-size, 96px);
   height: var(--effect-size, 96px);
   background-image: var(--effect-url);
@@ -1425,20 +1425,29 @@ h1 {
   background-position: 0 0;
   pointer-events: none;
   image-rendering: auto;
-  transform: translate(-50%, 16%) scale(0.96);
-  animation: attack-sprite-6frame 0.42s steps(1, end) forwards, effect-pop-fade 0.42s ease-out forwards;
+  transform: translate(-50%, 50%) scale(0.96);
   z-index: 8;
+}
+
+.attack-sprite-effect.is-projectile {
+  animation: attack-sprite-6frame 0.5s steps(1, end) forwards, effect-projectile-flight 0.5s ease-in forwards;
+}
+
+.attack-sprite-effect.is-melee {
+  left: var(--effect-to-x);
+  bottom: var(--effect-to-y);
+  transform: translate(-50%, 50%) scale(0.98);
+  animation: attack-sprite-6frame 0.42s steps(1, end) forwards, effect-pop-fade 0.42s ease-out forwards;
 }
 
 .attack-sprite-effect.is-skill {
   filter: drop-shadow(0 0 12px rgba(255, 247, 229, 0.54));
-  transform: translate(-50%, 18%) scale(1);
   animation-duration: 0.58s, 0.58s;
   z-index: 9;
 }
 
 .attack-sprite-effect.is-artist {
-  transform: translate(-50%, 18%) scale(1.05);
+  transform: translate(-50%, 50%) scale(1.05);
 }
 
 .damage-number {
@@ -1681,6 +1690,33 @@ h1 {
   100% {
     opacity: 0;
     scale: 1.06;
+  }
+}
+
+@keyframes effect-projectile-flight {
+  0% {
+    opacity: 0;
+    left: var(--effect-from-x);
+    bottom: var(--effect-from-y);
+    transform: translate(-50%, 50%) scale(0.72) rotate(-4deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  82% {
+    opacity: 1;
+    left: var(--effect-to-x);
+    bottom: var(--effect-to-y);
+    transform: translate(-50%, 50%) scale(1) rotate(3deg);
+  }
+
+  100% {
+    opacity: 0;
+    left: var(--effect-to-x);
+    bottom: var(--effect-to-y);
+    transform: translate(-50%, 50%) scale(0.9) rotate(0deg);
   }
 }
 
