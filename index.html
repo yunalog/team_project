@@ -10,7 +10,9 @@
   <body>
     <section class="start-screen" id="startScreen" aria-label="게임 시작 화면">
       <div class="start-scene">
-        <img src="Resource/Title/Title_Image.png" alt="스튜디오 크루 RPG" class="title-image" />
+        <div class="title-image-frame" aria-label="스튜디오 크루 RPG">
+          <img src="Resource/UI/Title_Image.png" alt="" class="title-image" />
+        </div>
         <button id="startButton" class="start-button" type="button">게임 시작</button>
         <div class="audio-control start-audio-control" aria-label="타이틀 BGM 설정">
           <button id="titleMuteButton" class="mute-button" type="button" data-audio-mute>음소거</button>
@@ -62,32 +64,14 @@
         <div id="effectLayer" class="effect-layer" aria-hidden="true"></div>
         <div id="enemyLayer" class="enemy-layer" aria-label="상대 프로젝트"></div>
         <div class="equipment-layer" aria-live="polite">
-          <button id="equippedItemPanel" class="equipped-item-panel is-collapsed" type="button" aria-expanded="false">
-            <div class="equipped-item-summary">
-              <span class="equipped-item-label">장착 장비</span>
-              <strong>대표 장비 슬롯</strong>
-              <p id="equippedItemStats">공격력 +0 / 스킬 공격력 +0</p>
-            </div>
-            <div id="equippedGradeBlocks" class="equipped-grade-blocks" aria-hidden="true"></div>
-            <div id="equippedItemList" class="equipped-item-list"></div>
-          </button>
-          <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
-            <div>
-              <span class="equipment-upgrade-label">장비 연구</span>
-              <strong id="equipmentGradeText">1단계</strong>
-              <p id="equipmentUpgradeTimer">업그레이드 대기 중</p>
-            </div>
-            <div class="equipment-upgrade-actions">
-              <button id="equipmentUpgradeButton" type="button">등급 업그레이드</button>
-              <button id="speedTicketButton" type="button">가속티켓</button>
-            </div>
-            <small id="speedTicketText">보유 0장 · 1장당 10분</small>
+          <div class="draw-machine-panel" aria-label="장비 뽑기">
+            <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
+            <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
+              <span>뽑기</span>
+              <strong id="equipmentDrawCost">10</strong>
+            </button>
+            <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
           </div>
-          <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
-            <span>장비</span>
-            <strong id="equipmentDrawCost">10</strong>
-          </button>
-          <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
           <div id="equipmentChoice" class="equipment-choice is-hidden">
             <div class="equipment-card">
               <span id="equipmentIcon" class="equipment-icon">?</span>
@@ -122,13 +106,14 @@
         </div>
 
         <div class="company-campus" id="companyCampus" data-company-tier="1">
-          <div class="office-building" id="companyBuilding">
-            <div class="building-sign"><span>STUDIO</span></div>
-            <div class="building-floors" id="companyFloors" aria-hidden="true"></div>
-            <div class="building-door"></div>
-          </div>
-          <div class="campus-tree tree-left"></div>
-          <div class="campus-tree tree-right"></div>
+          <img
+            class="office-building"
+            id="companyBuilding"
+            src="Resource/BackGround/Tycoon_Resource_1/Company_Img/Tycoon_Lv1.png"
+            alt="현재 회사 외관"
+            loading="eager"
+          >
+          <div class="building-floors" id="companyFloors" aria-hidden="true"></div>
           <div class="employee-crowd" id="employeeCrowd" aria-label="출근 중인 직원들"></div>
         </div>
 
@@ -180,6 +165,32 @@
           <div class="action-row">
             <button id="upgradePlayerButton" type="button">대표 역량 강화</button>
             <button id="nextStageButton" type="button">다음 의뢰</button>
+          </div>
+          <div class="battle-equipment-section">
+            <div id="equippedItemPanel" class="equipped-item-panel is-collapsed" aria-expanded="false">
+              <div class="equipped-item-header">
+                <div class="equipped-item-summary">
+                  <span class="equipped-item-label">장착 장비</span>
+                  <strong>대표 장비 슬롯</strong>
+                  <p id="equippedItemStats">공격력 +0 / 스킬 공격력 +0</p>
+                </div>
+                <button id="equipmentPanelToggleButton" class="equipment-panel-toggle" type="button" aria-expanded="false">목록 보기</button>
+              </div>
+              <div id="equippedGradeBlocks" class="equipped-grade-blocks" aria-hidden="true"></div>
+              <div id="equippedItemList" class="equipped-item-list"></div>
+            </div>
+            <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
+              <div>
+                <span class="equipment-upgrade-label">장비 연구</span>
+                <strong id="equipmentGradeText">1단계</strong>
+                <p id="equipmentUpgradeTimer">업그레이드 대기 중</p>
+              </div>
+              <div class="equipment-upgrade-actions">
+                <button id="equipmentUpgradeButton" type="button">등급 업그레이드</button>
+                <button id="speedTicketButton" type="button">가속티켓</button>
+              </div>
+              <small id="speedTicketText">보유 0장 · 1장당 10분</small>
+            </div>
           </div>
         </article>
 
@@ -253,7 +264,7 @@
                   <div class="squad-formation" id="squadFormation"></div>
                 </div>
                 <div>
-                  <span class="squad-subtitle">동료 현황</span>
+                  <span class="squad-subtitle">보유 동료</span>
                   <div class="squad-roster" id="squadRoster"></div>
                 </div>
               </div>
@@ -283,7 +294,7 @@
       </section>
 
       <nav class="bottom-tabs" aria-label="게임 메뉴">
-        <button class="tab-button is-active" type="button" data-tab="battle">업무</button>
+        <button class="tab-button is-active" type="button" data-tab="battle">전투</button>
         <button class="tab-button" type="button" data-tab="recruit">동료 영입</button>
         <button class="tab-button" type="button" data-tab="tools">회사</button>
         <button class="tab-button" type="button" data-tab="settings">설정</button>
@@ -291,13 +302,12 @@
     </main>
 
     <audio id="bgmAudio" src="Resource/Sound/BGM_Main_Theme.mp3" preload="auto" loop></audio>
-
     <div class="recruit-modal is-hidden" id="recruitDetailModal" role="dialog" aria-modal="true" aria-labelledby="recruitDetailTitle">
       <div class="recruit-modal__overlay" data-close-recruit-modal></div>
       <div class="recruit-modal__panel">
         <button class="recruit-modal__close" type="button" data-close-recruit-modal aria-label="상세보기 닫기">×</button>
         <div class="recruit-modal__header">
-          <span class="recruit-modal__badge" id="recruitDetailBadge" role="img" aria-label="직군 캐릭터">P</span>
+          <span class="recruit-modal__badge" id="recruitDetailBadge">P</span>
           <div>
             <h3 id="recruitDetailTitle">직군명</h3>
             <p id="recruitDetailCategory">직군 카테고리</p>
@@ -306,7 +316,7 @@
         <p class="recruit-modal__desc" id="recruitDetailDesc"></p>
         <div class="recruit-modal__stats">
           <div>
-            <span>현재 레벨</span>
+            <span>현재 보유</span>
             <strong id="recruitDetailLevel">Lv.0</strong>
           </div>
           <div>
@@ -329,6 +339,26 @@
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <div class="recruit-evolution-modal is-hidden" id="recruitPromotionModal" role="dialog" aria-modal="true" aria-labelledby="recruitPromotionTitle">
+      <div class="recruit-evolution-modal__overlay" data-close-recruit-promotion></div>
+      <div class="recruit-evolution-modal__panel">
+        <button class="recruit-evolution-modal__close" type="button" data-close-recruit-promotion aria-label="승급 닫기">×</button>
+        <div class="recruit-evolution-modal__portrait" id="recruitPromotionAvatar"></div>
+        <h3 id="recruitPromotionTitle">직군 승급</h3>
+        <p id="recruitPromotionDesc">이 직군은 승급 준비가 완료되었습니다.</p>
+        <div class="recruit-evolution-modal__actions">
+          <button id="recruitPromotionConfirmButton" type="button">승급 진행</button>
+          <button type="button" data-close-recruit-promotion>닫기</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/01-data.js"></script>
+    <script src="js/02-core.js"></script>
+    <script src="js/03-battle.js"></script>
+    <script src="js/04-recruits-company.js"></script>
+    <script src="js/05-equipment-growth.js"></script>
+    <script src="js/06-ui-render.js"></script>
   </body>
 </html>
+
