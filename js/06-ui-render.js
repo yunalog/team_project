@@ -184,6 +184,7 @@ function renderCompany() {
   setText(refs.companySceneDesc, progress.current.desc);
   setText(refs.companyEmployeeText, `${getEmployeeCount()}명`);
   setText(refs.companyFacilityText, `${facilityCount}회`);
+  setText(refs.companyBrandBonusText, getCompanyBrandBonusText());
 
   const companyValue = Math.floor(
     state.gold + state.idea * 5 + state.companyXp * 12 + getEmployeeCount() * 120 + facilityCount * 80
@@ -396,7 +397,7 @@ function renderShop() {
             <span>${tool.desc}</span>
           </div>
           <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>
-            ${cost} 아이디어 · 성장 +${growthXp}
+            ${cost} 아이디어 · EXP +${growthXp}
           </button>
         </div>
       `;

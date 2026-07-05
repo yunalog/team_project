@@ -565,12 +565,12 @@ function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
 
 function defeatEnemy(enemyId, manual) {
   state.enemies = state.enemies.filter((enemy) => enemy.id !== enemyId);
-  const goldGain = Math.floor((3 + state.chapter * 1.4 + state.subStage * 0.6) * getSquadGoldGainMultiplier());
-  const ideaGain = manual ? 1 : 0;
+  const baseGoldGain = 3 + state.chapter * 1.4 + state.subStage * 0.6;
+  const goldGain = getCompanyRewardAmount(baseGoldGain, "gold", getSquadGoldGainMultiplier());
+  const ideaGain = manual ? getCompanyRewardAmount(1, "idea") : 0;
   state.gold += goldGain;
   state.idea += ideaGain;
   state.clearCount += 1;
-  addCompanyXp(1);
 
   if (!state.enemies.length) completeWave(manual);
 }
@@ -580,9 +580,9 @@ function completeWave(manual) {
 
   isSpawningNext = true;
   const clearedBoss = state.battleMode === "boss";
-  const bonusIdea = clearedBoss ? 8 + state.chapter * 2 : manual ? 1 : 2;
+  const baseBonusIdea = clearedBoss ? 8 + state.chapter * 2 : manual ? 1 : 2;
+  const bonusIdea = getCompanyRewardAmount(baseBonusIdea, "idea");
   state.idea += bonusIdea;
-  addCompanyXp(clearedBoss ? 6 : 2);
   log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}` : `${getProgressLabel()} 클리어!`);
 
   window.setTimeout(() => {

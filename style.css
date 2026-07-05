@@ -2415,7 +2415,7 @@ h1 {
 .company-status-strip {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -2456,9 +2456,14 @@ h1 {
 
 .squad-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(170px, 0.8fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 10px;
   margin-top: 10px;
+}
+
+.squad-layout > div {
+  min-width: 0;
 }
 
 .squad-subtitle {
@@ -3915,7 +3920,8 @@ textarea {
 
 .squad-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(170px, 0.8fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 10px;
   margin-top: 10px;
 }
@@ -3979,6 +3985,7 @@ textarea {
 }
 
 .squad-roster {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   max-height: 276px;
   overflow-y: auto;
   padding-right: 3px;
@@ -3991,6 +3998,14 @@ textarea {
 
   .squad-formation {
     grid-template-columns: 1fr;
+  }
+
+  .squad-roster {
+    grid-template-columns: 1fr;
+  }
+
+  .company-status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

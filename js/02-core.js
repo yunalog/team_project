@@ -23,6 +23,7 @@ function initGame() {
     companyValueText: document.querySelector("#companyValueText"),
     companyEmployeeText: document.querySelector("#companyEmployeeText"),
     companyFacilityText: document.querySelector("#companyFacilityText"),
+    companyBrandBonusText: document.querySelector("#companyBrandBonusText"),
     companyStatusStrip: document.querySelector("#companyStatusStrip"),
     battleStatusItems: [...document.querySelectorAll(".battle-status-item")],
     squadFormation: document.querySelector("#squadFormation"),
@@ -407,6 +408,10 @@ function normalizeState(nextState) {
     playerLevel: Math.max(1, Number(nextState.playerLevel) || 1),
     clearCount: Math.max(0, Number(nextState.clearCount) || 0),
     companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
+    companyRewardRemainders: {
+      gold: Math.max(0, Math.min(0.999999, Number(nextState.companyRewardRemainders?.gold) || 0)),
+      idea: Math.max(0, Math.min(0.999999, Number(nextState.companyRewardRemainders?.idea) || 0)),
+    },
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
     squad:
