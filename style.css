@@ -1176,7 +1176,8 @@ h1 {
 
 .ally.is-slashing {
   left: var(--slash-x);
-  transform: translateX(-50%) scale(1.06);
+  bottom: var(--slash-y, var(--ally-y));
+  transform: translateX(-50%) translateY(-4px) scale(1.06);
   animation: ally-slash-lunge 0.3s ease-out;
 }
 
@@ -1436,7 +1437,7 @@ h1 {
 .attack-sprite-effect.is-melee {
   left: var(--effect-to-x);
   bottom: var(--effect-to-y);
-  transform: translate(-50%, 50%) scale(0.98);
+  transform: translate(-58%, 42%) scale(0.98);
   animation: attack-sprite-6frame 0.42s steps(1, end) forwards, effect-pop-fade 0.42s ease-out forwards;
 }
 
@@ -1447,7 +1448,7 @@ h1 {
 }
 
 .attack-sprite-effect.is-artist {
-  transform: translate(-50%, 50%) scale(1.05);
+  transform: translate(-62%, 42%) scale(1.05);
 }
 
 .damage-number {
@@ -1594,13 +1595,13 @@ h1 {
 
 @keyframes ally-slash-lunge {
   0% {
-    transform: translateX(-50%) translateX(-12px) scale(0.96);
+    transform: translateX(-50%) translateX(-12px) translateY(-4px) scale(0.96);
   }
   45% {
-    transform: translateX(-50%) translateX(10px) scale(1.12);
+    transform: translateX(-50%) translateX(10px) translateY(-8px) scale(1.12);
   }
   100% {
-    transform: translateX(-50%) translateX(0) scale(1.02);
+    transform: translateX(-50%) translateX(0) translateY(-4px) scale(1.02);
   }
 }
 

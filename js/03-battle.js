@@ -326,9 +326,11 @@ function playProjectile(unit, from, target, skill) {
 }
 
 function playSlash(unit, target, skill) {
+  const stance = getMeleeStancePosition(target);
   const ally = refs.allyLayer.querySelector(`[data-unit-id="${unit.id}"]`);
   if (ally) {
-    ally.style.setProperty("--slash-x", `${Math.max(36, target.x - 9)}%`);
+    ally.style.setProperty("--slash-x", `${stance.x}%`);
+    ally.style.setProperty("--slash-y", `${stance.y}px`);
     ally.classList.add("is-slashing");
     window.setTimeout(() => ally.classList.remove("is-slashing"), 300);
   }
@@ -337,9 +339,21 @@ function playSlash(unit, target, skill) {
 }
 
 function playSkillEffect(unit, targets) {
+  const melee = unit.attackType === "slash" || unit.skill?.type === "cleave";
+  if (melee && targets.length) {
+    const stance = getMeleeStancePosition(targets[0], { skill: true });
+    const ally = refs.allyLayer.querySelector(`[data-unit-id="${unit.id}"]`);
+    if (ally) {
+      ally.style.setProperty("--slash-x", `${stance.x}%`);
+      ally.style.setProperty("--slash-y", `${stance.y}px`);
+      ally.classList.add("is-slashing");
+      window.setTimeout(() => ally.classList.remove("is-slashing"), 420);
+    }
+  }
+
   targets.forEach((target, index) => {
     const from = getUnitPosition(unit.id);
-    const motion = unit.attackType === "slash" || unit.skill?.type === "cleave" ? "melee" : "projectile";
+    const motion = melee ? "melee" : "projectile";
     window.setTimeout(() => playAttackEffect(unit, target, { skill: true, from, motion }), index * 55);
   });
 }
@@ -369,11 +383,27 @@ function playAttackEffect(unit, target, options = {}) {
 function getEffectHitPosition(unit, target, options = {}) {
   const melee = Boolean(options.melee);
   const skill = Boolean(options.skill);
+  if (melee) {
+    const stance = getMeleeStancePosition(target, { skill });
+    return {
+      x: Math.min(target.x - (target.isBoss ? 5 : 4), stance.x + (skill ? 7 : 6)),
+      y: stance.y + (skill ? 58 : 50),
+    };
+  }
+
   const spriteCenterY = target.y + (target.isBoss ? 58 : 46);
-  const approachOffset = unit.attackType === "slash" ? 7 : 0;
   return {
-    x: melee ? Math.max(18, target.x - approachOffset) : target.x,
+    x: target.x,
     y: spriteCenterY + (skill ? 6 : 0),
+  };
+}
+
+function getMeleeStancePosition(target, options = {}) {
+  const skill = Boolean(options.skill);
+  const distance = target.isBoss ? (skill ? 22 : 19) : skill ? 18 : 15;
+  return {
+    x: Math.max(18, target.x - distance),
+    y: Math.max(22, target.y + (target.isBoss ? 4 : 0)),
   };
 }
 
