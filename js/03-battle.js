@@ -1,4 +1,4 @@
-function spawnWave() {
+﻿function spawnWave() {
   state.stage = state.chapter;
   state.enemies = state.battleMode === "boss" ? createBossWave() : createNormalWave();
   state.enemyMaxHp = state.enemies.reduce((sum, enemy) => sum + enemy.maxHp, 0);
@@ -7,6 +7,9 @@ function spawnWave() {
   isSpawningNext = false;
   basicAttackCooldown = 0.35;
   skillAttackCooldown = SKILL_ATTACK_RATE;
+  monsterAttackCooldown = MONSTER_ATTACK_RATE;
+  syncUnitHealth();
+  recoverUnitsForNewWave();
   if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
 }
@@ -92,22 +95,150 @@ function moveEnemies(delta) {
   const speed = Math.min(5.2, 2.2 + state.stage * 0.06);
   state.enemies.forEach((enemy) => {
     enemy.x = Math.max(ENEMY_CONTACT_X, enemy.x - speed * delta);
-
-    if (enemy.x <= ENEMY_CONTACT_X) {
-      if (enemy.isBoss) {
-        failBossBattle();
-        return;
-      }
-
-      enemy.x = ENEMY_SPAWN_X + enemy.lane * 3;
-      enemy.hp = Math.min(enemy.maxHp, enemy.hp + Math.ceil(enemy.maxHp * 0.1));
-      log("업무가 팀 앞까지 밀려와 일정 압박이 커졌습니다.");
-    }
   });
 
   syncEnemySummary();
 }
 
+function updateUnitHealth(delta = 0) {
+  const units = getUnits();
+  syncUnitHealth(units);
+
+  const pressured = state.enemies.some((enemy) => enemy.x <= MONSTER_ATTACK_RANGE);
+  if (pressured || isSpawningNext) return;
+
+  units.forEach((unit) => {
+    const maxHp = getUnitMaxHp(unit);
+    const currentHp = getUnitHp(unit.id);
+    if (currentHp <= 0 || currentHp >= maxHp) return;
+    state.unitHp[unit.id] = Math.min(maxHp, currentHp + UNIT_HP_RECOVERY_RATE * delta);
+  });
+}
+
+function syncUnitHealth(units = getUnits()) {
+  if (!state.unitHp || typeof state.unitHp !== "object") state.unitHp = {};
+  if (!state.unitMaxHp || typeof state.unitMaxHp !== "object") state.unitMaxHp = {};
+
+  const activeIds = new Set(units.map((unit) => unit.id));
+  Object.keys(state.unitHp).forEach((unitId) => {
+    if (!activeIds.has(unitId)) delete state.unitHp[unitId];
+  });
+  Object.keys(state.unitMaxHp).forEach((unitId) => {
+    if (!activeIds.has(unitId)) delete state.unitMaxHp[unitId];
+  });
+
+  units.forEach((unit) => {
+    const maxHp = getUnitMaxHp(unit);
+    const savedHp = Number(state.unitHp[unit.id]);
+    state.unitMaxHp[unit.id] = maxHp;
+    state.unitHp[unit.id] = Number.isFinite(savedHp) ? Math.min(maxHp, Math.max(0, savedHp)) : maxHp;
+  });
+}
+
+function recoverUnitsForNewWave() {
+  getUnits().forEach((unit) => {
+    const maxHp = getUnitMaxHp(unit);
+    const currentHp = getUnitHp(unit.id);
+    const recoveryFloor = Math.ceil(maxHp * 0.56);
+    const recoveryGain = Math.ceil(maxHp * 0.18);
+    state.unitHp[unit.id] = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
+  });
+}
+
+function updateMonsterAttacks(delta) {
+  if (isSpawningNext || !state.enemies.length) return;
+
+  const attackers = state.enemies
+    .filter((enemy) => enemy.x <= MONSTER_ATTACK_RANGE)
+    .sort((a, b) => a.x - b.x || a.y - b.y);
+  if (!attackers.length) {
+    monsterAttackCooldown = Math.min(monsterAttackCooldown, MONSTER_ATTACK_RATE);
+    return;
+  }
+
+  monsterAttackCooldown -= delta;
+  if (monsterAttackCooldown > 0) return;
+
+  const attacker = attackers[0];
+  const target = getMonsterAttackTarget();
+  if (!target) {
+    handlePartyDown();
+    return;
+  }
+
+  const extraPressure = Math.max(0, attackers.length - 1);
+  const damage = getMonsterAttackDamage(attacker, target, extraPressure);
+  state.unitHp[target.id] = Math.max(0, getUnitHp(target.id) - damage);
+  showUnitDamage(damage, target, attacker);
+  pulseUnit(target.id, "is-damaged", 220);
+
+  monsterAttackCooldown += attacker.isBoss ? MONSTER_ATTACK_RATE + 0.55 : MONSTER_ATTACK_RATE;
+
+  if (state.unitHp[target.id] <= 0) {
+    log(`${target.shortName}이 잠시 전투에서 이탈했습니다.`);
+    if (!getLivingUnits().length) handlePartyDown();
+  } else {
+    log(`${attacker.isBoss ? "보스" : "몬스터"}가 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
+  }
+}
+
+function getMonsterAttackTarget() {
+  const livingUnits = getLivingUnits();
+  if (!livingUnits.length) return null;
+  return livingUnits
+    .map((unit) => ({ unit, position: getUnitPosition(unit.id) }))
+    .sort((a, b) => b.position.x - a.position.x || a.position.y - b.position.y)[0].unit;
+}
+
+function getMonsterAttackDamage(enemy, unit, extraPressure = 0) {
+  const maxHp = getUnitMaxHp(unit);
+  const base = enemy.isBoss ? 4 + state.chapter * 0.55 : 1.5 + state.chapter * 0.22 + state.subStage * 0.14;
+  const capRatio = enemy.isBoss ? 0.085 : 0.045;
+  return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(base + extraPressure * 0.65)));
+}
+
+function getUnitMaxHp(unit) {
+  const hpGrowth = getGrowthValue("hp");
+  if (unit.id === "player") return Math.floor(115 + state.playerLevel * 8 + hpGrowth * 6);
+
+  const recruitCount = unit.recruitId ? getRecruitCount(unit.recruitId) : 1;
+  const boost = unit.recruitId ? getRecruitBoostLevel(unit.recruitId) : 0;
+  return Math.floor(72 + recruitCount * 3 + boost * 5 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2);
+}
+
+function getUnitHp(unitId) {
+  return Math.max(0, Number(state.unitHp?.[unitId]) || 0);
+}
+
+function isUnitAlive(unitId) {
+  return getUnitHp(unitId) > 0;
+}
+
+function getLivingUnits() {
+  const units = getUnits();
+  syncUnitHealth(units);
+  return units.filter((unit) => isUnitAlive(unit.id));
+}
+
+function handlePartyDown() {
+  if (isSpawningNext) return;
+
+  if (state.battleMode === "boss") {
+    failBossBattle();
+    return;
+  }
+
+  syncUnitHealth();
+  getUnits().forEach((unit) => {
+    state.unitHp[unit.id] = Math.ceil(getUnitMaxHp(unit) * 0.48);
+  });
+  state.enemies.forEach((enemy) => {
+    enemy.x = Math.min(ENEMY_SPAWN_X + enemy.lane * 3, enemy.x + 18);
+  });
+  monsterAttackCooldown = MONSTER_ATTACK_RATE + 1.4;
+  log("팀이 잠깐 재정비했습니다. 모두 체력을 일부 회복하고 몬스터를 밀어냅니다.");
+  syncEnemySummary();
+}
 function updateAutoCombat(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
@@ -127,14 +258,14 @@ function updateAutoCombat(delta) {
 }
 
 function performAttackRound(skill) {
-  getUnits().forEach((unit, index) => {
+  getLivingUnits().forEach((unit, index) => {
     window.setTimeout(() => attackUnit(unit, { skill }), index * 120);
   });
 }
 
 function attackUnit(unit, options = {}) {
   const target = getTargetEnemy();
-  if (isSpawningNext || !target) return;
+  if (isSpawningNext || !target || !isUnitAlive(unit.id)) return;
 
   const skill = Boolean(options.skill);
   const manual = Boolean(options.manual);
@@ -384,6 +515,30 @@ function showCriticalBurst(target) {
     refs.effectLayer.appendChild(particle);
     window.setTimeout(() => particle.remove(), 720);
   }
+}
+
+function showUnitDamage(amount, unit, enemy) {
+  const position = getUnitPosition(unit.id);
+  const damage = document.createElement("span");
+  damage.className = "damage-number is-unit-damage";
+  damage.textContent = `-${amount}`;
+  damage.style.setProperty("--hit-x", `${position.x}%`);
+  damage.style.setProperty("--hit-y", `${position.y + 92}px`);
+  damage.style.setProperty("--damage-x-pop", `${enemy.isBoss ? -10 : -6}px`);
+  damage.style.setProperty("--damage-x-apex", `${enemy.isBoss ? -22 : -14}px`);
+  damage.style.setProperty("--damage-x-drop", `${enemy.isBoss ? -16 : -10}px`);
+  damage.style.setProperty("--damage-x-end", `${enemy.isBoss ? -26 : -18}px`);
+  damage.style.setProperty("--damage-y-pop", "-22px");
+  damage.style.setProperty("--damage-y-apex", "-38px");
+  damage.style.setProperty("--damage-y-drop", "4px");
+  damage.style.setProperty("--damage-y-end", "18px");
+  damage.style.setProperty("--damage-tilt-start", "-4deg");
+  damage.style.setProperty("--damage-tilt-pop", "7deg");
+  damage.style.setProperty("--damage-tilt-apex", "-3deg");
+  damage.style.setProperty("--damage-tilt-drop", "2deg");
+  damage.style.setProperty("--damage-tilt-end", "-5deg");
+  refs.effectLayer.appendChild(damage);
+  window.setTimeout(() => damage.remove(), 920);
 }
 
 function pulseUnit(unitId, className, duration) {

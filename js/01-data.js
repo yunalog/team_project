@@ -7,6 +7,9 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
+const MONSTER_ATTACK_RANGE = 45;
+const MONSTER_ATTACK_RATE = 3.2;
+const UNIT_HP_RECOVERY_RATE = 1.1;
 const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
@@ -305,6 +308,8 @@ const defaultState = {
   enemyMaxHp: 10,
   enemyX: ENEMY_SPAWN_X,
   enemies: [],
+  unitHp: {},
+  unitMaxHp: {},
   clickPower: 1,
   playerLevel: 1,
   clearCount: 0,
@@ -340,6 +345,7 @@ let isSpawningNext = false;
 let lastRosterKey = "";
 let basicAttackCooldown = 0.35;
 let skillAttackCooldown = SKILL_ATTACK_RATE;
+let monsterAttackCooldown = MONSTER_ATTACK_RATE;
 let saveCooldown = 0;
 let lastTick = Date.now();
 let gameTimer = null;

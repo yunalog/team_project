@@ -1,4 +1,4 @@
-function switchTab(tab) {
+﻿function switchTab(tab) {
   activeTab = tab.dataset.tab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
@@ -27,6 +27,7 @@ function renderBattle() {
   renderCompany();
   updatePrimaryScene();
   setText(refs.dpsText, `초당 기여도 ${getTotalDps()}`);
+  renderAllies();
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
   setText(refs.clickPowerText, getManualPower());
@@ -256,7 +257,10 @@ function renderEnemies() {
 
 function renderAllies() {
   const units = getUnits();
-  const rosterKey = units.map((unit) => `${unit.id}:${unit.count}:${unit.power}`).join("|");
+  syncUnitHealth(units);
+  const rosterKey = units
+    .map((unit) => `${unit.id}:${unit.count}:${unit.power}:${Math.ceil(getUnitHp(unit.id))}:${getUnitMaxHp(unit)}`)
+    .join("|");
   if (rosterKey === lastRosterKey) return;
 
   lastRosterKey = rosterKey;
@@ -264,6 +268,9 @@ function renderAllies() {
     .map((unit, index) => {
       const position = getAllyPosition(index);
       const countText = unit.count > 1 ? ` x${unit.count}` : "";
+      const hp = getUnitHp(unit.id);
+      const maxHp = getUnitMaxHp(unit);
+      const hpPercent = Math.max(0, Math.round((hp / maxHp) * 100));
       const spriteMarkup = unit.sprites
         ? `<span class="ally-state-sprite" role="img" aria-label="${unit.name}" style="--idle-url: url('${unit.sprites.idle}'); --attack-url: url('${unit.sprites.attack}'); --skill-url: url('${unit.sprites.skill}')"></span>`
         : unit.spriteSheet
@@ -272,7 +279,10 @@ function renderAllies() {
         ? `<img src="${unit.sprite}" alt="${unit.name}" class="ally-sprite-image" />`
         : `<span class="ally-sprite">${unit.mark}</span>`;
       return `
-        <div class="ally" data-unit-id="${unit.id}" style="--ally-x: ${position.x}%; --ally-y: ${position.y}px; --ally-color: ${unit.color};">
+        <div class="ally${hp <= 0 ? " is-down" : ""}" data-unit-id="${unit.id}" style="--ally-x: ${position.x}%; --ally-y: ${position.y}px; --ally-color: ${unit.color};">
+          <div class="ally-hp-bar" aria-label="${unit.shortName} 체력">
+            <span style="width: ${hpPercent}%"></span>
+          </div>
           ${spriteMarkup}
           <span class="ally-role">${unit.shortName}${countText}</span>
         </div>
@@ -280,7 +290,6 @@ function renderAllies() {
     })
     .join("");
 }
-
 function getAllyPosition(index) {
   const positions = [
     { x: 8, y: 82 },
