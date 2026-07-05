@@ -1176,8 +1176,36 @@ h1 {
 
 .ally.is-slashing {
   left: var(--slash-x);
-  transform: translateX(-50%) scale(1.06);
+  bottom: var(--slash-y, var(--ally-y));
+  transform: translateX(-50%) translateY(-4px) scale(1.06);
   animation: ally-slash-lunge 0.3s ease-out;
+}
+
+.ally.is-damaged {
+  animation: ally-damaged 0.22s ease-in-out;
+}
+
+.ally.is-down {
+  opacity: 0.48;
+  filter: grayscale(0.55);
+}
+
+.ally-hp-bar {
+  overflow: hidden;
+  width: 54px;
+  height: 6px;
+  margin-bottom: 3px;
+  border: 1px solid rgba(17, 24, 39, 0.86);
+  border-radius: 999px;
+  background: rgba(254, 226, 226, 0.9);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.64), 0 2px 4px rgba(17, 24, 39, 0.18);
+}
+
+.ally-hp-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #84cc16);
+  transition: width 0.16s ease;
 }
 
 .ally-sprite {
@@ -1386,6 +1414,43 @@ h1 {
   box-shadow: 10px 10px 0 rgba(249, 115, 22, 0.28);
 }
 
+.attack-sprite-effect {
+  position: absolute;
+  left: var(--effect-from-x);
+  bottom: var(--effect-from-y);
+  width: var(--effect-size, 96px);
+  height: var(--effect-size, 96px);
+  background-image: var(--effect-url);
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  pointer-events: none;
+  image-rendering: auto;
+  transform: translate(-50%, 50%) scale(0.96);
+  z-index: 8;
+}
+
+.attack-sprite-effect.is-projectile {
+  animation: attack-sprite-6frame 0.5s steps(1, end) forwards, effect-projectile-flight 0.5s ease-in forwards;
+}
+
+.attack-sprite-effect.is-melee {
+  left: var(--effect-to-x);
+  bottom: var(--effect-to-y);
+  transform: translate(-58%, 42%) scale(0.98);
+  animation: attack-sprite-6frame 0.42s steps(1, end) forwards, effect-pop-fade 0.42s ease-out forwards;
+}
+
+.attack-sprite-effect.is-skill {
+  filter: drop-shadow(0 0 12px rgba(255, 247, 229, 0.54));
+  animation-duration: 0.58s, 0.58s;
+  z-index: 9;
+}
+
+.attack-sprite-effect.is-artist {
+  transform: translate(-62%, 42%) scale(1.05);
+}
+
 .damage-number {
   position: absolute;
   left: var(--hit-x);
@@ -1413,6 +1478,14 @@ h1 {
     0 0 18px rgba(239, 68, 68, 0.75);
   transform: translateX(-50%);
   animation: critical-damage-pop 1.12s cubic-bezier(0.16, 0.86, 0.28, 1) forwards;
+}
+
+.damage-number.is-unit-damage {
+  color: #f97316;
+  font-size: 18px;
+  text-shadow:
+    0 2px 0 #fff7ed,
+    0 0 8px rgba(249, 115, 22, 0.62);
 }
 
 .critical-burst,
@@ -1522,13 +1595,28 @@ h1 {
 
 @keyframes ally-slash-lunge {
   0% {
-    transform: translateX(-50%) translateX(-12px) scale(0.96);
+    transform: translateX(-50%) translateX(-12px) translateY(-4px) scale(0.96);
   }
   45% {
-    transform: translateX(-50%) translateX(10px) scale(1.12);
+    transform: translateX(-50%) translateX(10px) translateY(-8px) scale(1.12);
   }
   100% {
-    transform: translateX(-50%) translateX(0) scale(1.02);
+    transform: translateX(-50%) translateX(0) translateY(-4px) scale(1.02);
+  }
+}
+
+@keyframes ally-damaged {
+  0%,
+  100% {
+    transform: translateX(-50%);
+  }
+
+  35% {
+    transform: translateX(calc(-50% - 5px));
+  }
+
+  70% {
+    transform: translateX(calc(-50% + 5px));
   }
 }
 
@@ -1553,6 +1641,83 @@ h1 {
   to {
     opacity: 0;
     transform: rotate(-18deg) scale(1.15);
+  }
+}
+
+@keyframes attack-sprite-6frame {
+  0%,
+  15% {
+    background-position: 0 0;
+  }
+
+  16%,
+  31% {
+    background-position: 50% 0;
+  }
+
+  32%,
+  47% {
+    background-position: 100% 0;
+  }
+
+  48%,
+  63% {
+    background-position: 0 100%;
+  }
+
+  64%,
+  79% {
+    background-position: 50% 100%;
+  }
+
+  80%,
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes effect-pop-fade {
+  0% {
+    opacity: 0;
+    scale: 0.82;
+  }
+
+  16%,
+  72% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
+
+@keyframes effect-projectile-flight {
+  0% {
+    opacity: 0;
+    left: var(--effect-from-x);
+    bottom: var(--effect-from-y);
+    transform: translate(-50%, 50%) scale(0.72) rotate(-4deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  82% {
+    opacity: 1;
+    left: var(--effect-to-x);
+    bottom: var(--effect-to-y);
+    transform: translate(-50%, 50%) scale(1) rotate(3deg);
+  }
+
+  100% {
+    opacity: 0;
+    left: var(--effect-to-x);
+    bottom: var(--effect-to-y);
+    transform: translate(-50%, 50%) scale(0.9) rotate(0deg);
   }
 }
 
@@ -3735,7 +3900,6 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
-
 /* Restore 2차 기본 company squad bottom scroll/assets layout */
 .company-dashboard {
   min-height: 0;
@@ -3789,6 +3953,25 @@ textarea {
   background-size: 300% 100%;
 }
 
+.squad-slot--leader {
+  border-color: #39725a;
+  background: #e1efe2;
+}
+
+.squad-slot-fixed {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  padding: 4px 5px;
+  border: 1px solid #39725a;
+  border-radius: 5px;
+  background: rgba(225, 239, 226, 0.86);
+  color: #27624c;
+  font-size: 12px !important;
+  font-weight: 900;
+  line-height: 1.2 !important;
+}
+
 .squad-position {
   color: #5f4630;
   font-size: 12px;
@@ -3811,64 +3994,159 @@ textarea {
   }
 }
 
-/* Squad synergy panel */
+/* Keep company summary labels and long values fully visible. */
+.company-status-strip {
+  align-items: stretch;
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+.company-status-strip > div {
+  display: flex;
+  min-height: 76px;
+  padding: 10px;
+  flex-direction: column;
+  justify-content: center;
+  overflow: visible;
+}
+
+.company-status-strip span {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  white-space: nowrap;
+}
+
+.company-status-strip strong {
+  overflow: visible;
+  min-width: 0;
+  margin-top: 4px;
+  font-size: clamp(12px, 3vw, 16px) !important;
+  line-height: 1.25 !important;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+@media (max-width: 420px) {
+  .message-line {
+    padding-inline: 8px;
+    padding-bottom: 10px;
+  }
+
+  .company-status-strip {
+    gap: 5px;
+    margin-top: 18px;
+    margin-bottom: 6px;
+  }
+
+  .company-status-strip > div {
+    min-height: 72px;
+    padding: 8px 5px;
+  }
+
+  .company-status-strip span {
+    font-size: 11px !important;
+  }
+}
+
+/* Show only the representative and coworkers assigned to the active squad. */
+.employee-crowd {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(4px, 1.4vw, 12px);
+}
+
+.scene-employee {
+  flex: 0 0 clamp(38px, 6vw, 54px);
+  width: clamp(38px, 6vw, 54px);
+  height: clamp(46px, 7vw, 64px);
+  border-radius: 0;
+  background-color: transparent;
+  background-image: var(--employee-image);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  box-shadow: none;
+  filter: drop-shadow(0 4px 0 rgba(45, 33, 25, 0.22));
+  image-rendering: pixelated;
+}
+
+.scene-employee::before {
+  content: none;
+}
+
+.scene-employee.is-leader {
+  background-position: left center;
+  background-size: 300% 100%;
+}
+
+/* Prevent the company scene from overflowing its grid row and covering the summary cards. */
+.game-shell .company-scene {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Let the synergy explanation use the full width beneath both squad columns. */
 .squad-synergy-panel {
   grid-column: 1 / -1;
-  display: grid;
-  gap: 5px;
-  padding: 10px;
-  border: 2px dashed rgba(123, 90, 52, 0.72);
-  border-radius: 6px;
-  background: rgba(255, 248, 232, 0.82);
-  color: var(--ui-ink, #2d2119);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+  min-width: 0;
+  padding: 11px 12px;
+  border: 1px solid #b59666;
+  border-radius: 7px;
+  background: #fff8e9;
+  color: var(--ink);
 }
 
 .squad-synergy-panel.is-active {
-  border-style: solid;
-  border-color: #2f8a67;
-  background:
-    linear-gradient(180deg, rgba(233, 250, 235, 0.96), rgba(205, 232, 199, 0.96));
-  box-shadow: 3px 3px 0 rgba(45, 33, 25, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  border-color: #39725a;
+  background: #e1efe2;
+}
+
+.squad-synergy-kicker,
+.squad-synergy-panel strong,
+.squad-synergy-panel small {
+  display: block;
 }
 
 .squad-synergy-kicker {
-  color: #39725a;
+  color: #7f5d33;
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.08em;
 }
 
 .squad-synergy-panel strong {
+  margin-top: 4px;
   font-size: 14px;
 }
 
-.squad-synergy-panel small,
-.squad-synergy-panel p {
-  margin: 0;
-  color: var(--muted, #6f6251);
+.squad-synergy-panel small {
+  margin-top: 3px;
+  color: var(--muted);
   font-size: 11px;
   line-height: 1.45;
+  word-break: keep-all;
 }
 
-.squad-synergy-panel.is-active p {
-  color: #1c5f48;
-  font-weight: 900;
+.squad-synergy-panel p {
+  margin: 8px 0 0;
+  line-height: 1.55;
+  word-break: keep-all;
 }
 
 .squad-synergy-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 2px;
+  gap: 5px;
+  margin-top: 8px;
 }
 
 .squad-synergy-list span {
-  padding: 3px 5px;
-  border: 1px solid rgba(123, 90, 52, 0.48);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.54);
-  color: var(--muted, #6f6251);
+  padding: 3px 6px;
+  border: 1px solid rgba(127, 93, 51, 0.35);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
   font-size: 10px;
-  font-weight: 800;
+  line-height: 1.35;
 }

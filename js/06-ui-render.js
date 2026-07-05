@@ -1,4 +1,4 @@
-function switchTab(tab) {
+﻿function switchTab(tab) {
   activeTab = tab.dataset.tab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
@@ -27,6 +27,7 @@ function renderBattle() {
   renderCompany();
   updatePrimaryScene();
   setText(refs.dpsText, `초당 기여도 ${getTotalDps()}`);
+  renderAllies();
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
   setText(refs.clickPowerText, getManualPower());
@@ -175,7 +176,8 @@ function renderCompany() {
   const levelNumber = progress.levelIndex + 1;
   const facilityCount = getFacilityInvestmentCount();
   const visualTier = Math.min(companyLevels.length, levelNumber);
-  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}`;
+  const squadVisualKey = state.squad.map((recruitId) => recruitId || "empty").join(",");
+  const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}:${squadVisualKey}`;
 
   setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
   setText(refs.companySceneName, progress.current.name);
@@ -229,12 +231,35 @@ function renderCompanyFloors(visualTier, levelIndex) {
 }
 
 function renderCompanyEmployees() {
-  const colors = ["#315f78", "#b05b45", "#6a6fa6", "#3c7c58", "#c4893f", "#805b86"];
-  const visibleEmployees = Math.min(12, getEmployeeCount());
-  refs.employeeCrowd.innerHTML = Array.from({ length: visibleEmployees }, (_, index) => {
-    return `<span class="scene-employee" style="--employee-color: ${colors[index % colors.length]}"></span>`;
-  }).join("");
-  refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getEmployeeCount()}명`);
+  const employees = [
+    {
+      name: "대표",
+      sprite: "Anim/Player_1/Motion.png",
+      isLeader: true,
+    },
+    ...state.squad
+      .map((recruitId) => recruits.find((recruit) => recruit.id === recruitId))
+      .filter(Boolean)
+      .map((recruit) => ({
+        name: getRecruitRankLabel(recruit, getRecruitCount(recruit.id)),
+        sprite: recruit.sprites.idle,
+        isLeader: false,
+      })),
+  ];
+
+  refs.employeeCrowd.innerHTML = employees
+    .map(
+      (employee) => `
+        <span
+          class="scene-employee${employee.isLeader ? " is-leader" : ""}"
+          role="img"
+          aria-label="${employee.name}"
+          style="--employee-image: url('${employee.sprite}')"
+        ></span>
+      `
+    )
+    .join("");
+  refs.employeeCrowd.setAttribute("aria-label", `현재 업무 스쿼드 ${employees.length}명`);
 }
 
 function renderEnemies() {
@@ -256,14 +281,20 @@ function renderEnemies() {
 
 function renderAllies() {
   const units = getUnits();
-  const rosterKey = units.map((unit) => `${unit.id}:${unit.count}:${unit.power}:${unit.skillPower}:${unit.attackInterval}:${unit.criticalChance}`).join("|");
+  syncUnitHealth(units);
+  const rosterKey = units
+    .map((unit) => `${unit.id}:${unit.count}:${unit.power}:${Math.ceil(getUnitHp(unit.id))}:${getUnitMaxHp(unit)}`)
+    .join("|");
   if (rosterKey === lastRosterKey) return;
 
   lastRosterKey = rosterKey;
   refs.allyLayer.innerHTML = units
     .map((unit, index) => {
-      const position = getAllyPosition(index);
+      const position = getAllyPosition(index, units.length);
       const countText = unit.count > 1 ? ` x${unit.count}` : "";
+      const hp = getUnitHp(unit.id);
+      const maxHp = getUnitMaxHp(unit);
+      const hpPercent = Math.max(0, Math.round((hp / maxHp) * 100));
       const spriteMarkup = unit.sprites
         ? `<span class="ally-state-sprite" role="img" aria-label="${unit.name}" style="--idle-url: url('${unit.sprites.idle}'); --attack-url: url('${unit.sprites.attack}'); --skill-url: url('${unit.sprites.skill}')"></span>`
         : unit.spriteSheet
@@ -272,7 +303,10 @@ function renderAllies() {
         ? `<img src="${unit.sprite}" alt="${unit.name}" class="ally-sprite-image" />`
         : `<span class="ally-sprite">${unit.mark}</span>`;
       return `
-        <div class="ally" data-unit-id="${unit.id}" style="--ally-x: ${position.x}%; --ally-y: ${position.y}px; --ally-color: ${unit.color};">
+        <div class="ally${hp <= 0 ? " is-down" : ""}" data-unit-id="${unit.id}" style="--ally-x: ${position.x}%; --ally-y: ${position.y}px; --ally-color: ${unit.color};">
+          <div class="ally-hp-bar" aria-label="${unit.shortName} 체력">
+            <span style="width: ${hpPercent}%"></span>
+          </div>
           ${spriteMarkup}
           <span class="ally-role">${unit.shortName}${countText}</span>
         </div>
@@ -281,15 +315,27 @@ function renderAllies() {
     .join("");
 }
 
-function getAllyPosition(index) {
-  const positions = [
-    { x: 8, y: 82 },
-    { x: 34, y: 34 },
-    { x: 34, y: 134 },
-    { x: 21, y: 34 },
-    { x: 21, y: 134 },
-  ];
-  return positions[index] || { x: 16 + index * 5, y: 42 + (index % 3) * 46 };
+function getAllyPosition(index, unitCount = 1) {
+  const layouts = {
+    1: [{ x: 22, y: 76 }],
+    2: [
+      { x: 14, y: 76 },
+      { x: 31, y: 76 },
+    ],
+    3: [
+      { x: 14, y: 122 },
+      { x: 31, y: 122 },
+      { x: 22, y: 34 },
+    ],
+    4: [
+      { x: 14, y: 122 },
+      { x: 31, y: 122 },
+      { x: 14, y: 34 },
+      { x: 31, y: 34 },
+    ],
+  };
+  const positions = layouts[Math.min(4, Math.max(1, unitCount))];
+  return positions[index] || positions[positions.length - 1];
 }
 
 function renderShop() {
@@ -361,16 +407,20 @@ function renderShop() {
 }
 
 function renderSquadManagement() {
-  const positionNames = ["1번 자리", "2번 자리", "3번 자리"];
+  const positionNames = ["2번 자리", "3번 자리", "4번 자리"];
   const deployedIds = new Set(state.squad.filter(Boolean));
 
   const leaderMarkup = `
-    <div class="squad-leader">
-      ${getSquadCharacterAvatarMarkup(null, true)}
-      <div>
-        <strong>대표</strong>
-        <small>리더 · 고정 배치</small>
-      </div>
+    <div class="squad-slot squad-slot--leader is-filled">
+      <span class="squad-position">1번 자리</span>
+      <span class="squad-slot-body">
+        ${getSquadCharacterAvatarMarkup(null, true)}
+        <span>
+          <strong>대표</strong>
+          <small>리더 · 고정 배치</small>
+        </span>
+      </span>
+      <span class="squad-slot-fixed">고정 배치</span>
     </div>
   `;
 

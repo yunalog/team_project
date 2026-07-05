@@ -1,4 +1,4 @@
-function spawnWave() {
+﻿function spawnWave() {
   state.stage = state.chapter;
   state.enemies = state.battleMode === "boss" ? createBossWave() : createNormalWave();
   state.enemyMaxHp = state.enemies.reduce((sum, enemy) => sum + enemy.maxHp, 0);
@@ -9,6 +9,10 @@ function spawnWave() {
   skillAttackCooldown = getSquadSkillInterval();
   unitCombatTimers = {};
   combatEffects.enemyDebuffs = [];
+  skillAttackCooldown = SKILL_ATTACK_RATE;
+  monsterAttackCooldown = MONSTER_ATTACK_RATE;
+  syncUnitHealth();
+  recoverUnitsForNewWave();
   if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
 }
@@ -94,22 +98,150 @@ function moveEnemies(delta) {
   const speed = Math.min(5.2, 2.2 + state.stage * 0.06);
   state.enemies.forEach((enemy) => {
     enemy.x = Math.max(ENEMY_CONTACT_X, enemy.x - speed * delta);
-
-    if (enemy.x <= ENEMY_CONTACT_X) {
-      if (enemy.isBoss) {
-        failBossBattle();
-        return;
-      }
-
-      enemy.x = ENEMY_SPAWN_X + enemy.lane * 3;
-      enemy.hp = Math.min(enemy.maxHp, enemy.hp + Math.ceil(enemy.maxHp * 0.1));
-      log("업무가 팀 앞까지 밀려와 일정 압박이 커졌습니다.");
-    }
   });
 
   syncEnemySummary();
 }
 
+function updateUnitHealth(delta = 0) {
+  const units = getUnits();
+  syncUnitHealth(units);
+
+  const pressured = state.enemies.some((enemy) => enemy.x <= MONSTER_ATTACK_RANGE);
+  if (pressured || isSpawningNext) return;
+
+  units.forEach((unit) => {
+    const maxHp = getUnitMaxHp(unit);
+    const currentHp = getUnitHp(unit.id);
+    if (currentHp <= 0 || currentHp >= maxHp) return;
+    state.unitHp[unit.id] = Math.min(maxHp, currentHp + UNIT_HP_RECOVERY_RATE * delta);
+  });
+}
+
+function syncUnitHealth(units = getUnits()) {
+  if (!state.unitHp || typeof state.unitHp !== "object") state.unitHp = {};
+  if (!state.unitMaxHp || typeof state.unitMaxHp !== "object") state.unitMaxHp = {};
+
+  const activeIds = new Set(units.map((unit) => unit.id));
+  Object.keys(state.unitHp).forEach((unitId) => {
+    if (!activeIds.has(unitId)) delete state.unitHp[unitId];
+  });
+  Object.keys(state.unitMaxHp).forEach((unitId) => {
+    if (!activeIds.has(unitId)) delete state.unitMaxHp[unitId];
+  });
+
+  units.forEach((unit) => {
+    const maxHp = getUnitMaxHp(unit);
+    const savedHp = Number(state.unitHp[unit.id]);
+    state.unitMaxHp[unit.id] = maxHp;
+    state.unitHp[unit.id] = Number.isFinite(savedHp) ? Math.min(maxHp, Math.max(0, savedHp)) : maxHp;
+  });
+}
+
+function recoverUnitsForNewWave() {
+  getUnits().forEach((unit) => {
+    const maxHp = getUnitMaxHp(unit);
+    const currentHp = getUnitHp(unit.id);
+    const recoveryFloor = Math.ceil(maxHp * 0.56);
+    const recoveryGain = Math.ceil(maxHp * 0.18);
+    state.unitHp[unit.id] = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
+  });
+}
+
+function updateMonsterAttacks(delta) {
+  if (isSpawningNext || !state.enemies.length) return;
+
+  const attackers = state.enemies
+    .filter((enemy) => enemy.x <= MONSTER_ATTACK_RANGE)
+    .sort((a, b) => a.x - b.x || a.y - b.y);
+  if (!attackers.length) {
+    monsterAttackCooldown = Math.min(monsterAttackCooldown, MONSTER_ATTACK_RATE);
+    return;
+  }
+
+  monsterAttackCooldown -= delta;
+  if (monsterAttackCooldown > 0) return;
+
+  const attacker = attackers[0];
+  const target = getMonsterAttackTarget();
+  if (!target) {
+    handlePartyDown();
+    return;
+  }
+
+  const extraPressure = Math.max(0, attackers.length - 1);
+  const damage = getMonsterAttackDamage(attacker, target, extraPressure);
+  state.unitHp[target.id] = Math.max(0, getUnitHp(target.id) - damage);
+  showUnitDamage(damage, target, attacker);
+  pulseUnit(target.id, "is-damaged", 220);
+
+  monsterAttackCooldown += attacker.isBoss ? MONSTER_ATTACK_RATE + 0.55 : MONSTER_ATTACK_RATE;
+
+  if (state.unitHp[target.id] <= 0) {
+    log(`${target.shortName}이 잠시 전투에서 이탈했습니다.`);
+    if (!getLivingUnits().length) handlePartyDown();
+  } else {
+    log(`${attacker.isBoss ? "보스" : "몬스터"}가 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
+  }
+}
+
+function getMonsterAttackTarget() {
+  const livingUnits = getLivingUnits();
+  if (!livingUnits.length) return null;
+  return livingUnits
+    .map((unit) => ({ unit, position: getUnitPosition(unit.id) }))
+    .sort((a, b) => b.position.x - a.position.x || a.position.y - b.position.y)[0].unit;
+}
+
+function getMonsterAttackDamage(enemy, unit, extraPressure = 0) {
+  const maxHp = getUnitMaxHp(unit);
+  const base = enemy.isBoss ? 4 + state.chapter * 0.55 : 1.5 + state.chapter * 0.22 + state.subStage * 0.14;
+  const capRatio = enemy.isBoss ? 0.085 : 0.045;
+  return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(base + extraPressure * 0.65)));
+}
+
+function getUnitMaxHp(unit) {
+  const hpGrowth = getGrowthValue("hp");
+  if (unit.id === "player") return Math.floor(115 + state.playerLevel * 8 + hpGrowth * 6);
+
+  const recruitCount = unit.recruitId ? getRecruitCount(unit.recruitId) : 1;
+  const boost = unit.recruitId ? getRecruitBoostLevel(unit.recruitId) : 0;
+  return Math.floor(72 + recruitCount * 3 + boost * 5 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2);
+}
+
+function getUnitHp(unitId) {
+  return Math.max(0, Number(state.unitHp?.[unitId]) || 0);
+}
+
+function isUnitAlive(unitId) {
+  return getUnitHp(unitId) > 0;
+}
+
+function getLivingUnits() {
+  const units = getUnits();
+  syncUnitHealth(units);
+  return units.filter((unit) => isUnitAlive(unit.id));
+}
+
+function handlePartyDown() {
+  if (isSpawningNext) return;
+
+  if (state.battleMode === "boss") {
+    failBossBattle();
+    return;
+  }
+
+  syncUnitHealth();
+  getUnits().forEach((unit) => {
+    state.unitHp[unit.id] = Math.ceil(getUnitMaxHp(unit) * 0.48);
+  });
+  state.enemies.forEach((enemy) => {
+    enemy.x = Math.min(ENEMY_SPAWN_X + enemy.lane * 3, enemy.x + 18);
+  });
+  monsterAttackCooldown = MONSTER_ATTACK_RATE + 1.4;
+  log("팀이 잠깐 재정비했습니다. 모두 체력을 일부 회복하고 몬스터를 밀어냅니다.");
+  syncEnemySummary();
+}
 function updateAutoCombat(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
@@ -169,14 +301,14 @@ function syncUnitCombatTimers(units) {
 }
 
 function performAttackRound(skill) {
-  getUnits().forEach((unit, index) => {
+  getLivingUnits().forEach((unit, index) => {
     window.setTimeout(() => attackUnit(unit, { skill }), index * 120);
   });
 }
 
 function attackUnit(unit, options = {}) {
   const target = getTargetEnemy();
-  if (isSpawningNext || !target) return;
+  if (isSpawningNext || !target || !isUnitAlive(unit.id)) return;
 
   const skill = Boolean(options.skill);
   const manual = Boolean(options.manual);
@@ -291,53 +423,118 @@ function getSkillTargets(skill) {
 }
 
 function playProjectile(unit, from, target, skill) {
-  const shot = document.createElement("span");
-  shot.className = `projectile is-${unit.attackType}${skill ? " is-skill" : ""}`;
-  shot.style.setProperty("--from-x", `${from.x}%`);
-  shot.style.setProperty("--from-y", `${from.y}px`);
-  shot.style.setProperty("--to-x", `${target.x}%`);
-  shot.style.setProperty("--shot-color", unit.color);
-  refs.effectLayer.appendChild(shot);
+  playAttackEffect(unit, target, { skill, from, motion: "projectile" });
   pulseUnit(unit.id, "is-attacking", 320);
-  window.setTimeout(() => shot.remove(), 480);
 }
 
 function playSlash(unit, target, skill) {
+  const stance = getMeleeStancePosition(target);
   const ally = refs.allyLayer.querySelector(`[data-unit-id="${unit.id}"]`);
   if (ally) {
-    ally.style.setProperty("--slash-x", `${Math.max(36, target.x - 9)}%`);
+    ally.style.setProperty("--slash-x", `${stance.x}%`);
+    ally.style.setProperty("--slash-y", `${stance.y}px`);
     ally.classList.add("is-slashing");
     window.setTimeout(() => ally.classList.remove("is-slashing"), 300);
   }
 
-  const slash = document.createElement("span");
-  slash.className = `slash-effect${skill ? " is-skill" : ""}`;
-  slash.style.setProperty("--hit-x", `${target.x}%`);
-  refs.effectLayer.appendChild(slash);
-  window.setTimeout(() => slash.remove(), 360);
+  playAttackEffect(unit, target, { skill, motion: "melee" });
 }
 
 function playSkillEffect(unit, targets) {
-  const centerX = targets.reduce((sum, target) => sum + target.x, 0) / targets.length;
-  const centerY = targets.reduce((sum, target) => sum + target.y, 0) / targets.length + 64;
-  const effect = document.createElement("span");
-  effect.className = `skill-zone is-${unit.skill.type}`;
-  effect.textContent = unit.skill.type === "all" ? "TEST" : unit.skill.type === "chain" ? "LINK" : "";
-  effect.style.setProperty("--skill-x", `${centerX}%`);
-  effect.style.setProperty("--skill-y", `${centerY}px`);
-  effect.style.setProperty("--skill-color", unit.color);
-  refs.effectLayer.appendChild(effect);
-  window.setTimeout(() => effect.remove(), 620);
+  const melee = unit.attackType === "slash" || unit.skill?.type === "cleave";
+  if (melee && targets.length) {
+    const stance = getMeleeStancePosition(targets[0], { skill: true });
+    const ally = refs.allyLayer.querySelector(`[data-unit-id="${unit.id}"]`);
+    if (ally) {
+      ally.style.setProperty("--slash-x", `${stance.x}%`);
+      ally.style.setProperty("--slash-y", `${stance.y}px`);
+      ally.classList.add("is-slashing");
+      window.setTimeout(() => ally.classList.remove("is-slashing"), 420);
+    }
+  }
 
-  targets.forEach((target) => {
-    const marker = document.createElement("span");
-    marker.className = "skill-hit-marker";
-    marker.style.setProperty("--hit-x", `${target.x}%`);
-    marker.style.setProperty("--hit-y", `${target.y + 82}px`);
-    marker.style.setProperty("--skill-color", unit.color);
-    refs.effectLayer.appendChild(marker);
-    window.setTimeout(() => marker.remove(), 520);
+  targets.forEach((target, index) => {
+    const from = getUnitPosition(unit.id);
+    const motion = melee ? "melee" : "projectile";
+    window.setTimeout(() => playAttackEffect(unit, target, { skill: true, from, motion }), index * 55);
   });
+}
+
+function playAttackEffect(unit, target, options = {}) {
+  const skill = Boolean(options.skill);
+  const melee = options.motion === "melee" || unit.attackType === "slash";
+  const spriteUrl = getEffectSpriteUrl(unit, skill);
+  if (!spriteUrl) return;
+
+  const from = options.from || getUnitPosition(unit.id);
+  const hitPosition = getEffectHitPosition(unit, target, { skill, melee });
+  const effect = document.createElement("span");
+  effect.className = `attack-sprite-effect${skill ? " is-skill" : " is-normal"} ${
+    melee ? "is-melee" : "is-projectile"
+  } is-${getEffectKey(unit)}`;
+  effect.style.setProperty("--effect-url", `url("${spriteUrl}")`);
+  effect.style.setProperty("--effect-from-x", `${melee ? hitPosition.x : from.x}%`);
+  effect.style.setProperty("--effect-from-y", `${melee ? hitPosition.y : from.y + 64}px`);
+  effect.style.setProperty("--effect-to-x", `${hitPosition.x}%`);
+  effect.style.setProperty("--effect-to-y", `${hitPosition.y}px`);
+  effect.style.setProperty("--effect-size", getEffectSize(target, { skill, melee }));
+  refs.effectLayer.appendChild(effect);
+  window.setTimeout(() => effect.remove(), getEffectDuration({ skill, melee }));
+}
+
+function getEffectHitPosition(unit, target, options = {}) {
+  const melee = Boolean(options.melee);
+  const skill = Boolean(options.skill);
+  if (melee) {
+    const stance = getMeleeStancePosition(target, { skill });
+    return {
+      x: Math.min(target.x - (target.isBoss ? 5 : 4), stance.x + (skill ? 7 : 6)),
+      y: stance.y + (skill ? 58 : 50),
+    };
+  }
+
+  const spriteCenterY = target.y + (target.isBoss ? 58 : 46);
+  return {
+    x: target.x,
+    y: spriteCenterY + (skill ? 6 : 0),
+  };
+}
+
+function getMeleeStancePosition(target, options = {}) {
+  const skill = Boolean(options.skill);
+  const distance = target.isBoss ? (skill ? 22 : 19) : skill ? 18 : 15;
+  return {
+    x: Math.max(18, target.x - distance),
+    y: Math.max(22, target.y + (target.isBoss ? 4 : 0)),
+  };
+}
+
+function getEffectSize(target, options = {}) {
+  if (options.skill) return target.isBoss ? "152px" : "124px";
+  if (options.melee) return target.isBoss ? "122px" : "98px";
+  return target.isBoss ? "104px" : "82px";
+}
+
+function getEffectDuration(options = {}) {
+  if (options.skill && !options.melee) return 660;
+  if (options.skill) return 580;
+  if (options.melee) return 440;
+  return 520;
+}
+
+function getEffectSpriteUrl(unit, skill = false) {
+  const key = getEffectKey(unit);
+  const spriteSet = EFFECT_SPRITES[key] || EFFECT_SPRITES.player;
+  return spriteSet[skill ? "skill" : "normal"];
+}
+
+function getEffectKey(unit) {
+  if (unit.id === "player") return "player";
+  if (unit.recruitId === "planner") return "planner";
+  if (unit.recruitId === "business") return "business";
+  if (unit.recruitId === "artist") return "artist";
+  if (unit.recruitId === "qa") return "qa";
+  return "player";
 }
 
 function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
@@ -491,6 +688,30 @@ function showCriticalBurst(target) {
   }
 }
 
+function showUnitDamage(amount, unit, enemy) {
+  const position = getUnitPosition(unit.id);
+  const damage = document.createElement("span");
+  damage.className = "damage-number is-unit-damage";
+  damage.textContent = `-${amount}`;
+  damage.style.setProperty("--hit-x", `${position.x}%`);
+  damage.style.setProperty("--hit-y", `${position.y + 92}px`);
+  damage.style.setProperty("--damage-x-pop", `${enemy.isBoss ? -10 : -6}px`);
+  damage.style.setProperty("--damage-x-apex", `${enemy.isBoss ? -22 : -14}px`);
+  damage.style.setProperty("--damage-x-drop", `${enemy.isBoss ? -16 : -10}px`);
+  damage.style.setProperty("--damage-x-end", `${enemy.isBoss ? -26 : -18}px`);
+  damage.style.setProperty("--damage-y-pop", "-22px");
+  damage.style.setProperty("--damage-y-apex", "-38px");
+  damage.style.setProperty("--damage-y-drop", "4px");
+  damage.style.setProperty("--damage-y-end", "18px");
+  damage.style.setProperty("--damage-tilt-start", "-4deg");
+  damage.style.setProperty("--damage-tilt-pop", "7deg");
+  damage.style.setProperty("--damage-tilt-apex", "-3deg");
+  damage.style.setProperty("--damage-tilt-drop", "2deg");
+  damage.style.setProperty("--damage-tilt-end", "-5deg");
+  refs.effectLayer.appendChild(damage);
+  window.setTimeout(() => damage.remove(), 920);
+}
+
 function pulseUnit(unitId, className, duration) {
   const ally = refs.allyLayer.querySelector(`[data-unit-id="${unitId}"]`);
   if (!ally) return;
@@ -589,6 +810,7 @@ function getEnemyDebuffValue(key) {
 }
 
 function getUnitPosition(unitId) {
-  const index = Math.max(0, getUnits().findIndex((unit) => unit.id === unitId));
-  return getAllyPosition(index);
+  const units = getUnits();
+  const index = Math.max(0, units.findIndex((unit) => unit.id === unitId));
+  return getAllyPosition(index, units.length);
 }

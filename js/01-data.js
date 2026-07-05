@@ -7,6 +7,9 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
+const MONSTER_ATTACK_RANGE = 45;
+const MONSTER_ATTACK_RATE = 3.2;
+const UNIT_HP_RECOVERY_RATE = 1.1;
 const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
@@ -30,6 +33,28 @@ const BGM_TRACKS = {
   field: "Resource/Sound/BGM_Field.mp3",
   boss: "Resource/Sound/BGM_Boss.mp3",
   tycoon: "Resource/Sound/BGM_Tycoon.mp3",
+};
+const EFFECT_SPRITES = {
+  player: {
+    normal: "Resource/Effect/Normal_Attack_Effect/Main_Player_Normal_Effect/Main_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/Main_Player_Normal_Effect/Main_Skill_Sprite.png",
+  },
+  planner: {
+    normal: "Resource/Effect/Normal_Attack_Effect/Game_Designer_Normal_Effect/Gd_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/Game_Designer_Normal_Effect/Gd_Skill_Sprite.png",
+  },
+  business: {
+    normal: "Resource/Effect/Normal_Attack_Effect/PM_Normal_Effect/Pm_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/PM_Normal_Effect/Pm_Skill_Sprite.png",
+  },
+  artist: {
+    normal: "Resource/Effect/Normal_Attack_Effect/Art_Normal_Effect/Art_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/Art_Normal_Effect/Art_Skill_Sprite.png",
+  },
+  qa: {
+    normal: "Resource/Effect/Normal_Attack_Effect/QA_Normal_Effect/Qa_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/QA_Normal_Effect/Qa_Skill_Sprite.png",
+  },
 };
 const defaultAudioSettings = {
   volume: 0.45,
@@ -472,6 +497,8 @@ const defaultState = {
   enemyMaxHp: 10,
   enemyX: ENEMY_SPAWN_X,
   enemies: [],
+  unitHp: {},
+  unitMaxHp: {},
   clickPower: 1,
   playerLevel: 1,
   clearCount: 0,
@@ -509,6 +536,7 @@ let basicAttackCooldown = 0.35;
 let skillAttackCooldown = SKILL_ATTACK_RATE;
 let unitCombatTimers = {};
 let combatEffects = { buffs: [], enemyDebuffs: [], teamHp: 100, teamMaxHp: 100 };
+let monsterAttackCooldown = MONSTER_ATTACK_RATE;
 let saveCooldown = 0;
 let lastTick = Date.now();
 let gameTimer = null;
