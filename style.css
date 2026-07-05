@@ -3422,6 +3422,25 @@ textarea {
   background-size: 300% 100%;
 }
 
+.squad-slot--leader {
+  border-color: #39725a;
+  background: #e1efe2;
+}
+
+.squad-slot-fixed {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  padding: 4px 5px;
+  border: 1px solid #39725a;
+  border-radius: 5px;
+  background: rgba(225, 239, 226, 0.86);
+  color: #27624c;
+  font-size: 12px !important;
+  font-weight: 900;
+  line-height: 1.2 !important;
+}
+
 .squad-position {
   color: #5f4630;
   font-size: 12px;
@@ -3447,12 +3466,14 @@ textarea {
 /* Keep company summary labels and long values fully visible. */
 .company-status-strip {
   align-items: stretch;
+  margin-top: 24px;
+  margin-bottom: 8px;
 }
 
 .company-status-strip > div {
   display: flex;
-  min-height: 64px;
-  padding: 8px 10px;
+  min-height: 76px;
+  padding: 10px;
   flex-direction: column;
   justify-content: center;
   overflow: visible;
@@ -3479,18 +3500,52 @@ textarea {
 @media (max-width: 420px) {
   .message-line {
     padding-inline: 8px;
+    padding-bottom: 10px;
   }
 
   .company-status-strip {
     gap: 5px;
+    margin-top: 18px;
+    margin-bottom: 6px;
   }
 
   .company-status-strip > div {
-    min-height: 60px;
-    padding: 7px 5px;
+    min-height: 72px;
+    padding: 8px 5px;
   }
 
   .company-status-strip span {
     font-size: 11px !important;
   }
+}
+
+/* Show only the representative and coworkers assigned to the active squad. */
+.employee-crowd {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(4px, 1.4vw, 12px);
+}
+
+.scene-employee {
+  flex: 0 0 clamp(38px, 6vw, 54px);
+  width: clamp(38px, 6vw, 54px);
+  height: clamp(46px, 7vw, 64px);
+  border-radius: 0;
+  background-color: transparent;
+  background-image: var(--employee-image);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  box-shadow: none;
+  filter: drop-shadow(0 4px 0 rgba(45, 33, 25, 0.22));
+  image-rendering: pixelated;
+}
+
+.scene-employee::before {
+  content: none;
+}
+
+.scene-employee.is-leader {
+  background-position: left center;
+  background-size: 300% 100%;
 }

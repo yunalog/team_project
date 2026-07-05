@@ -284,13 +284,10 @@ function handleSquadChange(event) {
 
   const nextId = select.value || null;
   if (nextId) {
-    const owned = getRecruitCount(nextId);
-    const deployedElsewhere = state.squad.reduce(
-      (count, id, index) => count + (index !== slotIndex && id === nextId ? 1 : 0),
-      0
-    );
-    if (!recruits.some((recruit) => recruit.id === nextId) || deployedElsewhere >= owned) {
-      log("보유한 동료 수보다 많이 배치할 수 없습니다.");
+    const isRecruited = getRecruitCount(nextId) > 0;
+    const isDeployedElsewhere = state.squad.some((id, index) => index !== slotIndex && id === nextId);
+    if (!recruits.some((recruit) => recruit.id === nextId) || !isRecruited || isDeployedElsewhere) {
+      log("영입하지 않은 동료이거나 이미 다른 자리에 배치된 동료입니다.");
       renderSquadManagement();
       return;
     }
@@ -300,7 +297,8 @@ function handleSquadChange(event) {
   state.squadConfigured = true;
   lastRosterKey = "";
   const recruit = recruits.find((item) => item.id === nextId);
-  log(recruit ? `${slotIndex + 1}번 위치에 ${recruit.name} 배치 완료` : `${slotIndex + 1}번 위치를 비웠습니다.`);
+  const positionNumber = slotIndex + 2;
+  log(recruit ? `${positionNumber}번 자리에 ${recruit.name} 배치 완료` : `${positionNumber}번 자리를 비웠습니다.`);
   renderAll();
 }
 
@@ -407,10 +405,16 @@ function normalizeState(nextState) {
     companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
-    squad: nextState.squadConfigured
+    squad:
+      nextState.squadConfigured &&
+      Array.isArray(nextState.squad) &&
+      nextState.squad.length === defaultState.squad.length
       ? normalizeSquad(nextState.squad, nextState.recruits)
       : [...defaultState.squad],
-    squadConfigured: Boolean(nextState.squadConfigured),
+    squadConfigured:
+      Boolean(nextState.squadConfigured) &&
+      Array.isArray(nextState.squad) &&
+      nextState.squad.length === defaultState.squad.length,
     tools: nextState.tools && typeof nextState.tools === "object" ? nextState.tools : {},
     growthLevels:
       nextState.growthLevels && typeof nextState.growthLevels === "object"
@@ -453,16 +457,16 @@ function normalizeRecruitPromotions(promotions) {
 }
 
 function normalizeSquad(savedSquad, ownedRecruits = {}) {
-  const normalized = [null, null, null, null];
-  const used = {};
+  const normalized = [null, null, null];
+  const used = new Set();
   const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
 
   if (Array.isArray(savedSquad)) {
     savedSquad.slice(0, normalized.length).forEach((id, index) => {
-      const owned = Math.max(0, Number(ownedRoster[id]) || 0);
-      if (!recruits.some((recruit) => recruit.id === id) || (used[id] || 0) >= owned) return;
+      const level = Math.max(0, Number(ownedRoster[id]) || 0);
+      if (!recruits.some((recruit) => recruit.id === id) || level <= 0 || used.has(id)) return;
       normalized[index] = id;
-      used[id] = (used[id] || 0) + 1;
+      used.add(id);
     });
   }
 
