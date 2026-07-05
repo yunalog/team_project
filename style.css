@@ -5061,7 +5061,7 @@ textarea {
   min-height: 0;
   overflow: hidden;
   align-items: stretch;
-  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .tab-panel[data-panel="recruit"] .recruit-board__left,
