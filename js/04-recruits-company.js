@@ -160,6 +160,86 @@ function getRecruitSkillText(recruit) {
   return skill.desc || skill.name || "스킬 정보 없음";
 }
 
+
+function getRecruitSpriteSrc(recruit) {
+  return recruit?.sprites?.idle || recruit?.sprite || "";
+}
+
+function getRecruitAvatarMarkup(recruit, className = "recruit-card-avatar") {
+  const sprite = getRecruitSpriteSrc(recruit);
+  if (sprite) {
+    return `<span class="${className} has-character" role="img" aria-label="${recruit.name}" style="--recruit-image: url('${sprite}'); --recruit-color: ${recruit.color};"></span>`;
+  }
+  return `<span class="${className}" style="--recruit-color: ${recruit.color};">${recruit.mark}</span>`;
+}
+
+function formatRecruitStatRows(recruit) {
+  const stats = getRecruitBattleStats(recruit);
+  const rows = [
+    ["기본 공격력", stats.attackPower.toFixed(1)],
+    ["공격속도", `${stats.attackInterval.toFixed(2)}초`],
+    ["치명타확률", `${(stats.criticalChance * 100).toFixed(1)}%`],
+  ];
+  if (hasRecruitSkillPowerStat(recruit)) rows.push(["스킬피해량", stats.skillPower.toFixed(1)]);
+  return rows
+    .map(([label, value]) => `<span><b>${label}</b><strong>${value}</strong></span>`)
+    .join("");
+}
+
+function selectRecruitForGrowth(id) {
+  const recruit = recruits.find((item) => item.id === id);
+  if (!recruit) return;
+  activeRecruitPanelId = recruit.id;
+  renderShop();
+}
+
+function getSelectedRecruitForGrowth() {
+  return recruits.find((recruit) => recruit.id === activeRecruitPanelId) || recruits[0] || null;
+}
+
+function renderRecruitGrowthPanel() {
+  if (!refs.recruitGrowthPanel) return;
+  const recruit = getSelectedRecruitForGrowth();
+  if (!recruit) {
+    refs.recruitGrowthPanel.innerHTML = `
+      <div class="recruit-focus-empty">
+        <strong>직군을 선택하세요</strong>
+        <p>왼쪽 영입 카드에서 직군을 클릭하면 상세 성장 정보가 표시됩니다.</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!activeRecruitPanelId) activeRecruitPanelId = recruit.id;
+  const count = getRecruitCount(recruit.id);
+  const rankLabel = getRecruitRankLabel(recruit, count);
+  const cost = getRecruitBuyCost(recruit, count);
+  const promotionReady = shouldShowRecruitPromotionButton(recruit, count);
+  const promotionCost = getRecruitPromotionCost(recruit);
+  const actionDataset = promotionReady ? `data-recruit-promote="${recruit.id}"` : `data-buy-recruit="${recruit.id}"`;
+  const actionClass = promotionReady ? "shop-promote-button recruit-focus-action" : "recruit-focus-action";
+  const actionDisabled = promotionReady ? state.gold < promotionCost : state.gold < cost;
+  const buttonText = promotionReady ? `승급 🪙 ${promotionCost}` : count <= 0 ? `동료 획득 🪙 ${cost}` : `레벨업 🪙 ${cost}`;
+
+  refs.recruitGrowthPanel.innerHTML = `
+    <div class="recruit-focus-card" style="--recruit-color: ${recruit.color};">
+      <div class="recruit-focus-portrait">
+        ${getRecruitAvatarMarkup(recruit, "recruit-focus-avatar")}
+      </div>
+      <div class="recruit-focus-copy">
+        <span class="recruit-focus-role">${recruit.category}</span>
+        <strong>${rankLabel} Lv.${count}</strong>
+        <p>${recruit.desc}</p>
+        <div class="recruit-focus-skill">
+          <b>${recruit.skill?.name || "스킬"}</b>
+          <span>${getRecruitSkillText(recruit)}</span>
+        </div>
+      </div>
+      <button class="${actionClass}" type="button" ${actionDataset} ${actionDisabled ? "disabled" : ""}>${buttonText}</button>
+    </div>
+  `;
+}
+
 function renderRecruitDetailModal() {
   if (!refs.recruitDetailModal) return;
 
@@ -256,6 +336,7 @@ function confirmRecruitPromotion() {
   }
 
   state.gold -= cost;
+  activeRecruitPanelId = recruit.id;
   state.recruitPromotions[recruit.id] = (state.recruitPromotions[recruit.id] || 0) + 1;
   addCompanyXp(6);
   refs.recruitPromotionConfirmButton.disabled = true;
@@ -386,6 +467,7 @@ function buyRecruit(id) {
 
   state.gold -= cost;
   state.recruits[id] = count + 1;
+  activeRecruitPanelId = id;
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
   const rankLabel = getRecruitRankLabel(recruit, count + 1);

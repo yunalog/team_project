@@ -551,3 +551,4 @@ let autoDrawTimer = null;
 let equipmentPanelExpanded = false;
 let activeRecruitDetailId = null;
 let activeRecruitPromotionId = null;
+let activeRecruitPanelId = null;

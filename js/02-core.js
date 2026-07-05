@@ -41,6 +41,7 @@ function initGame() {
     attackTimerText: document.querySelector("#attackTimerText"),
     saveStateText: document.querySelector("#saveStateText"),
     recruitList: document.querySelector("#recruitList"),
+    recruitGrowthPanel: document.querySelector("#recruitGrowthPanel"),
     recruitDetailModal: document.querySelector("#recruitDetailModal"),
     recruitDetailBadge: document.querySelector("#recruitDetailBadge"),
     recruitPromotionModal: document.querySelector("#recruitPromotionModal"),
@@ -115,6 +116,7 @@ function bindEvents() {
   document.addEventListener("click", (event) => {
     const tab = event.target.closest("[data-tab]");
     const recruitButton = event.target.closest("[data-buy-recruit]");
+    const recruitSelectCard = event.target.closest("[data-select-recruit]");
     const recruitPromotionButton = event.target.closest("[data-recruit-promote]");
     const recruitDetailButton = event.target.closest("[data-recruit-detail]");
     const recruitModalDismiss = event.target.closest("[data-close-recruit-modal]");
@@ -123,6 +125,7 @@ function bindEvents() {
     const growthButton = event.target.closest("[data-upgrade-growth]");
 
     if (tab) switchTab(tab);
+    if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
     if (recruitPromotionButton) openRecruitPromotion(recruitPromotionButton.dataset.recruitPromote);
     if (recruitDetailButton) openRecruitDetail(recruitDetailButton.dataset.recruitDetail);
