@@ -5,6 +5,7 @@
     .querySelectorAll(".tab-panel")
     .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === activeTab));
   updatePrimaryScene();
+  if (activeTab === "tools") window.requestAnimationFrame(syncSquadRosterHeight);
   if (hasStartedGame) playBgm(getActiveBgmKey(), { silentFail: true });
 }
 
@@ -483,8 +484,19 @@ function renderSquadManagement() {
       `;
     })
     .join("");
+  window.requestAnimationFrame(syncSquadRosterHeight);
 }
 
+function syncSquadRosterHeight() {
+  if (!refs?.squadFormation || !refs?.squadRoster) return;
+
+  const formationHeight = refs.squadFormation.getBoundingClientRect().height;
+  if (formationHeight <= 0) return;
+
+  const height = `${formationHeight}px`;
+  refs.squadRoster.style.height = height;
+  refs.squadRoster.style.maxHeight = height;
+}
 
 function renderSquadSynergyPanel() {
   const activeSynergy = getActiveSquadSynergy();
@@ -551,6 +563,9 @@ function log(message) {
   if (refs && refs.battleLog) refs.battleLog.textContent = message;
 }
 
+window.addEventListener("resize", () => {
+  if (activeTab === "tools") window.requestAnimationFrame(syncSquadRosterHeight);
+});
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
