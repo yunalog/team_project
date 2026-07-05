@@ -3422,6 +3422,25 @@ textarea {
   background-size: 300% 100%;
 }
 
+.squad-slot--leader {
+  border-color: #39725a;
+  background: #e1efe2;
+}
+
+.squad-slot-fixed {
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  padding: 4px 5px;
+  border: 1px solid #39725a;
+  border-radius: 5px;
+  background: rgba(225, 239, 226, 0.86);
+  color: #27624c;
+  font-size: 12px !important;
+  font-weight: 900;
+  line-height: 1.2 !important;
+}
+
 .squad-position {
   color: #5f4630;
   font-size: 12px;
@@ -3447,6 +3466,8 @@ textarea {
 /* Keep company summary labels and long values fully visible. */
 .company-status-strip {
   align-items: stretch;
+  margin-top: 10px;
+  margin-bottom: 2px;
 }
 
 .company-status-strip > div {

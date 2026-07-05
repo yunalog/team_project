@@ -311,7 +311,7 @@ const defaultState = {
   companyXp: 0,
   elapsed: 0,
   recruits: {},
-  squad: [null, null, null, null],
+  squad: [null, null, null],
   squadConfigured: false,
   tools: {},
   growthLevels: {

@@ -361,16 +361,20 @@ function renderShop() {
 }
 
 function renderSquadManagement() {
-  const positionNames = ["1번 자리", "2번 자리", "3번 자리", "4번 자리"];
+  const positionNames = ["2번 자리", "3번 자리", "4번 자리"];
   const deployedIds = new Set(state.squad.filter(Boolean));
 
   const leaderMarkup = `
-    <div class="squad-leader">
-      ${getSquadCharacterAvatarMarkup(null, true)}
-      <div>
-        <strong>대표</strong>
-        <small>리더 · 고정 배치</small>
-      </div>
+    <div class="squad-slot squad-slot--leader is-filled">
+      <span class="squad-position">1번 자리</span>
+      <span class="squad-slot-body">
+        ${getSquadCharacterAvatarMarkup(null, true)}
+        <span>
+          <strong>대표</strong>
+          <small>리더 · 고정 배치</small>
+        </span>
+      </span>
+      <span class="squad-slot-fixed">고정 배치</span>
     </div>
   `;
 
