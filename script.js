@@ -1324,8 +1324,12 @@ function getRecruitBoostLevel(id) {
   return state.recruitBoosts?.[id] || 0;
 }
 
+function getRecruitBuyCost(recruit, count = getRecruitCount(recruit.id)) {
+  return 1;
+}
+
 function getRecruitEnhancementCost(id) {
-  return 24 + getRecruitBoostLevel(id) * 16;
+  return 1;
 }
 
 function getRecruitPromotionCount(id) {
@@ -1333,8 +1337,7 @@ function getRecruitPromotionCount(id) {
 }
 
 function getRecruitPromotionCost(recruit) {
-  const count = getRecruitCount(recruit.id);
-  return Math.max(60, Math.floor(costFor(recruit.baseCost, count) * 1.8));
+  return 1;
 }
 
 function shouldShowRecruitPromotionButton(recruit, count = getRecruitCount(recruit.id)) {
@@ -1572,7 +1575,7 @@ function costFor(baseCost, count) {
 function buyRecruit(id) {
   const recruit = recruits.find((item) => item.id === id);
   const count = getRecruitCount(id);
-  const cost = costFor(recruit.baseCost, count);
+  const cost = getRecruitBuyCost(recruit, count);
   if (state.gold < cost) return;
 
   state.gold -= cost;
@@ -1917,9 +1920,7 @@ function formatGrowthValue(type, value) {
 }
 
 function getGrowthCost(type) {
-  const base = growthConfigs[type]?.baseCost || 20;
-  const level = state.growthLevels?.[type] || 0;
-  return Math.floor(base * Math.pow(1.25, level));
+  return 1;
 }
 
 function upgradeGrowth(type) {
@@ -2236,7 +2237,7 @@ function renderShop() {
         ? categoryItems
             .map((recruit) => {
               const count = getRecruitCount(recruit.id);
-              const cost = costFor(recruit.baseCost, count);
+              const cost = getRecruitBuyCost(recruit, count);
               const label = getRecruitRankLabel(recruit, count);
               const promotionReady = shouldShowRecruitPromotionButton(recruit, count);
               const promotionCost = getRecruitPromotionCost(recruit);
