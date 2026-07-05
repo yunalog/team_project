@@ -97,12 +97,21 @@ function getRecruitPromotionTierByCount(count) {
   return Math.max(0, Math.floor((Number(count) || 0) / 10));
 }
 
+function getRecruitPromotionTier(recruit) {
+  const achievedTier = Math.min(5, getRecruitPromotionTierByCount(getRecruitLevel(recruit.id)));
+  const promotedTier = Math.min(5, getRecruitPromotionCount(recruit.id));
+  return Math.min(achievedTier, promotedTier);
+}
+
+function hasRecruitSkillPowerStat(recruit) {
+  return recruit.id === "artist" || recruit.id === "sound";
+}
+
 function getRecruitBattleStats(recruit) {
   const level = Math.max(1, getRecruitLevel(recruit.id));
-  const promotionTier = getRecruitPromotionTierByCount(level);
+  const promotionTier = getRecruitPromotionTier(recruit);
   const base = recruit.baseStats || {
     attackPower: recruit.dps || 1,
-    skillPower: recruit.dps || 1,
     attackInterval: BASIC_ATTACK_RATE,
     criticalChance: 0,
   };
@@ -112,8 +121,13 @@ function getRecruitBattleStats(recruit) {
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
   const boostBonus = getRecruitBoostLevel(recruit.id);
   const attackPower = base.attackPower + levelBonus * 0.12 + promotionTier * 1.2 + toolBonus + boostBonus;
-  const skillPower = (base.skillPower || base.attackPower) + levelBonus * 0.15 + promotionTier * 1.5 + Math.floor(boostBonus * 0.5);
-  const attackInterval = Math.max(0.35, (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.25, promotionTier * 0.015 + levelBonus * 0.001)));
+  const skillPower = hasRecruitSkillPowerStat(recruit)
+    ? (base.skillPower || base.attackPower || 1) + levelBonus * 0.15 + promotionTier * 1.5 + Math.floor(boostBonus * 0.5)
+    : 0;
+  const attackInterval = Math.max(
+    0.35,
+    (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.25, promotionTier * 0.015 + levelBonus * 0.001))
+  );
   const criticalChance = Math.min(0.55, (base.criticalChance || 0) + levelBonus * 0.001 + promotionTier * 0.01);
   return {
     attackPower,
@@ -130,7 +144,15 @@ function getRecruitPower(recruit) {
 
 function formatRecruitStatLine(recruit) {
   const stats = getRecruitBattleStats(recruit);
-  return `공격 ${stats.attackPower.toFixed(1)} · 스킬 ${stats.skillPower.toFixed(1)} · 속도 ${stats.attackInterval.toFixed(2)}초 · 치명 ${(stats.criticalChance * 100).toFixed(1)}%`;
+  const parts = [
+    `공격 ${stats.attackPower.toFixed(1)}`,
+    `속도 ${stats.attackInterval.toFixed(2)}초`,
+    `치명 ${(stats.criticalChance * 100).toFixed(1)}%`,
+  ];
+  if (hasRecruitSkillPowerStat(recruit)) {
+    parts.splice(1, 0, `스킬 ${stats.skillPower.toFixed(1)}`);
+  }
+  return parts.join(" · ");
 }
 
 function getRecruitSkillText(recruit) {
@@ -204,7 +226,7 @@ function renderRecruitPromotionModal() {
     ? `<img src="${recruit.sprites.idle}" alt="${recruit.name}" />`
     : `<span>${recruit.mark}</span>`;
   refs.recruitPromotionTitle.textContent = `${recruit.name} 승급`;
-  refs.recruitPromotionDesc.textContent = `${recruit.category} 직군이 진화합니다. 승급 비용은 ${getRecruitPromotionCost(recruit)} 자금입니다.`;
+  refs.recruitPromotionDesc.textContent = `${recruit.category} 직군이 진화합니다. 승급 완료 후 추가 능력치가 크게 상승합니다. 승급 비용은 ${getRecruitPromotionCost(recruit)} 자금입니다.`;
   refs.recruitPromotionConfirmButton.disabled = state.gold < getRecruitPromotionCost(recruit);
 }
 

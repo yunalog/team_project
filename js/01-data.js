@@ -49,7 +49,7 @@ const recruits = [
     baseCost: 25,
     dps: 1,
     attackType: "plan",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 2, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 2, criticalChance: 0 },
     skill: {
       type: "teamBuff",
       name: "전략 회의",
@@ -76,7 +76,7 @@ const recruits = [
     baseCost: 55,
     dps: 5,
     attackType: "code",
-    baseStats: { attackPower: 5, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 5, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "selfBuff",
       name: "집중 코딩",
@@ -128,7 +128,7 @@ const recruits = [
     baseCost: 80,
     dps: 1,
     attackType: "plan",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "teamBuff",
       name: "라이브 운영 지원",
@@ -157,7 +157,7 @@ const recruits = [
     baseCost: 140,
     dps: 1,
     attackType: "qa",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "enemyDebuff",
       name: "취약점 리포트",
@@ -203,7 +203,7 @@ const recruits = [
     baseCost: 210,
     dps: 3,
     attackType: "slash",
-    baseStats: { attackPower: 3, skillPower: 1, attackInterval: 2, criticalChance: 0 },
+    baseStats: { attackPower: 3, attackInterval: 2, criticalChance: 0 },
     basicTargets: 3,
     skill: {
       type: "selfBuff",
@@ -226,7 +226,7 @@ const recruits = [
     baseCost: 260,
     dps: 1,
     attackType: "qa",
-    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    baseStats: { attackPower: 1, attackInterval: 1.5, criticalChance: 0 },
     skill: {
       type: "resetAllyCooldowns",
       name: "쿨타임 분석",
@@ -300,11 +300,12 @@ const recruitRankNames = {
   ],
 };
 
-function getRecruitRankLabel(recruit, count) {
+function getRecruitRankLabel(recruit, count = getRecruitCount(recruit.id)) {
   const rankNames = recruitRankNames[recruit.id];
   if (!rankNames) return recruit.name;
-  const tier = Math.min(5, Math.floor(count / 10));
-  return rankNames[tier];
+  const achievedTier = Math.min(5, Math.floor((Number(count) || 0) / 10));
+  const promotedTier = Math.min(5, Number(state?.recruitPromotions?.[recruit.id]) || 0);
+  return rankNames[Math.min(achievedTier, promotedTier)];
 }
 
 
