@@ -451,7 +451,7 @@ function normalizeRecruitPromotions(promotions) {
 }
 
 function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
-  const normalized = [null, null, null, null];
+  const normalized = Array(SQUAD_MEMBER_LIMIT).fill(null);
   const used = {};
   const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
 

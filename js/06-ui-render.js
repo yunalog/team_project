@@ -361,7 +361,7 @@ function renderShop() {
 }
 
 function renderSquadManagement() {
-  const positionNames = ["1번 자리", "2번 자리", "3번 자리", "4번 자리"];
+  const positionNames = ["1번 자리", "2번 자리", "3번 자리"];
   const deployedIds = new Set(state.squad.filter(Boolean));
 
   const leaderMarkup = `

@@ -35,6 +35,7 @@ const defaultAudioSettings = {
   volume: 0.45,
   muted: false,
 };
+const SQUAD_MEMBER_LIMIT = 3; // 대표 1명 + 동료 3명 = 업무 스쿼드 최대 4명
 
 const recruits = [
   {
@@ -127,6 +128,45 @@ const recruits = [
       skill: "Anim/Player_QA/QA_Skill.png",
     },
   },
+  {
+    id: "sound",
+    name: "사운드 디자이너",
+    shortName: "사운드",
+    mark: "S",
+    color: "#0891b2",
+    desc: "효과음과 BGM으로 팀 사기를 올려 연속 공격을 지원합니다.",
+    category: "사운드직군",
+    baseCost: 170,
+    dps: 9,
+    attackType: "plan",
+    skill: { type: "chain", name: "리듬 부스트", targets: 3, multiplier: 1.35 },
+  },
+  {
+    id: "director",
+    name: "연출가",
+    shortName: "연출",
+    mark: "M",
+    color: "#db2777",
+    desc: "전투 흐름을 연출해 여러 업무를 한 번에 압박합니다.",
+    category: "연출직군",
+    baseCost: 210,
+    dps: 11,
+    attackType: "slash",
+    skill: { type: "cleave", name: "시네마틱 컷", targets: 3, multiplier: 1.7 },
+  },
+  {
+    id: "dataAnalyst",
+    name: "데이터 분석가",
+    shortName: "데이터",
+    mark: "DA",
+    color: "#16a34a",
+    desc: "지표를 분석해 약점을 찾아내고 안정적인 피해를 줍니다.",
+    category: "데이터 분석직군",
+    baseCost: 260,
+    dps: 13,
+    attackType: "qa",
+    skill: { type: "aoe", name: "지표 인사이트", radius: 16, multiplier: 1.55 },
+  },
 ];
 
 const recruitCategories = [
@@ -135,6 +175,9 @@ const recruitCategories = [
   "기획직군",
   "사업/운영직군",
   "QA직군",
+  "사운드직군",
+  "연출직군",
+  "데이터 분석직군",
 ];
 
 const recruitRankNames = {
@@ -177,6 +220,16 @@ const recruitRankNames = {
     "디버깅 장인",
     "품질 수호자",
     "전설의 버그 슬레이어",
+  ],
+  sound: ["사운드 1", "사운드 2", "사운드 3", "사운드 4", "사운드 5", "사운드 6"],
+  director: ["연출 1", "연출 2", "연출 3", "연출 4", "연출 5", "연출 6"],
+  dataAnalyst: [
+    "데이터 분석 1",
+    "데이터 분석 2",
+    "데이터 분석 3",
+    "데이터 분석 4",
+    "데이터 분석 5",
+    "데이터 분석 6",
   ],
 };
 
@@ -311,7 +364,7 @@ const defaultState = {
   companyXp: 0,
   elapsed: 0,
   recruits: {},
-  squad: [null, null, null, null],
+  squad: Array(SQUAD_MEMBER_LIMIT).fill(null),
   squadConfigured: false,
   tools: {},
   growthLevels: {
