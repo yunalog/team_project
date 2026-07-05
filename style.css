@@ -4229,3 +4229,175 @@ textarea {
   font-size: 10px;
   line-height: 1.35;
 }
+
+/* Keep combat contribution and the manual action anchored together. */
+.message-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 230px) minmax(142px, max-content);
+  align-items: center;
+}
+
+#battleLog {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#dpsText {
+  width: 100%;
+  min-width: 190px;
+  padding: 8px 12px;
+  color: var(--ink);
+  font-size: 14px !important;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  white-space: nowrap;
+}
+
+#manualWorkButton {
+  min-width: 142px;
+  min-height: 44px;
+  padding-inline: 15px;
+  font-size: 15px !important;
+  white-space: nowrap;
+}
+
+.company-status-strip {
+  grid-column: 1 / -1;
+}
+
+/* Increase battlefield and company-scene character readability. */
+.ally {
+  width: 108px;
+}
+
+.ally-hp-bar {
+  width: 62px;
+}
+
+.ally-sprite {
+  width: 69px;
+  height: 83px;
+  font-size: 29px;
+}
+
+.ally-sprite-image {
+  width: 76px;
+  height: 94px;
+}
+
+.ally-sprite-sheet {
+  width: 74px;
+  height: 74px;
+}
+
+.ally-state-sprite {
+  width: 136px;
+  height: 88px;
+}
+
+.enemy {
+  width: 128px;
+}
+
+.enemy.is-boss {
+  width: 172px;
+}
+
+.enemy-sprite {
+  width: 84px;
+  height: 84px;
+}
+
+.enemy.is-boss .enemy-sprite {
+  width: 126px;
+  height: 126px;
+}
+
+.enemy-hp-bar {
+  width: 86px;
+}
+
+.enemy.is-boss .enemy-hp-bar {
+  width: 130px;
+}
+
+.scene-employee {
+  flex-basis: clamp(44px, 7vw, 62px);
+  width: clamp(44px, 7vw, 62px);
+  height: clamp(54px, 8.2vw, 76px);
+}
+
+@media (max-width: 560px) {
+  .message-line {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+
+  #battleLog {
+    grid-column: 1 / -1;
+  }
+
+  #dpsText {
+    min-width: 0;
+  }
+
+  #manualWorkButton {
+    min-width: 126px;
+    padding-inline: 11px;
+  }
+
+  .ally {
+    width: 82px;
+  }
+
+  .ally-hp-bar {
+    width: 60px;
+  }
+
+  .ally-sprite {
+    width: 56px;
+    height: 70px;
+    font-size: 24px;
+  }
+
+  .ally-sprite-image {
+    width: 63px;
+    height: 79px;
+  }
+
+  .ally-sprite-sheet {
+    width: 62px;
+    height: 62px;
+  }
+
+  .ally-state-sprite {
+    width: 66px;
+    height: 66px;
+  }
+
+  .enemy {
+    width: 136px;
+  }
+
+  .enemy-sprite {
+    width: 92px;
+    height: 92px;
+  }
+
+  .enemy.is-boss {
+    width: 180px;
+  }
+
+  .enemy.is-boss .enemy-sprite {
+    width: 136px;
+    height: 136px;
+  }
+
+  .enemy-hp-bar {
+    width: 94px;
+  }
+
+  .enemy.is-boss .enemy-hp-bar {
+    width: 140px;
+  }
+}
