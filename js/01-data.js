@@ -35,6 +35,7 @@ const defaultAudioSettings = {
   volume: 0.45,
   muted: false,
 };
+const SQUAD_MEMBER_LIMIT = 3; // 대표 1명 + 동료 3명 = 업무 스쿼드 최대 4명
 
 const recruits = [
   {
@@ -43,12 +44,21 @@ const recruits = [
     shortName: "기획",
     mark: "P",
     color: "#f59e0b",
-    desc: "요구사항을 정리해 자동 기여도를 올립니다.",
+    desc: "요구사항을 정리하고 팀 전투력을 강화합니다.",
     category: "기획직군",
     baseCost: 25,
     dps: 1,
     attackType: "plan",
-    skill: { type: "chain", name: "일정 공유", targets: 3, multiplier: 1.2 },
+    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 2, criticalChance: 0 },
+    skill: {
+      type: "teamBuff",
+      name: "전략 회의",
+      cooldown: 10,
+      duration: 5,
+      attackPower: 0.2,
+      skillDamage: 0.2,
+      desc: "5초 동안 전체 동료 공격력과 스킬 피해량 20% 증가",
+    },
     sprites: {
       idle: "Anim/Player_CP/CP_Idle.png",
       attack: "Anim/Player_CP/CP_Atk.png",
@@ -61,12 +71,20 @@ const recruits = [
     shortName: "개발",
     mark: "D",
     color: "#2563eb",
-    desc: "핵심 기능을 빠르게 구현합니다.",
+    desc: "높은 기본 공격력으로 핵심 기능을 빠르게 구현합니다.",
     category: "개발직군",
     baseCost: 55,
-    dps: 3,
+    dps: 5,
     attackType: "code",
-    skill: { type: "aoe", name: "빌드 폭발", radius: 14, multiplier: 1.45 },
+    baseStats: { attackPower: 5, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    skill: {
+      type: "selfBuff",
+      name: "집중 코딩",
+      cooldown: 7,
+      duration: 4,
+      attackSpeed: 0.3,
+      desc: "4초 동안 자신의 공격속도 30% 증가",
+    },
     sprites: {
       idle: "Anim/Player_DG/DG_Idle.png",
       attack: "Anim/Player_DG/DG_ATK.png",
@@ -79,12 +97,20 @@ const recruits = [
     shortName: "아트",
     mark: "A",
     color: "#ec4899",
-    desc: "펜으로 근접 베기 공격을 합니다.",
+    desc: "스킬 피해량이 높고 광역 공격에 강합니다.",
     category: "아트직군",
     baseCost: 90,
-    dps: 5,
+    dps: 1,
     attackType: "slash",
-    skill: { type: "cleave", name: "잉크 소용돌이", targets: 2, multiplier: 1.9 },
+    baseStats: { attackPower: 1, skillPower: 10, attackInterval: 2, criticalChance: 0 },
+    skill: {
+      type: "skillAoeDamage",
+      name: "컬러 스플래시",
+      cooldown: 5,
+      radius: 18,
+      multiplier: 1,
+      desc: "스킬 피해량에 비례한 광역 데미지",
+    },
     sprites: {
       idle: "Anim/Player_ART/ART_Idle.png",
       attack: "Anim/Player_ART/ART_Atk.png",
@@ -97,12 +123,23 @@ const recruits = [
     shortName: "사업",
     mark: "B",
     color: "#f97316",
-    desc: "사업과 운영을 관리해 팀의 성장을 지원합니다.",
+    desc: "라이브 운영 노하우로 전체 동료를 강화합니다.",
     category: "사업/운영직군",
     baseCost: 80,
-    dps: 4,
+    dps: 1,
     attackType: "plan",
-    skill: { type: "chain", name: "협업 조율", targets: 2, multiplier: 1.3 },
+    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    skill: {
+      type: "teamBuff",
+      name: "라이브 운영 지원",
+      cooldown: 10,
+      duration: 5,
+      attackPower: 0.05,
+      skillDamage: 0.05,
+      attackSpeed: 0.1,
+      criticalChance: 0.1,
+      desc: "5초 동안 전체 동료 공격력 5%, 스킬 피해량 5%, 공격속도 10%, 치명타 확률 10% 증가",
+    },
     sprites: {
       idle: "Anim/Player_BG/BG_Idle.png",
       attack: "Anim/Player_BG/BG_Atk.png",
@@ -115,16 +152,86 @@ const recruits = [
     shortName: "QA",
     mark: "Q",
     color: "#7c3aed",
-    desc: "버그를 발견해 적 체력을 꾸준히 깎습니다.",
+    desc: "검증으로 적이 받는 피해를 증가시킵니다.",
     category: "QA직군",
     baseCost: 140,
-    dps: 8,
+    dps: 1,
     attackType: "qa",
-    skill: { type: "all", name: "전체 회귀 테스트", multiplier: 0.9 },
+    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    skill: {
+      type: "enemyDebuff",
+      name: "취약점 리포트",
+      cooldown: 10,
+      duration: 5,
+      damageTaken: 0.1,
+      desc: "5초 동안 모든 적이 아군에게 받는 피해 10% 증가",
+    },
     sprites: {
       idle: "Anim/Player_QA/QA_Idle.png",
       attack: "Anim/Player_QA/QA_Atk.png",
       skill: "Anim/Player_QA/QA_Skill.png",
+    },
+  },
+  {
+    id: "sound",
+    name: "사운드 디자이너",
+    shortName: "사운드",
+    mark: "S",
+    color: "#0891b2",
+    desc: "스킬 피해량을 기반으로 전체 아군을 회복합니다.",
+    category: "사운드직군",
+    baseCost: 170,
+    dps: 1,
+    attackType: "plan",
+    baseStats: { attackPower: 1, skillPower: 3, attackInterval: 1.5, criticalChance: 0 },
+    skill: {
+      type: "teamHeal",
+      name: "힐링 사운드",
+      cooldown: 8,
+      multiplier: 1,
+      desc: "전체 아군에게 스킬 피해량에 비례하는 광역 힐",
+    },
+  },
+  {
+    id: "director",
+    name: "연출가",
+    shortName: "연출",
+    mark: "M",
+    color: "#db2777",
+    desc: "기본 공격으로 여러 적을 동시에 타격합니다.",
+    category: "연출직군",
+    baseCost: 210,
+    dps: 3,
+    attackType: "slash",
+    baseStats: { attackPower: 3, skillPower: 1, attackInterval: 2, criticalChance: 0 },
+    basicTargets: 3,
+    skill: {
+      type: "selfBuff",
+      name: "클라이맥스 연출",
+      cooldown: 9,
+      duration: 5,
+      attackSpeed: 0.15,
+      basicTargets: "all",
+      desc: "5초 동안 공격속도 15% 증가, 기본공격이 모든 적을 타격",
+    },
+  },
+  {
+    id: "dataAnalyst",
+    name: "데이터 분석가",
+    shortName: "데이터",
+    mark: "DA",
+    color: "#16a34a",
+    desc: "분석 결과로 본인을 제외한 동료 스킬 쿨타임을 초기화합니다.",
+    category: "데이터 분석직군",
+    baseCost: 260,
+    dps: 1,
+    attackType: "qa",
+    baseStats: { attackPower: 1, skillPower: 1, attackInterval: 1.5, criticalChance: 0 },
+    skill: {
+      type: "resetAllyCooldowns",
+      name: "쿨타임 분석",
+      cooldown: 15,
+      desc: "본인을 제외한 아군 동료 전체 스킬 쿨타임 초기화",
     },
   },
 ];
@@ -135,6 +242,9 @@ const recruitCategories = [
   "기획직군",
   "사업/운영직군",
   "QA직군",
+  "사운드직군",
+  "연출직군",
+  "데이터 분석직군",
 ];
 
 const recruitRankNames = {
@@ -178,6 +288,16 @@ const recruitRankNames = {
     "품질 수호자",
     "전설의 버그 슬레이어",
   ],
+  sound: ["사운드 1", "사운드 2", "사운드 3", "사운드 4", "사운드 5", "사운드 6"],
+  director: ["연출 1", "연출 2", "연출 3", "연출 4", "연출 5", "연출 6"],
+  dataAnalyst: [
+    "데이터 분석 1",
+    "데이터 분석 2",
+    "데이터 분석 3",
+    "데이터 분석 4",
+    "데이터 분석 5",
+    "데이터 분석 6",
+  ],
 };
 
 function getRecruitRankLabel(recruit, count) {
@@ -186,6 +306,52 @@ function getRecruitRankLabel(recruit, count) {
   const tier = Math.min(5, Math.floor(count / 10));
   return rankNames[tier];
 }
+
+
+const squadSynergies = [
+  {
+    id: "coreDevTeam",
+    name: "핵심 개발팀",
+    requiredCategories: ["개발직군", "QA직군", "기획직군"],
+    effects: { attackPower: 0.3, criticalChance: 0.2, normalDamage: 0.15 },
+    effectText: "공격력 +30% · 치명타 확률 +20% · 일반 몬스터 피해 +15%",
+  },
+  {
+    id: "visualProductionTeam",
+    name: "비주얼 제작팀",
+    requiredCategories: ["아트직군", "연출직군", "사운드직군"],
+    effects: { skillDamage: 0.2, skillCooldownReduction: 0.1 },
+    effectText: "스킬 피해량 +20% · 스킬 쿨타임 -10%",
+  },
+  {
+    id: "liveService",
+    name: "라이브 서비스",
+    requiredCategories: ["사업/운영직군", "데이터 분석직군", "기획직군"],
+    effects: { goldGain: 0.5 },
+    effectText: "자금 획득률 +50%",
+  },
+  {
+    id: "indieDevTeam",
+    name: "인디 개발팀",
+    requiredCategories: ["개발직군", "아트직군", "사운드직군"],
+    effects: { attackSpeed: 0.3, skillCooldownReduction: 0.1 },
+    effectText: "공격속도 +30% · 스킬 쿨타임 -10%",
+  },
+  {
+    id: "hitMaker",
+    name: "흥행 제조기",
+    requiredCategories: ["사업/운영직군", "아트직군", "데이터 분석직군"],
+    effects: { goldGain: 0.5 },
+    effectText: "자금 획득률 +50%",
+  },
+  {
+    id: "hotfixMaster",
+    name: "핫픽스 마스터",
+    requiredCategories: ["QA직군", "연출직군", "개발직군"],
+    effects: { criticalChance: 0.1, bossDamage: 0.2, skillCooldownReduction: 0.1 },
+    effectText: "치명타 확률 +10% · 보스 피해량 +20% · 스킬 쿨타임 -10%",
+  },
+];
 
 const companyLevels = [
   { name: "1인 창업실", minXp: 0, desc: "작은 책상에서 첫 프로젝트를 시작했습니다.", benefit: "창문과 업무 공간 확장" },
@@ -311,7 +477,7 @@ const defaultState = {
   companyXp: 0,
   elapsed: 0,
   recruits: {},
-  squad: [null, null, null],
+  squad: Array(SQUAD_MEMBER_LIMIT).fill(null),
   squadConfigured: false,
   tools: {},
   growthLevels: {
@@ -340,6 +506,8 @@ let isSpawningNext = false;
 let lastRosterKey = "";
 let basicAttackCooldown = 0.35;
 let skillAttackCooldown = SKILL_ATTACK_RATE;
+let unitCombatTimers = {};
+let combatEffects = { buffs: [], enemyDebuffs: [], teamHp: 100, teamMaxHp: 100 };
 let saveCooldown = 0;
 let lastTick = Date.now();
 let gameTimer = null;

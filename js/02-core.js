@@ -456,9 +456,9 @@ function normalizeRecruitPromotions(promotions) {
   }, {});
 }
 
-function normalizeSquad(savedSquad, ownedRecruits = {}) {
-  const normalized = [null, null, null];
-  const used = new Set();
+function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
+  const normalized = Array(SQUAD_MEMBER_LIMIT).fill(null);
+  const used = {};
   const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
 
   if (Array.isArray(savedSquad)) {

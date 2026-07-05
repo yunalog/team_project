@@ -280,7 +280,7 @@ function renderEnemies() {
 
 function renderAllies() {
   const units = getUnits();
-  const rosterKey = units.map((unit) => `${unit.id}:${unit.count}:${unit.power}`).join("|");
+  const rosterKey = units.map((unit) => `${unit.id}:${unit.count}:${unit.power}:${unit.skillPower}:${unit.attackInterval}:${unit.criticalChance}`).join("|");
   if (rosterKey === lastRosterKey) return;
 
   lastRosterKey = rosterKey;
@@ -455,7 +455,7 @@ function renderSquadManagement() {
     })
     .join("");
 
-  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup;
+  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup + renderSquadSynergyPanel();
   refs.squadRoster.innerHTML = recruits
     .map((recruit) => {
       const level = getRecruitCount(recruit.id);
@@ -472,6 +472,37 @@ function renderSquadManagement() {
       `;
     })
     .join("");
+}
+
+
+function renderSquadSynergyPanel() {
+  const activeSynergy = getActiveSquadSynergy();
+  const filledCount = getSquadRecruitEntries().length;
+
+  if (activeSynergy) {
+    return `
+      <div class="squad-synergy-panel is-active">
+        <span class="squad-synergy-kicker">ACTIVE SYNERGY</span>
+        <strong>${activeSynergy.name}</strong>
+        <small>${activeSynergy.requiredCategories.join(" + ")}</small>
+        <p>${activeSynergy.effectText}</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="squad-synergy-panel">
+      <span class="squad-synergy-kicker">SQUAD SYNERGY</span>
+      <strong>조합 시너지 대기 중</strong>
+      <small>동료 ${filledCount}/${SQUAD_MEMBER_LIMIT}명 배치</small>
+      <p>정해진 3개 직군을 모두 배치하면 세트 효과가 활성화됩니다.</p>
+      <div class="squad-synergy-list">
+        ${squadSynergies
+          .map((synergy) => `<span>${synergy.name}</span>`)
+          .join("")}
+      </div>
+    </div>
+  `;
 }
 
 function getSquadCharacterAvatarMarkup(recruit, isLeader = false) {
