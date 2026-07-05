@@ -57,7 +57,7 @@ function getCompanyBrandBonusValue(key) {
 function getCompanyBrandBonusText() {
   const goldPercent = Math.round(getCompanyBrandBonusValue("goldGain") * 100);
   const ideaPercent = Math.round(getCompanyBrandBonusValue("ideaGain") * 100);
-  return `자금 +${goldPercent}% · 아이디어 +${ideaPercent}%`;
+  return `자금 +${goldPercent}%\n아이디어 +${ideaPercent}%`;
 }
 
 function getCompanyRewardAmount(baseAmount, resource, additionalMultiplier = 1) {

@@ -32,19 +32,22 @@
           <h1>스튜디오 크루 RPG</h1>
         </div>
         <div class="resource-row" aria-label="보유 자원">
-          <span><b id="goldText">0</b> 자금</span>
-          <span><b id="ideaText">0</b> 아이디어</span>
-          <span><b id="stageText">1</b> 스테이지</span>
+          <div class="resource-chip resource-chip--stage">
+            <i aria-hidden="true">🎮</i>
+            <small>스테이지</small>
+            <b id="stageText">1</b>
+          </div>
+          <div class="resource-chip resource-chip--gold">
+            <i aria-hidden="true">💵</i>
+            <small>자금</small>
+            <b id="goldText">0</b>
+          </div>
+          <div class="resource-chip resource-chip--idea">
+            <i aria-hidden="true">💡</i>
+            <small>아이디어</small>
+            <b id="ideaText">0</b>
+          </div>
         </div>
-        <div class="audio-control hud-audio-control" aria-label="게임 BGM 설정">
-          <button id="hudMuteButton" class="mute-button" type="button" data-audio-mute>음소거</button>
-          <label class="volume-control hud-volume-control" for="hudVolumeSlider">
-            <span>BGM</span>
-            <input id="hudVolumeSlider" type="range" min="0" max="100" value="45" data-audio-volume />
-            <strong id="hudVolumeValue" data-audio-value>45%</strong>
-          </label>
-        </div>
-        <button id="headerTitleButton" class="title-return-button" type="button">타이틀</button>
       </header>
 
       <section class="battlefield" id="battlefield" aria-label="전투 화면">
@@ -144,8 +147,8 @@
             <strong id="companyFacilityText">0회</strong>
           </div>
           <div>
-            <span>브랜드 가치 보너스</span>
-            <strong id="companyBrandBonusText">자금 +5% · 아이디어 +0%</strong>
+            <span>회사 보너스</span>
+            <strong id="companyBrandBonusText">자금 +5%<br />아이디어 +0%</strong>
           </div>
         </div>
       </section>

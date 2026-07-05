@@ -7,7 +7,6 @@ function initGame() {
     titleMuteButton: document.querySelector("#titleMuteButton"),
     titleVolumeSlider: document.querySelector("#titleVolumeSlider"),
     titleVolumeValue: document.querySelector("#titleVolumeValue"),
-    headerTitleButton: document.querySelector("#headerTitleButton"),
     battlefield: document.querySelector("#battlefield"),
     companyScene: document.querySelector("#companyScene"),
     companyLocationText: document.querySelector("#companyLocationText"),
@@ -152,7 +151,6 @@ function bindEvents() {
   refs.saveButton.addEventListener("click", () => saveState("수동 저장 완료"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
-  refs.headerTitleButton.addEventListener("click", returnToTitle);
   refs.startButton.addEventListener("click", startGame);
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-audio-mute]")) toggleMute();
