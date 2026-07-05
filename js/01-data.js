@@ -240,6 +240,52 @@ function getRecruitRankLabel(recruit, count) {
   return rankNames[tier];
 }
 
+
+const squadSynergies = [
+  {
+    id: "coreDevTeam",
+    name: "핵심 개발팀",
+    requiredCategories: ["개발직군", "QA직군", "기획직군"],
+    effects: { attackPower: 0.3, criticalChance: 0.2, normalDamage: 0.15 },
+    effectText: "공격력 +30% · 치명타 확률 +20% · 일반 몬스터 피해 +15%",
+  },
+  {
+    id: "visualProductionTeam",
+    name: "비주얼 제작팀",
+    requiredCategories: ["아트직군", "연출직군", "사운드직군"],
+    effects: { skillDamage: 0.2, skillCooldownReduction: 0.1 },
+    effectText: "스킬 피해량 +20% · 스킬 쿨타임 -10%",
+  },
+  {
+    id: "liveService",
+    name: "라이브 서비스",
+    requiredCategories: ["사업/운영직군", "데이터 분석직군", "기획직군"],
+    effects: { goldGain: 0.5 },
+    effectText: "자금 획득률 +50%",
+  },
+  {
+    id: "indieDevTeam",
+    name: "인디 개발팀",
+    requiredCategories: ["개발직군", "아트직군", "사운드직군"],
+    effects: { attackSpeed: 0.3, skillCooldownReduction: 0.1 },
+    effectText: "공격속도 +30% · 스킬 쿨타임 -10%",
+  },
+  {
+    id: "hitMaker",
+    name: "흥행 제조기",
+    requiredCategories: ["사업/운영직군", "아트직군", "데이터 분석직군"],
+    effects: { goldGain: 0.5 },
+    effectText: "자금 획득률 +50%",
+  },
+  {
+    id: "hotfixMaster",
+    name: "핫픽스 마스터",
+    requiredCategories: ["QA직군", "연출직군", "개발직군"],
+    effects: { criticalChance: 0.1, bossDamage: 0.2, skillCooldownReduction: 0.1 },
+    effectText: "치명타 확률 +10% · 보스 피해량 +20% · 스킬 쿨타임 -10%",
+  },
+];
+
 const companyLevels = [
   { name: "1인 창업실", minXp: 0, desc: "작은 책상에서 첫 프로젝트를 시작했습니다.", benefit: "창문과 업무 공간 확장" },
   { name: "작은 작업실", minXp: 24, desc: "동료를 맞이할 작은 작업실이 생겼습니다.", benefit: "두 번째 업무 공간 개방" },

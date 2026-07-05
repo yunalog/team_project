@@ -1,3 +1,60 @@
+
+function getSquadRecruitEntries() {
+  return (state.squad || [])
+    .map((recruitId) => recruits.find((recruit) => recruit.id === recruitId))
+    .filter(Boolean);
+}
+
+function getCategoryKey(category) {
+  return String(category || "").replace(/\s+/g, "");
+}
+
+function getActiveSquadSynergy() {
+  const squadMembers = getSquadRecruitEntries();
+  if (squadMembers.length !== SQUAD_MEMBER_LIMIT) return null;
+
+  const currentCategories = squadMembers.map((recruit) => getCategoryKey(recruit.category)).sort();
+  return (
+    squadSynergies.find((synergy) => {
+      const requiredCategories = synergy.requiredCategories.map(getCategoryKey).sort();
+      return (
+        requiredCategories.length === currentCategories.length &&
+        requiredCategories.every((category, index) => category === currentCategories[index])
+      );
+    }) || null
+  );
+}
+
+function getSquadSynergyBonuses() {
+  const synergy = getActiveSquadSynergy();
+  return synergy ? synergy.effects : {};
+}
+
+function getSquadSynergyValue(key) {
+  return Number(getSquadSynergyBonuses()[key]) || 0;
+}
+
+function getSquadAttackPowerMultiplier() {
+  return 1 + getSquadSynergyValue("attackPower");
+}
+
+function getSquadSkillDamageMultiplier() {
+  return 1 + getSquadSynergyValue("skillDamage");
+}
+
+function getSquadGoldGainMultiplier() {
+  return 1 + getSquadSynergyValue("goldGain");
+}
+
+function getSquadAttackInterval() {
+  return BASIC_ATTACK_RATE / (1 + getSquadSynergyValue("attackSpeed"));
+}
+
+function getSquadSkillInterval() {
+  const reduction = Math.min(0.8, getSquadSynergyValue("skillCooldownReduction"));
+  return SKILL_ATTACK_RATE * (1 - reduction);
+}
+
 function getRecruitCount(id) {
   return state.recruits[id] || 0;
 }
@@ -174,7 +231,8 @@ function getGlobalMultiplier() {
 
 function getTotalDps() {
   const squadPower = getUnits().reduce((sum, unit) => sum + unit.power, 0);
-  return Math.max(1, Math.round(squadPower * getGlobalMultiplier()));
+  const attackSpeedBonus = 1 + getSquadSynergyValue("attackSpeed");
+  return Math.max(1, Math.round(squadPower * getGlobalMultiplier() * attackSpeedBonus));
 }
 
 function getTeamCount() {

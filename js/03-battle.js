@@ -6,7 +6,7 @@ function spawnWave() {
   state.enemyX = ENEMY_SPAWN_X;
   isSpawningNext = false;
   basicAttackCooldown = 0.35;
-  skillAttackCooldown = SKILL_ATTACK_RATE;
+  skillAttackCooldown = getSquadSkillInterval();
   if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
 }
@@ -115,12 +115,12 @@ function updateAutoCombat(delta) {
   skillAttackCooldown -= delta;
 
   if (basicAttackCooldown <= 0) {
-    basicAttackCooldown += BASIC_ATTACK_RATE;
+    basicAttackCooldown += getSquadAttackInterval();
     performAttackRound(false);
   }
 
   if (skillAttackCooldown <= 0) {
-    skillAttackCooldown += SKILL_ATTACK_RATE;
+    skillAttackCooldown += getSquadSkillInterval();
     performAttackRound(true);
     log("팀 스킬 공격!");
   }
@@ -165,7 +165,7 @@ function castSkill(unit, from) {
 
   targets.forEach((target, index) => {
     const skillPower = unit.id === "player" ? getPlayerSkillPower() : unit.power;
-    const damage = Math.ceil(skillPower * unit.skill.multiplier + state.playerLevel * 0.6);
+    const damage = Math.ceil((skillPower * unit.skill.multiplier + state.playerLevel * 0.6) * getSquadSkillDamageMultiplier());
     window.setTimeout(() => damageEnemy(target.id, damage, false), 120 + index * 70);
   });
 
@@ -246,8 +246,10 @@ function damageEnemy(enemyId, amount, manual) {
   if (!target) return;
 
   const growthCriticalBonus = Math.min(0.3, (state.growthLevels?.critical || 0) * 0.001);
-  const critical = Math.random() < Math.min(0.6, CRITICAL_CHANCE + growthCriticalBonus);
-  const multiplier = getGlobalMultiplier() * (critical ? CRITICAL_MULTIPLIER : 1);
+  const criticalBonus = getSquadSynergyValue("criticalChance");
+  const critical = Math.random() < Math.min(0.8, CRITICAL_CHANCE + growthCriticalBonus + criticalBonus);
+  const enemyTypeBonus = target.isBoss ? getSquadSynergyValue("bossDamage") : getSquadSynergyValue("normalDamage");
+  const multiplier = getGlobalMultiplier() * (1 + enemyTypeBonus) * (critical ? CRITICAL_MULTIPLIER : 1);
   const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
   showDamage(finalAmount, target, { critical });
@@ -263,7 +265,7 @@ function damageEnemy(enemyId, amount, manual) {
 
 function defeatEnemy(enemyId, manual) {
   state.enemies = state.enemies.filter((enemy) => enemy.id !== enemyId);
-  const goldGain = Math.floor(3 + state.chapter * 1.4 + state.subStage * 0.6);
+  const goldGain = Math.floor((3 + state.chapter * 1.4 + state.subStage * 0.6) * getSquadGoldGainMultiplier());
   const ideaGain = manual ? 1 : 0;
   state.gold += goldGain;
   state.idea += ideaGain;
@@ -402,7 +404,7 @@ function getPlayerUnit(power = getPlayerPower()) {
     color: "#059669",
     spriteSheet: "Anim/Player_1/Motion.png",
     count: 1,
-    power,
+    power: Math.max(1, Math.round(power * getSquadAttackPowerMultiplier())),
     attackType: "code",
     skill: { type: "aoe", name: "핫픽스 배포", radius: 12, multiplier: 1.35 },
   };
@@ -419,7 +421,7 @@ function getUnits() {
       id: `squad-${slotIndex}-${recruit.id}`,
       recruitId: recruit.id,
       count: 1,
-      power: getRecruitPower(recruit),
+      power: Math.max(1, Math.round(getRecruitPower(recruit) * getSquadAttackPowerMultiplier())),
     });
   });
   return units;
