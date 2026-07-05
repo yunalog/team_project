@@ -67,10 +67,10 @@ button:disabled {
 
 .title-image-frame {
   position: absolute;
-  top: 50%;
+  top: 36%;
   left: 50%;
   z-index: 1;
-  width: min(88%, 680px);
+  width: min(76%, 600px);
   aspect-ratio: 1916 / 821;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -82,12 +82,13 @@ button:disabled {
   position: absolute;
   inset: -12% -8%;
   background:
-    radial-gradient(circle, rgba(255, 247, 191, 0.95) 0 2px, transparent 3px) 8% 22% / 32% 30%,
-    radial-gradient(circle, rgba(145, 232, 255, 0.9) 0 1px, transparent 3px) 82% 18% / 28% 34%,
-    radial-gradient(circle, rgba(255, 212, 106, 0.92) 0 2px, transparent 4px) 16% 76% / 35% 30%,
-    radial-gradient(circle, rgba(255, 255, 255, 0.9) 0 1px, transparent 3px) 88% 70% / 30% 32%;
+    radial-gradient(circle, rgba(255, 124, 139, 0.95) 0 2px, transparent 4px) 8% 22% / 32% 30%,
+    radial-gradient(circle, rgba(75, 202, 169, 0.95) 0 2px, transparent 4px) 82% 18% / 28% 34%,
+    radial-gradient(circle, rgba(88, 169, 255, 0.95) 0 2px, transparent 4px) 16% 76% / 35% 30%,
+    radial-gradient(circle, rgba(196, 132, 255, 0.9) 0 2px, transparent 4px) 88% 70% / 30% 32%;
   background-repeat: no-repeat;
   content: "";
+  filter: drop-shadow(0 0 5px rgba(64, 95, 121, 0.38));
   opacity: 0;
   animation: title-sparkle 2.4s ease-in-out 1.05s infinite;
 }
@@ -2168,8 +2169,8 @@ h1 {
   }
 
   .title-image-frame {
-    top: 45%;
-    width: min(94%, 520px);
+    top: 34%;
+    width: min(82%, 500px);
   }
 
   .start-button {
