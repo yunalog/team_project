@@ -51,7 +51,7 @@ button:disabled {
   place-items: center;
   min-height: 100vh;
   padding: 0;
-  background: #162724;
+  background: #1f2d2a;
 }
 
 .start-scene {
@@ -59,9 +59,10 @@ button:disabled {
   width: min(100%, 760px);
   min-height: 100vh;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 50% 46%, rgba(255, 231, 155, 0.14), transparent 30%),
-    linear-gradient(180deg, #132d31 0%, #172823 48%, #0f1716 100%);
+  background-image: url("Resource/Title/Title_BackGround.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 .title-image-frame {
