@@ -350,7 +350,7 @@ h1 {
 
 .office-building {
   position: absolute;
-  bottom: clamp(23px, 8.6vw, 58px);
+  bottom: clamp(4px, 2.6vw, 18px);
   left: 50%;
   z-index: 2;
   display: block;
