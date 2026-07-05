@@ -1808,13 +1808,19 @@ h1 {
 .recruit-modal__badge {
   display: grid;
   place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--recruit-badge-color, #f59e0b);
+  width: 58px;
+  height: 58px;
+  border: 2px solid var(--recruit-badge-color, #f59e0b);
+  border-radius: 8px;
+  background-color: #f6ead2;
+  background-image: var(--recruit-image);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
   color: #fff;
   font-size: 18px;
   font-weight: 900;
+  image-rendering: pixelated;
 }
 
 .recruit-modal__header h3 {

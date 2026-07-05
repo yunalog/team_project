@@ -159,16 +159,16 @@ const recruitRankNames = {
     "버그 탐지기",
     "버그 사냥꾼",
     "QA 전문가",
-    "디버깅 장인",
+    "QA 마스터",
     "품질 수호자",
     "전설의 버그 슬레이어",
   ],
 };
 
-function getRecruitRankLabel(recruit, count) {
+function getRecruitRankLabel(recruit, level) {
   const rankNames = recruitRankNames[recruit.id];
   if (!rankNames) return recruit.name;
-  const tier = Math.min(5, Math.floor(count / 10));
+  const tier = Math.min(5, Math.floor(Math.max(0, Number(level) || 0) / 10));
   return rankNames[tier];
 }
 
@@ -609,13 +609,10 @@ function handleSquadChange(event) {
 
   const nextId = select.value || null;
   if (nextId) {
-    const owned = getRecruitCount(nextId);
-    const deployedElsewhere = state.squad.reduce(
-      (count, id, index) => count + (index !== slotIndex && id === nextId ? 1 : 0),
-      0
-    );
-    if (!recruits.some((recruit) => recruit.id === nextId) || deployedElsewhere >= owned) {
-      log("보유한 동료 수보다 많이 배치할 수 없습니다.");
+    const isRecruited = getRecruitLevel(nextId) > 0;
+    const isDeployedElsewhere = state.squad.some((id, index) => index !== slotIndex && id === nextId);
+    if (!recruits.some((recruit) => recruit.id === nextId) || !isRecruited || isDeployedElsewhere) {
+      log("영입하지 않은 동료이거나 이미 다른 자리에 배치된 동료입니다.");
       renderSquadManagement();
       return;
     }
@@ -625,7 +622,8 @@ function handleSquadChange(event) {
   state.squadConfigured = true;
   lastRosterKey = "";
   const recruit = recruits.find((item) => item.id === nextId);
-  log(recruit ? `${slotIndex + 1}번 위치에 ${recruit.name} 배치 완료` : `${slotIndex + 1}번 위치를 비웠습니다.`);
+  const rankLabel = recruit ? getRecruitRankLabel(recruit, getRecruitLevel(recruit.id)) : "";
+  log(rankLabel ? `${slotIndex + 1}번 자리에 ${rankLabel} 배치 완료` : `${slotIndex + 1}번 자리를 비웠습니다.`);
   renderAll();
 }
 
@@ -759,28 +757,27 @@ function normalizeRecruitBoosts(boosts) {
 
 function normalizeSquad(savedSquad, ownedRecruits = {}, autoFill = false) {
   const normalized = [null, null, null, null];
-  const used = {};
+  const used = new Set();
   const ownedRoster = ownedRecruits && typeof ownedRecruits === "object" ? ownedRecruits : {};
 
   if (Array.isArray(savedSquad)) {
     savedSquad.slice(0, normalized.length).forEach((id, index) => {
-      const owned = Math.max(0, Number(ownedRoster[id]) || 0);
-      if (!recruits.some((recruit) => recruit.id === id) || (used[id] || 0) >= owned) return;
+      const level = Math.max(0, Number(ownedRoster[id]) || 0);
+      if (!recruits.some((recruit) => recruit.id === id) || level <= 0 || used.has(id)) return;
       normalized[index] = id;
-      used[id] = (used[id] || 0) + 1;
+      used.add(id);
     });
   }
 
   if (autoFill) {
     recruits.forEach((recruit) => {
-      let remaining = Math.max(0, Number(ownedRoster[recruit.id]) || 0) - (used[recruit.id] || 0);
-      while (remaining > 0) {
-        const emptyIndex = normalized.indexOf(null);
-        if (emptyIndex < 0) return;
-        normalized[emptyIndex] = recruit.id;
-        used[recruit.id] = (used[recruit.id] || 0) + 1;
-        remaining -= 1;
-      }
+      const level = Math.max(0, Number(ownedRoster[recruit.id]) || 0);
+      if (level <= 0 || used.has(recruit.id)) return;
+
+      const emptyIndex = normalized.indexOf(null);
+      if (emptyIndex < 0) return;
+      normalized[emptyIndex] = recruit.id;
+      used.add(recruit.id);
     });
   }
 
@@ -942,7 +939,7 @@ function getBossHp() {
 }
 
 function getDifficultyGrowthPower() {
-  const recruitPower = recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id) * getRecruitPower(recruit), 0);
+  const recruitPower = recruits.reduce((sum, recruit) => sum + getRecruitLevel(recruit.id) * getRecruitPower(recruit), 0);
   const equipmentPower = getEquippedItems().reduce((sum, item) => sum + item.powerBonus + item.skillBonus, 0);
   const toolPower = tools.reduce((sum, tool) => sum + getToolLevel(tool.id) * ((tool.click || 0) + (tool.dps || 0)), 0);
   const upgradePower = Math.max(0, state.playerLevel - 1) * 1.3 + Math.max(0, state.clickPower - 1) * 0.6;
@@ -1264,11 +1261,14 @@ function getUnits() {
   state.squad.forEach((recruitId, slotIndex) => {
     const recruit = recruits.find((item) => item.id === recruitId);
     if (!recruit) return;
+    const rankLabel = getRecruitRankLabel(recruit, getRecruitLevel(recruit.id));
 
     units.push({
       ...recruit,
       id: `squad-${slotIndex}-${recruit.id}`,
       recruitId: recruit.id,
+      name: rankLabel,
+      shortName: rankLabel,
       count: 1,
       power: getRecruitPower(recruit),
     });
@@ -1281,8 +1281,8 @@ function getUnitPosition(unitId) {
   return getAllyPosition(index);
 }
 
-function getRecruitCount(id) {
-  return state.recruits[id] || 0;
+function getRecruitLevel(id) {
+  return Math.max(0, Math.floor(Number(state.recruits[id]) || 0));
 }
 
 function getRecruitBoostLevel(id) {
@@ -1320,7 +1320,8 @@ function renderRecruitDetailModal() {
 
   const boostLevel = getRecruitBoostLevel(recruit.id);
   const enhancementCost = getRecruitEnhancementCost(recruit.id);
-  const currentCount = getRecruitCount(recruit.id);
+  const currentLevel = getRecruitLevel(recruit.id);
+  const rankLabel = getRecruitRankLabel(recruit, currentLevel);
   const skillText = recruit.skill?.type === "aoe"
     ? `${recruit.skill.name} · ${recruit.skill.radius}칸 범위 공격 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`
     : recruit.skill?.type === "all"
@@ -1330,12 +1331,14 @@ function renderRecruitDetailModal() {
     : `${recruit.skill.name} · 단일 대상 / 배율 ${recruit.skill.multiplier.toFixed(2)}배`;
 
   refs.recruitDetailModal.classList.remove("is-hidden");
-  refs.recruitDetailBadge.textContent = recruit.mark;
+  refs.recruitDetailBadge.textContent = "";
   refs.recruitDetailBadge.style.setProperty("--recruit-badge-color", recruit.color);
-  refs.recruitDetailTitle.textContent = recruit.name;
-  refs.recruitDetailCategory.textContent = `${recruit.category} · 보유 ${currentCount}명`;
+  refs.recruitDetailBadge.style.setProperty("--recruit-image", `url('${recruit.sprites.idle}')`);
+  refs.recruitDetailBadge.setAttribute("aria-label", rankLabel);
+  refs.recruitDetailTitle.textContent = rankLabel;
+  refs.recruitDetailCategory.textContent = `${recruit.category} · Lv.${currentLevel}`;
   refs.recruitDetailDesc.textContent = recruit.desc;
-  refs.recruitDetailLevel.textContent = `Lv.${currentCount}`;
+  refs.recruitDetailLevel.textContent = `Lv.${currentLevel}`;
   refs.recruitDetailDps.textContent = `${recruit.dps + boostLevel} / 초`;
   refs.recruitDetailBoost.textContent = `${boostLevel}단계`;
   refs.recruitDetailSkillName.textContent = recruit.skill?.name || "스킬 정보";
@@ -1369,7 +1372,7 @@ function enhanceRecruitDetail() {
   state.gold -= cost;
   state.recruitBoosts[recruit.id] = (state.recruitBoosts[recruit.id] || 0) + 1;
   addCompanyXp(2);
-  log(`${recruit.name} 전문성이 강화되었습니다. 회사 성장 경험치 +2`);
+  log(`${getRecruitRankLabel(recruit, getRecruitLevel(recruit.id))} 전문성이 강화되었습니다. 회사 성장 경험치 +2`);
   renderAll();
 }
 
@@ -1387,7 +1390,7 @@ function getTeamCount() {
 }
 
 function getEmployeeCount() {
-  return 1 + recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id), 0);
+  return 1 + recruits.filter((recruit) => getRecruitLevel(recruit.id) > 0).length;
 }
 
 function getEnemyName() {
@@ -1461,20 +1464,20 @@ function costFor(baseCost, count) {
 
 function buyRecruit(id) {
   const recruit = recruits.find((item) => item.id === id);
-  const count = getRecruitCount(id);
-  const cost = costFor(recruit.baseCost, count);
+  const level = getRecruitLevel(id);
+  const cost = costFor(recruit.baseCost, level);
   if (state.gold < cost) return;
 
   state.gold -= cost;
-  state.recruits[id] = count + 1;
+  state.recruits[id] = level + 1;
   if (!state.squadConfigured) {
     state.squad = normalizeSquad(state.squad, state.recruits, true);
     lastRosterKey = "";
   }
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
-  const rankLabel = getRecruitRankLabel(recruit, count + 1);
-  log(`${rankLabel} 영입 완료. 회사 성장 경험치 +4`);
+  const rankLabel = getRecruitRankLabel(recruit, level + 1);
+  log(`${rankLabel} ${level === 0 ? "영입" : "성장"} 완료. 회사 성장 경험치 +4`);
   renderAll();
 }
 
@@ -2052,30 +2055,20 @@ function renderCompanyFloors(visualTier, levelIndex) {
 }
 
 function renderCompanyEmployees() {
-  const visibleEmployeeCount = Math.min(12, getEmployeeCount());
   const employees = [
     {
       name: "대표",
       sprite: "Anim/Player_1/Motion.png",
       isLeader: true,
     },
-  ];
-
-  for (let employeeIndex = 0; employees.length < visibleEmployeeCount; employeeIndex += 1) {
-    let employeeAdded = false;
-
-    recruits.forEach((recruit) => {
-      if (employees.length >= visibleEmployeeCount || getRecruitCount(recruit.id) <= employeeIndex) return;
-      employees.push({
-        name: recruit.name,
+    ...recruits
+      .filter((recruit) => getRecruitLevel(recruit.id) > 0)
+      .map((recruit) => ({
+        name: getRecruitRankLabel(recruit, getRecruitLevel(recruit.id)),
         sprite: recruit.sprites.idle,
         isLeader: false,
-      });
-      employeeAdded = true;
-    });
-
-    if (!employeeAdded) break;
-  }
+      })),
+  ];
 
   refs.employeeCrowd.innerHTML = employees
     .map(
@@ -2157,18 +2150,20 @@ function renderShop() {
       const itemsHtml = categoryItems.length
         ? categoryItems
             .map((recruit) => {
-              const count = getRecruitCount(recruit.id);
-              const cost = costFor(recruit.baseCost, count);
-              const label = getRecruitRankLabel(recruit, count);
+              const level = getRecruitLevel(recruit.id);
+              const cost = costFor(recruit.baseCost, level);
+              const label = getRecruitRankLabel(recruit, level);
               return `
                 <div class="shop-item">
                   <div class="shop-item__content">
-                    <strong>${label} Lv.${count}</strong>
+                    <strong>${label} Lv.${level}</strong>
                     <span class="shop-meta">${recruit.desc} / 초당 +${recruit.dps}</span>
                   </div>
                   <div class="shop-item__actions">
                     <button class="shop-detail-button" type="button" data-recruit-detail="${recruit.id}">상세보기</button>
-                    <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>${cost} 자금</button>
+                    <button type="button" data-buy-recruit="${recruit.id}" ${state.gold < cost ? "disabled" : ""}>
+                      ${cost} 자금 · ${level === 0 ? "영입" : "성장"}
+                    </button>
                   </div>
                 </div>
               `;
@@ -2213,11 +2208,8 @@ function renderShop() {
 }
 
 function renderSquadManagement() {
-  const positionNames = ["전열 A", "전열 B", "지원 A", "지원 B"];
-  const deployedCounts = state.squad.reduce((counts, id) => {
-    if (id) counts[id] = (counts[id] || 0) + 1;
-    return counts;
-  }, {});
+  const positionNames = ["1번 자리", "2번 자리", "3번 자리", "4번 자리"];
+  const deployedIds = new Set(state.squad.filter(Boolean));
 
   const leaderMarkup = `
     <div class="squad-leader">
@@ -2232,17 +2224,17 @@ function renderSquadManagement() {
   const slotMarkup = state.squad
     .map((recruitId, slotIndex) => {
       const assigned = recruits.find((recruit) => recruit.id === recruitId);
+      const assignedLevel = assigned ? getRecruitLevel(assigned.id) : 0;
+      const assignedRank = assigned ? getRecruitRankLabel(assigned, assignedLevel) : "";
       const options = recruits
+        .filter((recruit) => getRecruitLevel(recruit.id) > 0)
         .map((recruit) => {
-          const owned = getRecruitCount(recruit.id);
-          const deployedElsewhere = state.squad.reduce(
-            (count, id, index) => count + (index !== slotIndex && id === recruit.id ? 1 : 0),
-            0
-          );
-          const unavailable = recruit.id !== recruitId && deployedElsewhere >= owned;
+          const level = getRecruitLevel(recruit.id);
+          const rankLabel = getRecruitRankLabel(recruit, level);
+          const isDeployedElsewhere = recruit.id !== recruitId && deployedIds.has(recruit.id);
           return `<option value="${recruit.id}" ${recruit.id === recruitId ? "selected" : ""} ${
-            unavailable ? "disabled" : ""
-          }>${recruit.name} · 보유 ${owned}</option>`;
+            isDeployedElsewhere ? "disabled" : ""
+          }>${rankLabel} · Lv.${level}</option>`;
         })
         .join("");
       const color = assigned ? assigned.color : "#9a8b77";
@@ -2257,8 +2249,8 @@ function renderSquadManagement() {
                 : `<span class="squad-avatar is-empty" style="--squad-color: ${color};" aria-hidden="true">+</span>`
             }
             <span>
-              <strong>${assigned ? assigned.name : "빈 위치"}</strong>
-              <small>${slotIndex + 1}번 배치 슬롯</small>
+              <strong>${assignedRank || "빈 자리"}</strong>
+              <small>${assigned ? `${assigned.category} · Lv.${assignedLevel}` : "동료를 선택하세요"}</small>
             </span>
           </span>
           <select data-squad-slot="${slotIndex}" aria-label="${positionNames[slotIndex]} 동료 선택">
@@ -2273,14 +2265,15 @@ function renderSquadManagement() {
   refs.squadFormation.innerHTML = leaderMarkup + slotMarkup;
   refs.squadRoster.innerHTML = recruits
     .map((recruit) => {
-      const owned = getRecruitCount(recruit.id);
-      const deployed = deployedCounts[recruit.id] || 0;
+      const level = getRecruitLevel(recruit.id);
+      const rankLabel = getRecruitRankLabel(recruit, level);
+      const isDeployed = deployedIds.has(recruit.id);
       return `
-        <div class="squad-roster-item${owned ? "" : " is-unowned"}">
+        <div class="squad-roster-item${level > 0 ? "" : " is-unowned"}">
           ${getSquadCharacterAvatarMarkup(recruit)}
           <div>
-            <strong>${recruit.name}</strong>
-            <small>보유 ${owned} · 배치 ${deployed}</small>
+            <strong>${rankLabel}</strong>
+            <small>Lv.${level} · ${level === 0 ? "합류 전" : isDeployed ? "배치 중" : "대기 중"}</small>
           </div>
         </div>
       `;
@@ -2289,7 +2282,7 @@ function renderSquadManagement() {
 }
 
 function getSquadCharacterAvatarMarkup(recruit, isLeader = false) {
-  const name = isLeader ? "대표" : recruit.name;
+  const name = isLeader ? "대표" : getRecruitRankLabel(recruit, getRecruitLevel(recruit.id));
   const color = isLeader ? "#059669" : recruit.color;
   const sprite = isLeader ? "Anim/Player_1/Motion.png" : recruit.sprites.idle;
 
