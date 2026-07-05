@@ -5,6 +5,7 @@
     .querySelectorAll(".tab-panel")
     .forEach((panel) => panel.classList.toggle("is-active", panel.dataset.panel === activeTab));
   updatePrimaryScene();
+  if (activeTab === "tools") window.requestAnimationFrame(syncSquadRosterHeight);
   if (hasStartedGame) playBgm(getActiveBgmKey(), { silentFail: true });
 }
 
@@ -101,19 +102,27 @@ function renderEquippedItems() {
       const item = getEquippedItem(slot.id);
       if (!item) {
         return `
-          <div class="equipped-tile is-empty">
-            <span class="equipped-tile-image">${slot.name.slice(0, 1)}</span>
-            <span class="equipped-tile-grade">비어있음</span>
-            <strong>${slot.name}</strong>
+          <div class="equipped-list-item is-empty" style="--equipment-color: rgba(74, 43, 23, 0.28);">
+            <span class="equipped-list-color" aria-hidden="true"></span>
+            <span class="equipped-list-image">${slot.name.slice(0, 1)}</span>
+            <span class="equipped-list-copy">
+              <span class="equipped-list-grade">비어있음</span>
+              <strong>${slot.name}</strong>
+              <small>장비 없음</small>
+            </span>
           </div>
         `;
       }
 
       return `
-        <div class="equipped-tile" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
-          <span class="equipped-tile-image">${item.image ? "" : item.icon}</span>
-          <span class="equipped-tile-grade">${item.grade}</span>
-          <strong>${item.name}</strong>
+        <div class="equipped-list-item" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
+          <span class="equipped-list-color" aria-hidden="true"></span>
+          <span class="equipped-list-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-list-copy">
+            <span class="equipped-list-grade">${item.grade}</span>
+            <strong>${item.name}</strong>
+            <small>공격력 +${item.powerBonus} · 스킬 +${item.skillBonus}</small>
+          </span>
         </div>
       `;
     })
@@ -185,6 +194,7 @@ function renderCompany() {
   setText(refs.companySceneDesc, progress.current.desc);
   setText(refs.companyEmployeeText, `${getEmployeeCount()}명`);
   setText(refs.companyFacilityText, `${facilityCount}회`);
+  setText(refs.companyBrandBonusText, getCompanyBrandBonusText());
 
   const companyValue = Math.floor(
     state.gold + state.idea * 5 + state.companyXp * 12 + getEmployeeCount() * 120 + facilityCount * 80
@@ -379,7 +389,7 @@ function renderShop() {
             <span>${tool.desc}</span>
           </div>
           <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>
-            ${cost} 아이디어 · 성장 +${growthXp}
+            ${cost} 아이디어 · EXP +${growthXp}
           </button>
         </div>
       `;
@@ -465,8 +475,19 @@ function renderSquadManagement() {
       `;
     })
     .join("");
+  window.requestAnimationFrame(syncSquadRosterHeight);
 }
 
+function syncSquadRosterHeight() {
+  if (!refs?.squadFormation || !refs?.squadRoster) return;
+
+  const formationHeight = refs.squadFormation.getBoundingClientRect().height;
+  if (formationHeight <= 0) return;
+
+  const height = `${formationHeight}px`;
+  refs.squadRoster.style.height = height;
+  refs.squadRoster.style.maxHeight = height;
+}
 
 function renderSquadSynergyPanel() {
   const activeSynergy = getActiveSquadSynergy();
@@ -533,6 +554,9 @@ function log(message) {
   if (refs && refs.battleLog) refs.battleLog.textContent = message;
 }
 
+window.addEventListener("resize", () => {
+  if (activeTab === "tools") window.requestAnimationFrame(syncSquadRosterHeight);
+});
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);

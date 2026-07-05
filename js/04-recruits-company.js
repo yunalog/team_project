@@ -46,6 +46,35 @@ function getSquadGoldGainMultiplier() {
   return 1 + getSquadSynergyValue("goldGain");
 }
 
+function getCompanyBrandBonuses(levelIndex = getCompanyLevelIndex()) {
+  return companyLevels[levelIndex]?.brandBonus || {};
+}
+
+function getCompanyBrandBonusValue(key) {
+  return Number(getCompanyBrandBonuses()[key]) || 0;
+}
+
+function getCompanyBrandBonusText() {
+  const goldPercent = Math.round(getCompanyBrandBonusValue("goldGain") * 100);
+  const ideaPercent = Math.round(getCompanyBrandBonusValue("ideaGain") * 100);
+  return `자금 +${goldPercent}%\n아이디어 +${ideaPercent}%`;
+}
+
+function getCompanyRewardAmount(baseAmount, resource, additionalMultiplier = 1) {
+  const amount = Math.max(0, Number(baseAmount) || 0);
+  if (amount <= 0) return 0;
+
+  const adjustedAmount = Math.floor(amount * Math.max(1, Number(additionalMultiplier) || 1));
+  const bonusRate = getCompanyBrandBonusValue(`${resource}Gain`);
+  if (!state.companyRewardRemainders) state.companyRewardRemainders = { gold: 0, idea: 0 };
+
+  const carriedBonus = Math.max(0, Number(state.companyRewardRemainders[resource]) || 0);
+  const accumulatedBonus = adjustedAmount * bonusRate + carriedBonus;
+  const bonusAmount = Math.floor(accumulatedBonus + 0.0000001);
+  state.companyRewardRemainders[resource] = accumulatedBonus - bonusAmount;
+  return adjustedAmount + bonusAmount;
+}
+
 function getSquadAttackInterval() {
   return BASIC_ATTACK_RATE / (1 + getSquadSynergyValue("attackSpeed"));
 }
@@ -360,7 +389,7 @@ function enhanceRecruitDetail() {
   state.gold -= cost;
   state.recruitBoosts[recruit.id] = (state.recruitBoosts[recruit.id] || 0) + 1;
   addCompanyXp(2);
-  log(`${recruit.name} 전문성이 강화되었습니다. 회사 성장 경험치 +2`);
+  log(`${recruit.name} 전문성이 강화되었습니다. 회사 EXP +2`);
   renderAll();
 }
 
@@ -432,13 +461,15 @@ function getFacilityInvestmentCount() {
 function deriveCompanyXp(nextState) {
   const recruitCount = Object.values(nextState.recruits || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const facilityCount = Object.values(nextState.tools || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
-  return Math.max(
-    0,
-    Math.floor(Number(nextState.clearCount) || 0) +
-      recruitCount * 4 +
-      facilityCount * 6 +
-      Math.max(0, (Number(nextState.chapter) || 1) - 1) * 10
+  const recruitBoostCount = Object.values(nextState.recruitBoosts || {}).reduce(
+    (sum, value) => sum + (Number(value) || 0),
+    0
   );
+  const recruitPromotionCount = Object.values(nextState.recruitPromotions || {}).reduce(
+    (sum, value) => sum + (Number(value) || 0),
+    0
+  );
+  return Math.max(0, recruitCount * 4 + facilityCount * 6 + recruitBoostCount * 2 + recruitPromotionCount * 6);
 }
 
 function addCompanyXp(amount) {
@@ -471,7 +502,7 @@ function buyRecruit(id) {
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
   const rankLabel = getRecruitRankLabel(recruit, count + 1);
-  log(`${rankLabel} 영입 완료. 회사 성장 경험치 +4`);
+  log(`${rankLabel} 영입 완료. 회사 EXP +4`);
   renderAll();
 }
 
@@ -485,7 +516,7 @@ function buyTool(id) {
   state.tools[id] = level + 1;
   addCompanyXp(tool.growthXp + level * 2);
   if (tool.click) state.clickPower += tool.click;
-  log(`${tool.name} 확장 완료. 회사 성장 경험치 +${tool.growthXp + level * 2}`);
+  log(`${tool.name} 확장 완료. 회사 EXP +${tool.growthXp + level * 2}`);
   renderAll();
 }
 
