@@ -11,6 +11,7 @@ const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
+const SLASH_LUNGE_MAX_DISTANCE = 12;
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
@@ -1013,7 +1014,7 @@ function attackUnit(unit, options = {}) {
   const damage = unit.power;
 
   if (unit.attackType === "slash") {
-    playSlash(unit, target, skill);
+    playSlash(unit, from, target, skill);
     window.setTimeout(() => damageEnemy(target.id, damage, manual), 140);
   } else {
     playProjectile(unit, from, target, skill);
@@ -1066,10 +1067,12 @@ function playProjectile(unit, from, target, skill) {
   window.setTimeout(() => shot.remove(), 480);
 }
 
-function playSlash(unit, target, skill) {
+function playSlash(unit, from, target, skill) {
   const ally = refs.allyLayer.querySelector(`[data-unit-id="${unit.id}"]`);
   if (ally) {
-    ally.style.setProperty("--slash-x", `${Math.max(36, target.x - 9)}%`);
+    const targetApproachX = Math.max(from.x, target.x - 9);
+    const lungeX = Math.min(from.x + SLASH_LUNGE_MAX_DISTANCE, targetApproachX);
+    ally.style.setProperty("--slash-x", `${lungeX}%`);
     ally.classList.add("is-slashing");
     window.setTimeout(() => ally.classList.remove("is-slashing"), 300);
   }
