@@ -267,10 +267,6 @@ function buyRecruit(id) {
 
   state.gold -= cost;
   state.recruits[id] = count + 1;
-  if (!state.squadConfigured) {
-    state.squad = normalizeSquad(state.squad, state.recruits, true);
-    lastRosterKey = "";
-  }
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
   const rankLabel = getRecruitRankLabel(recruit, count + 1);
