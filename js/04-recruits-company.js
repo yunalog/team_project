@@ -182,7 +182,8 @@ function getTeamCount() {
 }
 
 function getEmployeeCount() {
-  return 1 + recruits.reduce((sum, recruit) => sum + getRecruitCount(recruit.id), 0);
+  const acquiredRoleCount = recruits.filter((recruit) => getRecruitCount(recruit.id) > 0).length;
+  return 1 + acquiredRoleCount;
 }
 
 function getEnemyName() {

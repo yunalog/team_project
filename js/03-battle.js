@@ -426,6 +426,7 @@ function getUnits() {
 }
 
 function getUnitPosition(unitId) {
-  const index = Math.max(0, getUnits().findIndex((unit) => unit.id === unitId));
-  return getAllyPosition(index);
+  const units = getUnits();
+  const index = Math.max(0, units.findIndex((unit) => unit.id === unitId));
+  return getAllyPosition(index, units.length);
 }
