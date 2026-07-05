@@ -1944,6 +1944,15 @@ h1 {
   display: block;
 }
 
+.tab-panel[data-panel="recruit"] {
+  overflow: hidden;
+}
+
+.tab-panel[data-panel="recruit"].is-active {
+  display: block;
+  overflow: hidden;
+}
+
 .stat-grid,
 .timer-board {
   display: grid;
@@ -2050,19 +2059,54 @@ h1 {
 
 .shop-list {
   display: grid;
+  align-content: start;
   gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #a87f49 rgba(255, 247, 229, 0.55);
+}
+
+.shop-list::-webkit-scrollbar,
+.recruit-focus-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shop-list::-webkit-scrollbar-track,
+.recruit-focus-panel::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(255, 247, 229, 0.55);
+}
+
+.shop-list::-webkit-scrollbar-thumb,
+.recruit-focus-panel::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(255, 247, 229, 0.55);
+  border-radius: 999px;
+  background: #a87f49;
 }
 
 .recruit-board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 14px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .recruit-board__left,
 .recruit-board__right {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255, 247, 229, 0.5);
 }
 
 .recruit-category {
@@ -2186,6 +2230,7 @@ h1 {
 @media (max-width: 680px) {
   .recruit-board {
     grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .growth-grid {
@@ -4765,7 +4810,12 @@ textarea {
 }
 
 .recruit-focus-panel {
-  min-height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #a87f49 rgba(255, 247, 229, 0.55);
 }
 
 .recruit-focus-empty,
@@ -4986,4 +5036,86 @@ textarea {
 
 .recruit-class-body .recruit-class-stats {
   min-width: 0;
+}
+
+/* Recruit tab fixed inner scroll override */
+.panel-area {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-panel[data-panel="recruit"],
+.tab-panel[data-panel="recruit"].is-active {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-panel[data-panel="recruit"].is-active {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.tab-panel[data-panel="recruit"] .recruit-board {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1.08fr) minmax(260px, 0.92fr);
+}
+
+.tab-panel[data-panel="recruit"] .recruit-board__left,
+.tab-panel[data-panel="recruit"] .recruit-board__right {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-panel[data-panel="recruit"] .shop-list,
+.tab-panel[data-panel="recruit"] .recruit-focus-panel {
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: #a87f49 rgba(255, 247, 229, 0.55);
+}
+
+.tab-panel[data-panel="recruit"] .shop-list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.tab-panel[data-panel="recruit"] .recruit-focus-panel {
+  display: block;
+}
+
+.tab-panel[data-panel="recruit"] .shop-list::-webkit-scrollbar,
+.tab-panel[data-panel="recruit"] .recruit-focus-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tab-panel[data-panel="recruit"] .shop-list::-webkit-scrollbar-track,
+.tab-panel[data-panel="recruit"] .recruit-focus-panel::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(255, 247, 229, 0.55);
+}
+
+.tab-panel[data-panel="recruit"] .shop-list::-webkit-scrollbar-thumb,
+.tab-panel[data-panel="recruit"] .recruit-focus-panel::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(255, 247, 229, 0.55);
+  border-radius: 999px;
+  background: #a87f49;
+}
+
+@media (max-width: 760px) {
+  .tab-panel[data-panel="recruit"] .recruit-board {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
 }
