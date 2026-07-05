@@ -1391,16 +1391,20 @@ h1 {
   left: var(--hit-x);
   bottom: var(--hit-y, 158px);
   color: #b91c1c;
-  font-size: 18px;
+  font-size: 21px;
   font-weight: 800;
-  text-shadow: 0 2px 0 #fff;
-  animation: damage-float 0.7s ease-out forwards;
+  pointer-events: none;
+  text-shadow:
+    0 2px 0 #fff,
+    0 4px 8px rgba(45, 33, 25, 0.24);
+  transform: translate(-50%, 0);
+  animation: damage-gravity-pop 0.92s cubic-bezier(0.16, 0.84, 0.34, 1) forwards;
   z-index: 8;
 }
 
 .damage-number.is-critical {
   color: #facc15;
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 1000;
   letter-spacing: 0;
   text-shadow:
@@ -1408,7 +1412,7 @@ h1 {
     0 0 8px rgba(250, 204, 21, 0.9),
     0 0 18px rgba(239, 68, 68, 0.75);
   transform: translateX(-50%);
-  animation: critical-damage-pop 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: critical-damage-pop 1.12s cubic-bezier(0.16, 0.86, 0.28, 1) forwards;
 }
 
 .critical-burst,
@@ -1552,33 +1556,49 @@ h1 {
   }
 }
 
-@keyframes damage-float {
-  from {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  to {
+@keyframes damage-gravity-pop {
+  0% {
     opacity: 0;
-    transform: translate(-50%, -34px);
+    transform: translate(-50%, 8px) scale(0.72) rotate(var(--damage-tilt-start, 0deg));
+  }
+  12% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--damage-x-pop, 0px)), var(--damage-y-pop, -28px)) scale(1.18) rotate(var(--damage-tilt-pop, 0deg));
+  }
+  42% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--damage-x-apex, 0px)), var(--damage-y-apex, -42px)) scale(1) rotate(var(--damage-tilt-apex, 0deg));
+  }
+  72% {
+    opacity: 0.78;
+    transform: translate(calc(-50% + var(--damage-x-drop, 0px)), var(--damage-y-drop, 3px)) scale(0.92) rotate(var(--damage-tilt-drop, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--damage-x-end, 0px)), var(--damage-y-end, 24px)) scale(0.72) rotate(var(--damage-tilt-end, 0deg));
   }
 }
 
 @keyframes critical-damage-pop {
   0% {
     opacity: 0;
-    transform: translate(-50%, 12px) scale(0.42) rotate(-5deg);
+    transform: translate(-50%, 16px) scale(0.46) rotate(var(--damage-tilt-start, -5deg));
   }
   18% {
     opacity: 1;
-    transform: translate(-50%, -8px) scale(1.28) rotate(3deg);
+    transform: translate(calc(-50% + var(--damage-x-pop, 0px)), var(--damage-y-pop, -42px)) scale(1.28) rotate(var(--damage-tilt-pop, 3deg));
   }
   45% {
     opacity: 1;
-    transform: translate(-50%, -16px) scale(1) rotate(0deg);
+    transform: translate(calc(-50% + var(--damage-x-apex, 0px)), var(--damage-y-apex, -58px)) scale(1) rotate(var(--damage-tilt-apex, 0deg));
+  }
+  74% {
+    opacity: 0.74;
+    transform: translate(calc(-50% + var(--damage-x-drop, 0px)), var(--damage-y-drop, 4px)) scale(0.88) rotate(var(--damage-tilt-drop, 0deg));
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -58px) scale(0.78) rotate(2deg);
+    transform: translate(calc(-50% + var(--damage-x-end, 0px)), var(--damage-y-end, 32px)) scale(0.68) rotate(var(--damage-tilt-end, 0deg));
   }
 }
 
@@ -2999,12 +3019,12 @@ html, body {
    - 기존 개별 font-size 선언을 최하단에서 덮어씀
    ========================================================= */
 :root {
-  --ui-font-xs: 11px;
-  --ui-font-sm: 12px;
-  --ui-font-md: 13px;
-  --ui-font-lg: 15px;
-  --ui-font-title: 20px;
-  --ui-font-display: 24px;
+  --ui-font-xs: 12px;
+  --ui-font-sm: 13px;
+  --ui-font-md: 14px;
+  --ui-font-lg: 16px;
+  --ui-font-title: 22px;
+  --ui-font-display: 26px;
 }
 
 html,
@@ -3144,12 +3164,12 @@ textarea {
 
 /* 전투 연출 숫자는 UI 가독성을 위해 예외적으로 크게 유지하되, 크기 규칙은 통일 */
 .damage-number {
-  font-size: 18px !important;
+  font-size: 21px !important;
   line-height: 1 !important;
 }
 
 .damage-number.is-critical {
-  font-size: 28px !important;
+  font-size: 36px !important;
   line-height: 1 !important;
 }
 
@@ -3165,12 +3185,12 @@ textarea {
 /* 모바일에서 과하게 커지거나 줄바꿈이 심해지는 부분 보정 */
 @media (max-width: 430px) {
   :root {
-    --ui-font-xs: 10px;
-    --ui-font-sm: 11px;
-    --ui-font-md: 12px;
-    --ui-font-lg: 14px;
-    --ui-font-title: 18px;
-    --ui-font-display: 22px;
+    --ui-font-xs: 11px;
+    --ui-font-sm: 12px;
+    --ui-font-md: 13px;
+    --ui-font-lg: 15px;
+    --ui-font-title: 20px;
+    --ui-font-display: 24px;
   }
 
   .tab-button {

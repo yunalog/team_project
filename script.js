@@ -1224,14 +1224,31 @@ function syncEnemySummary() {
 
 function showDamage(amount, target, options = {}) {
   const critical = Boolean(options.critical);
+  const burstX = Math.round((Math.random() - 0.5) * (critical ? 46 : 34));
+  const apexY = Math.round(critical ? 52 + Math.random() * 24 : 34 + Math.random() * 20);
+  const fallY = Math.round(critical ? 28 + Math.random() * 16 : 20 + Math.random() * 14);
+  const tilt = Math.round((Math.random() - 0.5) * (critical ? 18 : 12));
   const damage = document.createElement("span");
   damage.className = `damage-number${critical ? " is-critical" : ""}`;
   damage.textContent = critical ? `CRIT ${amount}` : `-${amount}`;
   damage.style.setProperty("--hit-x", `${target.x}%`);
   damage.style.setProperty("--hit-y", `${target.y + 92}px`);
+  damage.style.setProperty("--damage-x-pop", `${Math.round(burstX * 0.35)}px`);
+  damage.style.setProperty("--damage-x-apex", `${burstX}px`);
+  damage.style.setProperty("--damage-x-drop", `${Math.round(burstX * 1.14)}px`);
+  damage.style.setProperty("--damage-x-end", `${Math.round(burstX * 1.24)}px`);
+  damage.style.setProperty("--damage-y-pop", `${Math.round(apexY * -0.7)}px`);
+  damage.style.setProperty("--damage-y-apex", `${apexY * -1}px`);
+  damage.style.setProperty("--damage-y-drop", `${Math.round(fallY * 0.12)}px`);
+  damage.style.setProperty("--damage-y-end", `${fallY}px`);
+  damage.style.setProperty("--damage-tilt-start", `${Math.round(tilt * -0.5)}deg`);
+  damage.style.setProperty("--damage-tilt-pop", `${tilt}deg`);
+  damage.style.setProperty("--damage-tilt-apex", `${Math.round(tilt * 0.35)}deg`);
+  damage.style.setProperty("--damage-tilt-drop", `${Math.round(tilt * -0.24)}deg`);
+  damage.style.setProperty("--damage-tilt-end", `${Math.round(tilt * -0.55)}deg`);
   refs.effectLayer.appendChild(damage);
   if (critical) showCriticalBurst(target);
-  window.setTimeout(() => damage.remove(), critical ? 980 : 760);
+  window.setTimeout(() => damage.remove(), critical ? 1120 : 920);
 }
 
 function showCriticalBurst(target) {
