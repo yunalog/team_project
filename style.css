@@ -1176,8 +1176,36 @@ h1 {
 
 .ally.is-slashing {
   left: var(--slash-x);
-  transform: translateX(-50%) scale(1.06);
+  bottom: var(--slash-y, var(--ally-y));
+  transform: translateX(-50%) translateY(-4px) scale(1.06);
   animation: ally-slash-lunge 0.3s ease-out;
+}
+
+.ally.is-damaged {
+  animation: ally-damaged 0.22s ease-in-out;
+}
+
+.ally.is-down {
+  opacity: 0.48;
+  filter: grayscale(0.55);
+}
+
+.ally-hp-bar {
+  overflow: hidden;
+  width: 54px;
+  height: 6px;
+  margin-bottom: 3px;
+  border: 1px solid rgba(17, 24, 39, 0.86);
+  border-radius: 999px;
+  background: rgba(254, 226, 226, 0.9);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.64), 0 2px 4px rgba(17, 24, 39, 0.18);
+}
+
+.ally-hp-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #84cc16);
+  transition: width 0.16s ease;
 }
 
 .ally-sprite {
@@ -1386,6 +1414,43 @@ h1 {
   box-shadow: 10px 10px 0 rgba(249, 115, 22, 0.28);
 }
 
+.attack-sprite-effect {
+  position: absolute;
+  left: var(--effect-from-x);
+  bottom: var(--effect-from-y);
+  width: var(--effect-size, 96px);
+  height: var(--effect-size, 96px);
+  background-image: var(--effect-url);
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  pointer-events: none;
+  image-rendering: auto;
+  transform: translate(-50%, 50%) scale(0.96);
+  z-index: 8;
+}
+
+.attack-sprite-effect.is-projectile {
+  animation: attack-sprite-6frame 0.5s steps(1, end) forwards, effect-projectile-flight 0.5s ease-in forwards;
+}
+
+.attack-sprite-effect.is-melee {
+  left: var(--effect-to-x);
+  bottom: var(--effect-to-y);
+  transform: translate(-58%, 42%) scale(0.98);
+  animation: attack-sprite-6frame 0.42s steps(1, end) forwards, effect-pop-fade 0.42s ease-out forwards;
+}
+
+.attack-sprite-effect.is-skill {
+  filter: drop-shadow(0 0 12px rgba(255, 247, 229, 0.54));
+  animation-duration: 0.58s, 0.58s;
+  z-index: 9;
+}
+
+.attack-sprite-effect.is-artist {
+  transform: translate(-62%, 42%) scale(1.05);
+}
+
 .damage-number {
   position: absolute;
   left: var(--hit-x);
@@ -1413,6 +1478,14 @@ h1 {
     0 0 18px rgba(239, 68, 68, 0.75);
   transform: translateX(-50%);
   animation: critical-damage-pop 1.12s cubic-bezier(0.16, 0.86, 0.28, 1) forwards;
+}
+
+.damage-number.is-unit-damage {
+  color: #f97316;
+  font-size: 18px;
+  text-shadow:
+    0 2px 0 #fff7ed,
+    0 0 8px rgba(249, 115, 22, 0.62);
 }
 
 .critical-burst,
@@ -1522,13 +1595,28 @@ h1 {
 
 @keyframes ally-slash-lunge {
   0% {
-    transform: translateX(-50%) translateX(-12px) scale(0.96);
+    transform: translateX(-50%) translateX(-12px) translateY(-4px) scale(0.96);
   }
   45% {
-    transform: translateX(-50%) translateX(10px) scale(1.12);
+    transform: translateX(-50%) translateX(10px) translateY(-8px) scale(1.12);
   }
   100% {
-    transform: translateX(-50%) translateX(0) scale(1.02);
+    transform: translateX(-50%) translateX(0) translateY(-4px) scale(1.02);
+  }
+}
+
+@keyframes ally-damaged {
+  0%,
+  100% {
+    transform: translateX(-50%);
+  }
+
+  35% {
+    transform: translateX(calc(-50% - 5px));
+  }
+
+  70% {
+    transform: translateX(calc(-50% + 5px));
   }
 }
 
@@ -1553,6 +1641,83 @@ h1 {
   to {
     opacity: 0;
     transform: rotate(-18deg) scale(1.15);
+  }
+}
+
+@keyframes attack-sprite-6frame {
+  0%,
+  15% {
+    background-position: 0 0;
+  }
+
+  16%,
+  31% {
+    background-position: 50% 0;
+  }
+
+  32%,
+  47% {
+    background-position: 100% 0;
+  }
+
+  48%,
+  63% {
+    background-position: 0 100%;
+  }
+
+  64%,
+  79% {
+    background-position: 50% 100%;
+  }
+
+  80%,
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes effect-pop-fade {
+  0% {
+    opacity: 0;
+    scale: 0.82;
+  }
+
+  16%,
+  72% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
+
+@keyframes effect-projectile-flight {
+  0% {
+    opacity: 0;
+    left: var(--effect-from-x);
+    bottom: var(--effect-from-y);
+    transform: translate(-50%, 50%) scale(0.72) rotate(-4deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  82% {
+    opacity: 1;
+    left: var(--effect-to-x);
+    bottom: var(--effect-to-y);
+    transform: translate(-50%, 50%) scale(1) rotate(3deg);
+  }
+
+  100% {
+    opacity: 0;
+    left: var(--effect-to-x);
+    bottom: var(--effect-to-y);
+    transform: translate(-50%, 50%) scale(0.9) rotate(0deg);
   }
 }
 
@@ -3735,6 +3900,8 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+<<<<<<< HEAD
+=======
 
 /* Restore 2차 기본 company squad bottom scroll/assets layout */
 .company-dashboard {
@@ -3922,3 +4089,4 @@ textarea {
   height: 100%;
   min-height: 0;
 }
+>>>>>>> 4798229ab0d591192a906b9157affd896fabf848

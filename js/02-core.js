@@ -353,7 +353,9 @@ function tick(delta) {
     state.elapsed += delta;
     saveCooldown += delta;
 
+    updateUnitHealth(delta);
     moveEnemies(delta);
+    updateMonsterAttacks(delta);
     updateAutoCombat(delta);
     updateEquipmentUpgrade(delta);
 
@@ -399,6 +401,8 @@ function normalizeState(nextState) {
     enemyMaxHp: Math.max(1, Number(nextState.enemyMaxHp) || defaultState.enemyMaxHp),
     enemyX: Number(nextState.enemyX) || ENEMY_SPAWN_X,
     enemies: normalizeEnemies(nextState.enemies),
+    unitHp: nextState.unitHp && typeof nextState.unitHp === "object" ? nextState.unitHp : {},
+    unitMaxHp: nextState.unitMaxHp && typeof nextState.unitMaxHp === "object" ? nextState.unitMaxHp : {},
     clickPower: Math.max(1, Number(nextState.clickPower) || 1),
     playerLevel: Math.max(1, Number(nextState.playerLevel) || 1),
     clearCount: Math.max(0, Number(nextState.clearCount) || 0),
