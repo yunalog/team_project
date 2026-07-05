@@ -1392,7 +1392,7 @@ function addCompanyXp(amount) {
 
 function getBattleBackground() {
   const bgIndex = ((state.chapter - 1) % 3) + 1;
-  return `Resource/BackGround/BG_${bgIndex}.png`;
+  return `Resource/BackGround/Stage_Background/BG_${bgIndex}.png`;
 }
 
 function deriveSubStageFromLegacy(stage) {
