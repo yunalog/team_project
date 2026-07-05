@@ -3549,3 +3549,9 @@ textarea {
   background-position: left center;
   background-size: 300% 100%;
 }
+
+/* Prevent the company scene from overflowing its grid row and covering the summary cards. */
+.game-shell .company-scene {
+  height: 100%;
+  min-height: 0;
+}

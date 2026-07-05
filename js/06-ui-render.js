@@ -286,7 +286,7 @@ function renderAllies() {
   lastRosterKey = rosterKey;
   refs.allyLayer.innerHTML = units
     .map((unit, index) => {
-      const position = getAllyPosition(index);
+      const position = getAllyPosition(index, units.length);
       const countText = unit.count > 1 ? ` x${unit.count}` : "";
       const spriteMarkup = unit.sprites
         ? `<span class="ally-state-sprite" role="img" aria-label="${unit.name}" style="--idle-url: url('${unit.sprites.idle}'); --attack-url: url('${unit.sprites.attack}'); --skill-url: url('${unit.sprites.skill}')"></span>`
@@ -305,15 +305,27 @@ function renderAllies() {
     .join("");
 }
 
-function getAllyPosition(index) {
-  const positions = [
-    { x: 8, y: 82 },
-    { x: 34, y: 34 },
-    { x: 34, y: 134 },
-    { x: 21, y: 34 },
-    { x: 21, y: 134 },
-  ];
-  return positions[index] || { x: 16 + index * 5, y: 42 + (index % 3) * 46 };
+function getAllyPosition(index, unitCount = 1) {
+  const layouts = {
+    1: [{ x: 22, y: 76 }],
+    2: [
+      { x: 14, y: 76 },
+      { x: 31, y: 76 },
+    ],
+    3: [
+      { x: 14, y: 122 },
+      { x: 31, y: 122 },
+      { x: 22, y: 34 },
+    ],
+    4: [
+      { x: 14, y: 122 },
+      { x: 31, y: 122 },
+      { x: 14, y: 34 },
+      { x: 31, y: 34 },
+    ],
+  };
+  const positions = layouts[Math.min(4, Math.max(1, unitCount))];
+  return positions[index] || positions[positions.length - 1];
 }
 
 function renderShop() {
