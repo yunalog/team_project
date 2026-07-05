@@ -202,6 +202,8 @@ const companyLevels = [
   { name: "글로벌 기업", minXp: 1740, desc: "전 세계가 주목하는 글로벌 기업입니다.", benefit: "최고 단계 달성" },
 ];
 
+const companyImageBasePath = "Resource/BackGround/Tycoon_Resource_1/Company_Img";
+
 const tools = [
   {
     id: "engine",
@@ -1363,6 +1365,11 @@ function getCompanyProgress() {
   };
 }
 
+function getCompanyImageSrc(levelNumber) {
+  const safeLevel = Math.max(1, Math.min(companyLevels.length, Number(levelNumber) || 1));
+  return `${companyImageBasePath}/Tycoon_Lv${safeLevel}.png`;
+}
+
 function getFacilityInvestmentCount() {
   return tools.reduce((total, tool) => total + getToolLevel(tool.id), 0);
 }
@@ -1938,7 +1945,7 @@ function renderCompany() {
   const progress = getCompanyProgress();
   const levelNumber = progress.levelIndex + 1;
   const facilityCount = getFacilityInvestmentCount();
-  const visualTier = Math.min(6, Math.floor(progress.levelIndex / 2) + 1);
+  const visualTier = Math.min(companyLevels.length, levelNumber);
   const visualKey = `${progress.levelIndex}:${getEmployeeCount()}:${facilityCount}`;
 
   setText(refs.companyLevelChip, `COMPANY Lv.${levelNumber}`);
@@ -1965,9 +1972,8 @@ function renderCompany() {
     const isFirstRender = !lastCompanyVisualKey;
     lastCompanyVisualKey = visualKey;
     refs.companyCampus.dataset.companyTier = String(visualTier);
-    refs.companyBuilding.style.setProperty("--building-width", `${160 + visualTier * 20}px`);
-    refs.companyBuilding.style.setProperty("--building-height", `${96 + visualTier * 6}px`);
-    renderCompanyFloors(visualTier, progress.levelIndex);
+    refs.companyBuilding.setAttribute("src", getCompanyImageSrc(levelNumber));
+    refs.companyBuilding.setAttribute("alt", `${progress.current.name} 외관`);
     renderCompanyEmployees();
 
     if (!isFirstRender) {
