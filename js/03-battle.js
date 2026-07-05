@@ -329,15 +329,6 @@ function attackUnit(unit, options = {}) {
       window.setTimeout(() => damageEnemy(enemy.id, unit.power, manual, unit), 210 + index * 35);
     }
   });
-  const damage = unit.power;
-
-  if (unit.attackType === "slash") {
-    playSlash(unit, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 140);
-  } else {
-    playProjectile(unit, from, target, skill);
-    window.setTimeout(() => damageEnemy(target.id, damage, manual), 420);
-  }
 }
 
 function castSkill(unit, from) {
@@ -546,7 +537,7 @@ function getEffectKey(unit) {
   return "player";
 }
 
-function damageEnemy(enemyId, amount, manual) {
+function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
   if (isSpawningNext) return;
 
   const target = state.enemies.find((enemy) => enemy.id === enemyId) || getTargetEnemy();
