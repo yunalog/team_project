@@ -34,6 +34,28 @@ const BGM_TRACKS = {
   boss: "Resource/Sound/BGM_Boss.mp3",
   tycoon: "Resource/Sound/BGM_Tycoon.mp3",
 };
+const EFFECT_SPRITES = {
+  player: {
+    normal: "Resource/Effect/Normal_Attack_Effect/Main_Player_Normal_Effect/Main_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/Main_Player_Normal_Effect/Main_Skill_Sprite.png",
+  },
+  planner: {
+    normal: "Resource/Effect/Normal_Attack_Effect/Game_Designer_Normal_Effect/Gd_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/Game_Designer_Normal_Effect/Gd_Skill_Sprite.png",
+  },
+  business: {
+    normal: "Resource/Effect/Normal_Attack_Effect/PM_Normal_Effect/Pm_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/PM_Normal_Effect/Pm_Skill_Sprite.png",
+  },
+  artist: {
+    normal: "Resource/Effect/Normal_Attack_Effect/Art_Normal_Effect/Art_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/Art_Normal_Effect/Art_Skill_Sprite.png",
+  },
+  qa: {
+    normal: "Resource/Effect/Normal_Attack_Effect/QA_Normal_Effect/Qa_Normal_Sprite.png",
+    skill: "Resource/Effect/Skill_Effect/QA_Normal_Effect/Qa_Skill_Sprite.png",
+  },
+};
 const defaultAudioSettings = {
   volume: 0.45,
   muted: false,

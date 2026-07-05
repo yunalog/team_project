@@ -321,15 +321,8 @@ function getSkillTargets(skill) {
 }
 
 function playProjectile(unit, from, target, skill) {
-  const shot = document.createElement("span");
-  shot.className = `projectile is-${unit.attackType}${skill ? " is-skill" : ""}`;
-  shot.style.setProperty("--from-x", `${from.x}%`);
-  shot.style.setProperty("--from-y", `${from.y}px`);
-  shot.style.setProperty("--to-x", `${target.x}%`);
-  shot.style.setProperty("--shot-color", unit.color);
-  refs.effectLayer.appendChild(shot);
+  playAttackEffect(unit, target, { skill, from });
   pulseUnit(unit.id, "is-attacking", 320);
-  window.setTimeout(() => shot.remove(), 480);
 }
 
 function playSlash(unit, target, skill) {
@@ -340,34 +333,43 @@ function playSlash(unit, target, skill) {
     window.setTimeout(() => ally.classList.remove("is-slashing"), 300);
   }
 
-  const slash = document.createElement("span");
-  slash.className = `slash-effect${skill ? " is-skill" : ""}`;
-  slash.style.setProperty("--hit-x", `${target.x}%`);
-  refs.effectLayer.appendChild(slash);
-  window.setTimeout(() => slash.remove(), 360);
+  playAttackEffect(unit, target, { skill });
 }
 
 function playSkillEffect(unit, targets) {
-  const centerX = targets.reduce((sum, target) => sum + target.x, 0) / targets.length;
-  const centerY = targets.reduce((sum, target) => sum + target.y, 0) / targets.length + 64;
-  const effect = document.createElement("span");
-  effect.className = `skill-zone is-${unit.skill.type}`;
-  effect.textContent = unit.skill.type === "all" ? "TEST" : unit.skill.type === "chain" ? "LINK" : "";
-  effect.style.setProperty("--skill-x", `${centerX}%`);
-  effect.style.setProperty("--skill-y", `${centerY}px`);
-  effect.style.setProperty("--skill-color", unit.color);
-  refs.effectLayer.appendChild(effect);
-  window.setTimeout(() => effect.remove(), 620);
-
-  targets.forEach((target) => {
-    const marker = document.createElement("span");
-    marker.className = "skill-hit-marker";
-    marker.style.setProperty("--hit-x", `${target.x}%`);
-    marker.style.setProperty("--hit-y", `${target.y + 82}px`);
-    marker.style.setProperty("--skill-color", unit.color);
-    refs.effectLayer.appendChild(marker);
-    window.setTimeout(() => marker.remove(), 520);
+  targets.forEach((target, index) => {
+    window.setTimeout(() => playAttackEffect(unit, target, { skill: true }), index * 55);
   });
+}
+
+function playAttackEffect(unit, target, options = {}) {
+  const skill = Boolean(options.skill);
+  const spriteUrl = getEffectSpriteUrl(unit, skill);
+  if (!spriteUrl) return;
+
+  const effect = document.createElement("span");
+  effect.className = `attack-sprite-effect${skill ? " is-skill" : " is-normal"} is-${getEffectKey(unit)}`;
+  effect.style.setProperty("--effect-url", `url("${spriteUrl}")`);
+  effect.style.setProperty("--effect-x", `${target.x}%`);
+  effect.style.setProperty("--effect-y", `${target.y + (target.isBoss ? 84 : 72)}px`);
+  effect.style.setProperty("--effect-size", skill ? (target.isBoss ? "150px" : "126px") : target.isBoss ? "116px" : "92px");
+  refs.effectLayer.appendChild(effect);
+  window.setTimeout(() => effect.remove(), skill ? 620 : 460);
+}
+
+function getEffectSpriteUrl(unit, skill = false) {
+  const key = getEffectKey(unit);
+  const spriteSet = EFFECT_SPRITES[key] || EFFECT_SPRITES.player;
+  return spriteSet[skill ? "skill" : "normal"];
+}
+
+function getEffectKey(unit) {
+  if (unit.id === "player") return "player";
+  if (unit.recruitId === "planner") return "planner";
+  if (unit.recruitId === "business") return "business";
+  if (unit.recruitId === "artist") return "artist";
+  if (unit.recruitId === "qa") return "qa";
+  return "player";
 }
 
 function damageEnemy(enemyId, amount, manual) {

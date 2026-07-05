@@ -1413,6 +1413,34 @@ h1 {
   box-shadow: 10px 10px 0 rgba(249, 115, 22, 0.28);
 }
 
+.attack-sprite-effect {
+  position: absolute;
+  left: var(--effect-x);
+  bottom: var(--effect-y);
+  width: var(--effect-size, 96px);
+  height: var(--effect-size, 96px);
+  background-image: var(--effect-url);
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  pointer-events: none;
+  image-rendering: auto;
+  transform: translate(-50%, 16%) scale(0.96);
+  animation: attack-sprite-6frame 0.42s steps(1, end) forwards, effect-pop-fade 0.42s ease-out forwards;
+  z-index: 8;
+}
+
+.attack-sprite-effect.is-skill {
+  filter: drop-shadow(0 0 12px rgba(255, 247, 229, 0.54));
+  transform: translate(-50%, 18%) scale(1);
+  animation-duration: 0.58s, 0.58s;
+  z-index: 9;
+}
+
+.attack-sprite-effect.is-artist {
+  transform: translate(-50%, 18%) scale(1.05);
+}
+
 .damage-number {
   position: absolute;
   left: var(--hit-x);
@@ -1603,6 +1631,56 @@ h1 {
   to {
     opacity: 0;
     transform: rotate(-18deg) scale(1.15);
+  }
+}
+
+@keyframes attack-sprite-6frame {
+  0%,
+  15% {
+    background-position: 0 0;
+  }
+
+  16%,
+  31% {
+    background-position: 50% 0;
+  }
+
+  32%,
+  47% {
+    background-position: 100% 0;
+  }
+
+  48%,
+  63% {
+    background-position: 0 100%;
+  }
+
+  64%,
+  79% {
+    background-position: 50% 100%;
+  }
+
+  80%,
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes effect-pop-fade {
+  0% {
+    opacity: 0;
+    scale: 0.82;
+  }
+
+  16%,
+  72% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1.06;
   }
 }
 
