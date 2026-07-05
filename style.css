@@ -514,31 +514,28 @@ h1 {
   left: 10px;
   z-index: 3;
   display: flex;
+  align-items: end;
   justify-content: center;
-  gap: clamp(8px, 3vw, 26px);
+  gap: clamp(0px, 0.7vw, 7px);
   pointer-events: none;
 }
 
 .scene-employee {
-  position: relative;
-  width: 12px;
-  height: 24px;
-  border-radius: 6px 6px 3px 3px;
-  background: var(--employee-color, #345f76);
-  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.22);
+  flex: 0 1 clamp(24px, 4.2vw, 38px);
+  width: clamp(24px, 4.2vw, 38px);
+  height: clamp(30px, 5vw, 46px);
+  background-image: var(--employee-image);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  filter: drop-shadow(0 3px 0 rgba(45, 33, 25, 0.22));
+  image-rendering: pixelated;
   animation: employee-bob 1.7s ease-in-out infinite;
 }
 
-.scene-employee::before {
-  position: absolute;
-  top: -7px;
-  left: 2px;
-  width: 9px;
-  height: 9px;
-  border: 1px solid rgba(45, 33, 25, 0.35);
-  border-radius: 50%;
-  background: #f0bc8b;
-  content: "";
+.scene-employee.is-leader {
+  background-position: left center;
+  background-size: 300% 100%;
 }
 
 .scene-employee:nth-child(2n) {
@@ -2010,6 +2007,26 @@ h1 {
   font-size: 12px;
   font-weight: 900;
   text-shadow: 0 1px rgba(0, 0, 0, 0.28);
+}
+
+.squad-avatar.has-character {
+  width: 42px;
+  height: 42px;
+  overflow: hidden;
+  border-radius: 6px;
+  background-color: #f6ead2;
+  background-image: var(--squad-image);
+  background-repeat: no-repeat;
+  background-position: center bottom;
+  background-size: contain;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  image-rendering: pixelated;
+  text-shadow: none;
+}
+
+.squad-avatar.has-character.is-leader {
+  background-position: left center;
+  background-size: 300% 100%;
 }
 
 .squad-slot {

@@ -2052,11 +2052,43 @@ function renderCompanyFloors(visualTier, levelIndex) {
 }
 
 function renderCompanyEmployees() {
-  const colors = ["#315f78", "#b05b45", "#6a6fa6", "#3c7c58", "#c4893f", "#805b86"];
-  const visibleEmployees = Math.min(12, getEmployeeCount());
-  refs.employeeCrowd.innerHTML = Array.from({ length: visibleEmployees }, (_, index) => {
-    return `<span class="scene-employee" style="--employee-color: ${colors[index % colors.length]}"></span>`;
-  }).join("");
+  const visibleEmployeeCount = Math.min(12, getEmployeeCount());
+  const employees = [
+    {
+      name: "대표",
+      sprite: "Anim/Player_1/Motion.png",
+      isLeader: true,
+    },
+  ];
+
+  for (let employeeIndex = 0; employees.length < visibleEmployeeCount; employeeIndex += 1) {
+    let employeeAdded = false;
+
+    recruits.forEach((recruit) => {
+      if (employees.length >= visibleEmployeeCount || getRecruitCount(recruit.id) <= employeeIndex) return;
+      employees.push({
+        name: recruit.name,
+        sprite: recruit.sprites.idle,
+        isLeader: false,
+      });
+      employeeAdded = true;
+    });
+
+    if (!employeeAdded) break;
+  }
+
+  refs.employeeCrowd.innerHTML = employees
+    .map(
+      (employee) => `
+        <span
+          class="scene-employee${employee.isLeader ? " is-leader" : ""}"
+          role="img"
+          aria-label="${employee.name}"
+          style="--employee-image: url('${employee.sprite}')"
+        ></span>
+      `
+    )
+    .join("");
   refs.employeeCrowd.setAttribute("aria-label", `출근 중인 직원 ${getEmployeeCount()}명`);
 }
 
@@ -2189,7 +2221,7 @@ function renderSquadManagement() {
 
   const leaderMarkup = `
     <div class="squad-leader">
-      <span class="squad-avatar" style="--squad-color: #059669;">C</span>
+      ${getSquadCharacterAvatarMarkup(null, true)}
       <div>
         <strong>대표</strong>
         <small>리더 · 고정 배치</small>
@@ -2214,13 +2246,16 @@ function renderSquadManagement() {
         })
         .join("");
       const color = assigned ? assigned.color : "#9a8b77";
-      const mark = assigned ? assigned.mark : "+";
 
       return `
         <label class="squad-slot${assigned ? " is-filled" : ""}">
           <span class="squad-position">${positionNames[slotIndex]}</span>
           <span class="squad-slot-body">
-            <span class="squad-avatar" style="--squad-color: ${color};">${mark}</span>
+            ${
+              assigned
+                ? getSquadCharacterAvatarMarkup(assigned)
+                : `<span class="squad-avatar is-empty" style="--squad-color: ${color};" aria-hidden="true">+</span>`
+            }
             <span>
               <strong>${assigned ? assigned.name : "빈 위치"}</strong>
               <small>${slotIndex + 1}번 배치 슬롯</small>
@@ -2242,7 +2277,7 @@ function renderSquadManagement() {
       const deployed = deployedCounts[recruit.id] || 0;
       return `
         <div class="squad-roster-item${owned ? "" : " is-unowned"}">
-          <span class="squad-avatar" style="--squad-color: ${recruit.color};">${recruit.mark}</span>
+          ${getSquadCharacterAvatarMarkup(recruit)}
           <div>
             <strong>${recruit.name}</strong>
             <small>보유 ${owned} · 배치 ${deployed}</small>
@@ -2251,6 +2286,21 @@ function renderSquadManagement() {
       `;
     })
     .join("");
+}
+
+function getSquadCharacterAvatarMarkup(recruit, isLeader = false) {
+  const name = isLeader ? "대표" : recruit.name;
+  const color = isLeader ? "#059669" : recruit.color;
+  const sprite = isLeader ? "Anim/Player_1/Motion.png" : recruit.sprites.idle;
+
+  return `
+    <span
+      class="squad-avatar has-character${isLeader ? " is-leader" : ""}"
+      role="img"
+      aria-label="${name}"
+      style="--squad-color: ${color}; --squad-image: url('${sprite}')"
+    ></span>
+  `;
 }
 
 function formatTime(seconds) {
