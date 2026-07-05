@@ -259,14 +259,6 @@ const equipmentUpgradeConfigs = [
   { level: 5, label: "5단계", maxGrade: 3, nextCost: 0, duration: 0, desc: "최대 연구 단계" },
 ];
 
-const growthConfigs = {
-  process: { label: "작업처리능력", baseCost: 18 },
-  critical: { label: "실수 감소", baseCost: 20 },
-  skill: { label: "새로운 아이디어", baseCost: 22 },
-  speed: { label: "작업 속도", baseCost: 16 },
-  hp: { label: "야근 버티기", baseCost: 24 },
-};
-
 const enemyNames = ["작은 버그", "촉박한 마감", "스코프 증가", "서버 장애", "대형 프로젝트"];
 
 const growthConfigs = {
