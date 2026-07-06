@@ -5600,18 +5600,59 @@ button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) 
   text-shadow: 0 1px 0 rgba(255, 243, 178, 0.68);
 }
 
-/* Company scene final layering: building sits on the background platform, employees stay behind it. */
+/* Company scene final layering: align each transparent PNG by its visible bottom edge. */
 .company-campus {
-  --company-platform-bottom: clamp(18px, 4.2vw, 38px);
+  --company-platform-bottom: clamp(13px, 3.5vw, 30px);
+  --company-ground-shift: 0px;
+}
+
+.company-campus[data-company-tier="1"] {
+  --company-ground-shift: clamp(-42px, -5.2vw, -24px);
+}
+
+.company-campus[data-company-tier="2"] {
+  --company-ground-shift: clamp(-54px, -6.2vw, -31px);
+}
+
+.company-campus[data-company-tier="3"] {
+  --company-ground-shift: clamp(-48px, -5.6vw, -28px);
+}
+
+.company-campus[data-company-tier="4"],
+.company-campus[data-company-tier="5"] {
+  --company-ground-shift: clamp(-46px, -5.3vw, -27px);
+}
+
+.company-campus[data-company-tier="6"] {
+  --company-ground-shift: clamp(-52px, -5.9vw, -30px);
+}
+
+.company-campus[data-company-tier="7"],
+.company-campus[data-company-tier="8"] {
+  --company-ground-shift: clamp(-25px, -3vw, -14px);
+}
+
+.company-campus[data-company-tier="9"] {
+  --company-ground-shift: clamp(-18px, -2.2vw, -9px);
+}
+
+.company-campus[data-company-tier="10"] {
+  --company-ground-shift: clamp(-26px, -2.8vw, -14px);
+}
+
+.company-campus[data-company-tier="11"],
+.company-campus[data-company-tier="12"] {
+  --company-ground-shift: clamp(-14px, -1.8vw, -7px);
 }
 
 .office-building {
+  bottom: calc(var(--company-platform-bottom) + var(--company-ground-shift));
   z-index: 4;
 }
 
 .employee-crowd {
-  bottom: clamp(10px, 2.8vw, 28px);
-  z-index: 1;
+  bottom: clamp(-4px, 0.8vw, 10px);
+  z-index: 6;
 }
 
 .scene-employee {
