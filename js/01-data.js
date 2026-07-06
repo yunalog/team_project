@@ -15,6 +15,7 @@ const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
+const RECRUIT_UNLOCK_CHAPTER = 2;
 const NORMAL_MONSTER_IMAGES = [
   "Resource/Monster/Normal_Monster/Field_Monster1.png",
   "Resource/Monster/Normal_Monster/Field_Monster2.png",

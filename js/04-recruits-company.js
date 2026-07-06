@@ -92,12 +92,23 @@ function getRecruitBoostLevel(id) {
   return state.recruitBoosts?.[id] || 0;
 }
 
+function isRecruitUnlocked() {
+  return state.chapter >= RECRUIT_UNLOCK_CHAPTER;
+}
+
 function getRecruitBuyCost(recruit, count = getRecruitCount(recruit.id)) {
-  return 1;
+  const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
+  const firstHireCost = Math.round(baseCost * 5);
+  if (count <= 0) return firstHireCost;
+
+  return Math.round(firstHireCost * Math.pow(1.55, count));
 }
 
 function getRecruitEnhancementCost(id) {
-  return 1;
+  const recruit = recruits.find((item) => item.id === id);
+  const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
+  const boostLevel = getRecruitBoostLevel(id);
+  return Math.round(baseCost * 2.4 * Math.pow(1.62, boostLevel));
 }
 
 function getRecruitPromotionCount(id) {
@@ -105,7 +116,9 @@ function getRecruitPromotionCount(id) {
 }
 
 function getRecruitPromotionCost(recruit) {
-  return 1;
+  const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
+  const promotionCount = getRecruitPromotionCount(recruit?.id);
+  return Math.round(baseCost * 12 * Math.pow(1.95, promotionCount));
 }
 
 function shouldShowRecruitPromotionButton(recruit, count = getRecruitCount(recruit.id)) {
@@ -228,6 +241,16 @@ function getSelectedRecruitForGrowth() {
 
 function renderRecruitGrowthPanel() {
   if (!refs.recruitGrowthPanel) return;
+  if (!isRecruitUnlocked()) {
+    refs.recruitGrowthPanel.innerHTML = `
+      <div class="recruit-focus-empty">
+        <strong>${RECRUIT_UNLOCK_CHAPTER}스테이지에서 해금</strong>
+        <p>초반에는 대표 성장과 장비 뽑기로 전투 흐름을 익히고, 2스테이지부터 팀을 확장합니다.</p>
+      </div>
+    `;
+    return;
+  }
+
   const recruit = getSelectedRecruitForGrowth();
   if (!recruit) {
     refs.recruitGrowthPanel.innerHTML = `
@@ -491,6 +514,11 @@ function costFor(baseCost, count) {
 }
 
 function buyRecruit(id) {
+  if (!isRecruitUnlocked()) {
+    log(`동료 영입은 ${RECRUIT_UNLOCK_CHAPTER}스테이지 진입 후 해금됩니다.`);
+    return;
+  }
+
   const recruit = recruits.find((item) => item.id === id);
   const count = getRecruitCount(id);
   const cost = getRecruitBuyCost(recruit, count);
