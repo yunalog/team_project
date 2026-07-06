@@ -1478,24 +1478,54 @@ h1 {
   z-index: 8;
 }
 
+.monster-cast-sprite,
 .monster-skill-effect {
   position: absolute;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  image-rendering: auto;
+}
+
+.monster-cast-sprite {
+  left: var(--monster-cast-x);
+  bottom: var(--monster-cast-y);
+  width: var(--monster-cast-size, 122px);
+  height: var(--monster-cast-size, 122px);
+  background-image: var(--monster-cast-url);
+  transform: translate(-50%, 44%) scaleX(-1);
+  animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-cast-lunge 0.62s ease-out forwards;
+  z-index: 8;
+}
+
+.monster-cast-sprite.is-boss {
+  filter: drop-shadow(0 0 14px rgba(248, 113, 113, 0.42));
+}
+
+.monster-skill-effect {
   left: var(--monster-skill-x);
   bottom: var(--monster-skill-y);
   width: var(--monster-skill-size, 112px);
   height: var(--monster-skill-size, 112px);
   background-image: var(--monster-skill-url);
-  background-repeat: no-repeat;
-  background-size: 300% 200%;
-  background-position: 0 0;
-  pointer-events: none;
   transform: translate(-50%, 44%) scaleX(-1);
-  animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-skill-pop 0.62s ease-out forwards;
   z-index: 9;
 }
 
 .monster-skill-effect.is-boss {
   filter: drop-shadow(0 0 14px rgba(248, 113, 113, 0.42));
+}
+
+.monster-skill-effect.is-melee {
+  animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-skill-pop 0.62s ease-out forwards;
+}
+
+.monster-skill-effect.is-projectile {
+  left: var(--monster-skill-from-x);
+  bottom: var(--monster-skill-from-y);
+  transform: translate(-50%, 50%) scaleX(-1) scale(0.78) rotate(4deg);
+  animation: monster-skill-6frame 0.68s steps(1, end) forwards, monster-projectile-flight 0.68s ease-in forwards;
 }
 
 .attack-sprite-effect.is-projectile {
@@ -1791,6 +1821,54 @@ h1 {
   100% {
     opacity: 0;
     scale: 1.04;
+  }
+}
+
+@keyframes monster-cast-lunge {
+  0% {
+    opacity: 0;
+    translate: 10px 0;
+    scale: 0.92;
+  }
+
+  18%,
+  76% {
+    opacity: 1;
+    translate: -8px -4px;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: -14px 0;
+    scale: 1.03;
+  }
+}
+
+@keyframes monster-projectile-flight {
+  0% {
+    opacity: 0;
+    left: var(--monster-skill-from-x);
+    bottom: var(--monster-skill-from-y);
+    transform: translate(-50%, 50%) scaleX(-1) scale(0.68) rotate(6deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 1;
+    left: var(--monster-skill-to-x);
+    bottom: var(--monster-skill-to-y);
+    transform: translate(-50%, 50%) scaleX(-1) scale(1) rotate(-5deg);
+  }
+
+  100% {
+    opacity: 0;
+    left: var(--monster-skill-to-x);
+    bottom: var(--monster-skill-to-y);
+    transform: translate(-50%, 50%) scaleX(-1) scale(0.92) rotate(0deg);
   }
 }
 

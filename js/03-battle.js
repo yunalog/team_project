@@ -31,10 +31,14 @@ function createNormalWave() {
       lane: index,
       isBoss: false,
     };
+    const monsterIndex = getNormalMonsterIndex(enemy);
     return {
       ...enemy,
-      image: getMonsterImage(enemy),
-      skillImage: getMonsterSkillImage(enemy),
+      monsterIndex,
+      attackType: getMonsterAttackType({ ...enemy, monsterIndex }),
+      image: getMonsterImage({ ...enemy, monsterIndex }),
+      skillImage: getMonsterSkillImage({ ...enemy, monsterIndex }),
+      effectImage: getMonsterEffectImage({ ...enemy, monsterIndex }),
     };
   });
 }
@@ -53,8 +57,14 @@ function createBossWave() {
       isBoss: true,
       image: getMonsterImage({ isBoss: true }),
       skillImage: getMonsterSkillImage({ isBoss: true, lane: 0 }),
+      effectImage: getMonsterEffectImage({ isBoss: true, lane: 0 }),
+      attackType: "melee",
     },
   ];
+}
+
+function getNormalMonsterIndex(enemy) {
+  return (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_IMAGES.length;
 }
 
 function getMonsterImage(enemy) {
@@ -62,13 +72,29 @@ function getMonsterImage(enemy) {
     return BOSS_MONSTER_IMAGES[(state.chapter - 1) % BOSS_MONSTER_IMAGES.length];
   }
 
-  const index = (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_IMAGES.length;
+  const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
   return NORMAL_MONSTER_IMAGES[index];
 }
 
 function getMonsterSkillImage(enemy) {
-  const index = (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_SKILL_IMAGES.length;
+  const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
   return NORMAL_MONSTER_SKILL_IMAGES[index];
+}
+
+function getMonsterEffectImage(enemy) {
+  if (enemy.isBoss) return enemy.skillImage || getMonsterSkillImage(enemy);
+  const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
+  return NORMAL_MONSTER_EFFECT_IMAGES[index];
+}
+
+function getMonsterAttackType(enemy) {
+  if (enemy.isBoss) return enemy.attackType || "melee";
+  const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
+  return NORMAL_MONSTER_ATTACK_TYPES[index] || "melee";
+}
+
+function getMonsterAttackRange(enemy) {
+  return getMonsterAttackType(enemy) === "ranged" ? MONSTER_RANGED_ATTACK_RANGE : MONSTER_ATTACK_RANGE;
 }
 
 function getWaveEnemyCount() {
@@ -104,7 +130,8 @@ function moveEnemies(delta) {
 
   const speed = Math.min(5.2, 2.2 + state.stage * 0.06);
   state.enemies.forEach((enemy) => {
-    enemy.x = Math.max(ENEMY_CONTACT_X, enemy.x - speed * delta);
+    const stopX = getMonsterAttackType(enemy) === "ranged" ? getMonsterAttackRange(enemy) : ENEMY_CONTACT_X;
+    enemy.x = Math.max(stopX, enemy.x - speed * delta);
   });
 
   syncEnemySummary();
@@ -114,7 +141,7 @@ function updateUnitHealth(delta = 0) {
   const units = getUnits();
   syncUnitHealth(units);
 
-  const pressured = state.enemies.some((enemy) => enemy.x <= MONSTER_ATTACK_RANGE);
+  const pressured = state.enemies.some((enemy) => enemy.x <= getMonsterAttackRange(enemy));
   if (pressured || isSpawningNext) return;
 
   units.forEach((unit) => {
@@ -159,7 +186,7 @@ function updateMonsterAttacks(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
   const attackers = state.enemies
-    .filter((enemy) => enemy.x <= MONSTER_ATTACK_RANGE)
+    .filter((enemy) => enemy.x <= getMonsterAttackRange(enemy))
     .sort((a, b) => a.x - b.x || a.y - b.y);
   if (!attackers.length) {
     monsterAttackCooldown = Math.min(monsterAttackCooldown, MONSTER_ATTACK_RATE);
@@ -178,10 +205,10 @@ function updateMonsterAttacks(delta) {
 
   const extraPressure = Math.max(0, attackers.length - 1);
   const damage = getMonsterAttackDamage(attacker, target, extraPressure);
-  playMonsterSkillEffect(attacker);
+  const attackDelay = playMonsterSkillEffect(attacker, target);
 
   monsterAttackCooldown += attacker.isBoss ? MONSTER_ATTACK_RATE + 0.55 : MONSTER_ATTACK_RATE;
-  window.setTimeout(() => applyMonsterAttackDamage(attacker, target, damage), 260);
+  window.setTimeout(() => applyMonsterAttackDamage(attacker, target, damage), attackDelay);
 }
 
 function applyMonsterAttackDamage(attacker, target, damage) {
@@ -198,9 +225,14 @@ function applyMonsterAttackDamage(attacker, target, damage) {
   }
 }
 
-function playMonsterSkillEffect(enemy) {
-  const spriteUrl = enemy.skillImage || getMonsterSkillImage(enemy);
-  if (!spriteUrl) return;
+function playMonsterSkillEffect(enemy, target) {
+  const skillSpriteUrl = enemy.skillImage || getMonsterSkillImage(enemy);
+  const effectSpriteUrl = enemy.effectImage || getMonsterEffectImage(enemy);
+  if (!skillSpriteUrl && !effectSpriteUrl) return 260;
+
+  const attackType = getMonsterAttackType(enemy);
+  const ranged = attackType === "ranged";
+  const targetPosition = target ? getUnitPosition(target.id) : null;
 
   const enemyElement = refs.enemyLayer.querySelector(`[data-enemy-id="${enemy.id}"]`);
   if (enemyElement) {
@@ -208,14 +240,35 @@ function playMonsterSkillEffect(enemy) {
     window.setTimeout(() => enemyElement.classList.remove("is-skill-casting"), 620);
   }
 
-  const effect = document.createElement("span");
-  effect.className = `monster-skill-effect${enemy.isBoss ? " is-boss" : ""}`;
-  effect.style.setProperty("--monster-skill-url", `url("${spriteUrl}")`);
-  effect.style.setProperty("--monster-skill-x", `${enemy.x}%`);
-  effect.style.setProperty("--monster-skill-y", `${enemy.y + (enemy.isBoss ? 58 : 42)}px`);
-  effect.style.setProperty("--monster-skill-size", enemy.isBoss ? "156px" : "112px");
-  refs.effectLayer.appendChild(effect);
-  window.setTimeout(() => effect.remove(), 660);
+  if (skillSpriteUrl) {
+    const cast = document.createElement("span");
+    cast.className = `monster-cast-sprite${enemy.isBoss ? " is-boss" : ""}`;
+    cast.style.setProperty("--monster-cast-url", `url("${skillSpriteUrl}")`);
+    cast.style.setProperty("--monster-cast-x", `${enemy.x}%`);
+    cast.style.setProperty("--monster-cast-y", `${enemy.y + (enemy.isBoss ? 58 : 46)}px`);
+    cast.style.setProperty("--monster-cast-size", enemy.isBoss ? "164px" : "122px");
+    refs.effectLayer.appendChild(cast);
+    window.setTimeout(() => cast.remove(), 680);
+  }
+
+  if (effectSpriteUrl) {
+    const effect = document.createElement("span");
+    effect.className = `monster-skill-effect${enemy.isBoss ? " is-boss" : ""} ${
+      ranged ? "is-projectile" : "is-melee"
+    }`;
+    effect.style.setProperty("--monster-skill-url", `url("${effectSpriteUrl}")`);
+    effect.style.setProperty("--monster-skill-from-x", `${enemy.x}%`);
+    effect.style.setProperty("--monster-skill-from-y", `${enemy.y + (enemy.isBoss ? 70 : 56)}px`);
+    effect.style.setProperty("--monster-skill-to-x", `${targetPosition ? targetPosition.x : Math.max(18, enemy.x - 22)}%`);
+    effect.style.setProperty("--monster-skill-to-y", `${targetPosition ? targetPosition.y + 70 : enemy.y + 56}px`);
+    effect.style.setProperty("--monster-skill-x", `${ranged ? enemy.x : enemy.x}%`);
+    effect.style.setProperty("--monster-skill-y", `${enemy.y + (enemy.isBoss ? 68 : 54)}px`);
+    effect.style.setProperty("--monster-skill-size", enemy.isBoss ? "156px" : ranged ? "96px" : "118px");
+    refs.effectLayer.appendChild(effect);
+    window.setTimeout(() => effect.remove(), ranged ? 760 : 660);
+  }
+
+  return ranged ? 520 : 300;
 }
 
 function getMonsterAttackTarget() {

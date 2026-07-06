@@ -565,19 +565,26 @@ function resetGame() {
 function normalizeEnemies(enemies) {
   if (!Array.isArray(enemies)) return [];
   return enemies
-    .map((enemy, index) => ({
-      id: enemy.id || `saved-${index}`,
-      name: enemy.name || getEnemyName(),
-      hp: Math.max(1, Number(enemy.hp) || 1),
-      maxHp: Math.max(1, Number(enemy.maxHp) || 1),
-      x: Number(enemy.x) || ENEMY_SPAWN_X,
-      y: Number(enemy.y) || getEnemyLaneY(index),
-      lane: Number(enemy.lane) || index,
-      isBoss: Boolean(enemy.isBoss),
-      image: enemy.image || getMonsterImage({ ...enemy, lane: Number(enemy.lane) || index, isBoss: Boolean(enemy.isBoss) }),
-      skillImage:
-        enemy.skillImage ||
-        getMonsterSkillImage({ ...enemy, lane: Number(enemy.lane) || index, isBoss: Boolean(enemy.isBoss) }),
-    }))
+    .map((enemy, index) => {
+      const lane = Number(enemy.lane) || index;
+      const normalizedEnemy = { ...enemy, lane, isBoss: Boolean(enemy.isBoss) };
+      const monsterIndex = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(normalizedEnemy);
+      const withIndex = { ...normalizedEnemy, monsterIndex };
+      return {
+        id: enemy.id || `saved-${index}`,
+        name: enemy.name || getEnemyName(),
+        hp: Math.max(1, Number(enemy.hp) || 1),
+        maxHp: Math.max(1, Number(enemy.maxHp) || 1),
+        x: Number(enemy.x) || ENEMY_SPAWN_X,
+        y: Number(enemy.y) || getEnemyLaneY(index),
+        lane,
+        isBoss: Boolean(enemy.isBoss),
+        monsterIndex,
+        attackType: enemy.attackType || getMonsterAttackType(withIndex),
+        image: enemy.image || getMonsterImage(withIndex),
+        skillImage: enemy.skillImage || getMonsterSkillImage(withIndex),
+        effectImage: enemy.effectImage || getMonsterEffectImage(withIndex),
+      };
+    })
     .filter((enemy) => enemy.hp > 0);
 }
