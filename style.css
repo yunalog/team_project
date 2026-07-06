@@ -6105,15 +6105,16 @@ button.is-active:not(:disabled),
 }
 
 
-.offline-unlock-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 22px;
-  background: rgba(18, 14, 10, 0.72);
+.offline-unlock-modal h2 {
+    font-size: 34px;      /* 기존보다 크게 */
+    font-weight: 900;
+    color: #f4b400;       /* 골드 */
+    text-shadow:
+        2px 2px 0 #3a2410,
+        0 0 10px rgba(255, 210, 0, 0.35);
+    margin-bottom: 18px;
+    text-align: center;
+    letter-spacing: 1px;
 }
 
 .offline-unlock-modal.is-visible {
@@ -6239,5 +6240,91 @@ button.is-active:not(:disabled),
 
   .offline-unlock-options small {
     font-size: 15px;
+  }
+}
+
+/* 비접속 보상 버튼 2줄/아이콘 강제 정렬 수정 */
+.offline-plan-buttons button,
+.offline-unlock-options button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  text-align: center !important;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  line-height: 1.2 !important;
+}
+
+.offline-plan-buttons .offline-plan-icon,
+.offline-unlock-options .offline-plan-icon {
+  display: grid !important;
+  place-items: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  margin: 0 auto 2px !important;
+  border: 2px solid #2f2a24 !important;
+  border-radius: 50% !important;
+  background: #fff2a6 !important;
+  box-shadow: 0 3px 0 rgba(47, 42, 36, 0.35) !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+}
+
+.offline-plan-buttons .offline-plan-time,
+.offline-unlock-options .offline-plan-time {
+  display: block !important;
+  width: 100% !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1.2 !important;
+}
+
+.offline-plan-buttons .offline-plan-rate,
+.offline-unlock-options .offline-plan-rate {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+.offline-unlock-options button {
+  min-height: 136px !important;
+  padding: 16px 12px !important;
+}
+
+.offline-unlock-options .offline-plan-icon {
+  width: 46px !important;
+  height: 46px !important;
+  font-size: 24px !important;
+}
+
+.offline-unlock-options .offline-plan-time {
+  font-size: 22px !important;
+}
+
+.offline-unlock-options .offline-plan-rate {
+  font-size: 17px !important;
+}
+
+@media (max-width: 560px) {
+  .offline-plan-buttons .offline-plan-icon,
+  .offline-unlock-options .offline-plan-icon {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 18px !important;
+  }
+
+  .offline-plan-buttons .offline-plan-time,
+  .offline-unlock-options .offline-plan-time {
+    font-size: 17px !important;
+  }
+
+  .offline-plan-buttons .offline-plan-rate,
+  .offline-unlock-options .offline-plan-rate {
+    font-size: 14px !important;
   }
 }
