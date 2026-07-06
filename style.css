@@ -5490,6 +5490,15 @@ textarea {
   transform: translate(-50%, 44%);
 }
 
+.monster-skill-effect.is-melee {
+  z-index: 12;
+}
+
+.monster-skill-effect.is-boss.is-melee {
+  transform: translate(-50%, 38%);
+  filter: drop-shadow(0 0 16px rgba(248, 113, 113, 0.48)) drop-shadow(0 0 10px rgba(250, 204, 21, 0.32));
+}
+
 .monster-skill-effect.is-projectile {
   transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
 }

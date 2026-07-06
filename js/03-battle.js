@@ -303,6 +303,7 @@ function playMonsterSkillEffect(enemy, target) {
   }
 
   if (effectSpriteUrl) {
+    const effectSize = enemy.isBoss ? (ranged ? "156px" : "176px") : ranged ? "88px" : "98px";
     const effect = document.createElement("span");
     effect.className = `monster-skill-effect${enemy.isBoss ? " is-boss" : ""} ${
       ranged ? "is-projectile" : "is-melee"
@@ -314,7 +315,7 @@ function playMonsterSkillEffect(enemy, target) {
     effect.style.setProperty("--monster-skill-to-y", `${targetPosition ? targetPosition.y + 70 : enemy.y + 56}px`);
     effect.style.setProperty("--monster-skill-x", `${ranged ? enemy.x : meleePosition.hitX}%`);
     effect.style.setProperty("--monster-skill-y", `${ranged ? enemy.y + (enemy.isBoss ? 68 : 54) : meleePosition.hitY}px`);
-    effect.style.setProperty("--monster-skill-size", enemy.isBoss ? "146px" : ranged ? "88px" : "98px");
+    effect.style.setProperty("--monster-skill-size", effectSize);
     refs.effectLayer.appendChild(effect);
     window.setTimeout(() => effect.remove(), ranged ? 760 : 660);
   }
