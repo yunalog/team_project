@@ -6408,26 +6408,26 @@ button.is-active:not(:disabled),
   padding: 6px 14px;
   border: 3px solid #2f2418;
   border-radius: 999px;
-  background: #5eead4;
-  color: #18332f;
-  font-size: 14px;
-  font-weight: 900;
-  letter-spacing: 1px;
+  background: #2dd4bf;
+  color: #0b2824;
+  font-size: 18px;
+  font-weight: 1000;
+  letter-spacing: 1.2px;
   box-shadow: 0 4px 0 #2f2418;
 }
 
 .offline-claim-card h2 {
   margin: 6px 0 8px;
-  font-size: clamp(32px, 5vw, 48px);
+  font-size: clamp(36px, 5.6vw, 54px);
   line-height: 1.08;
   font-weight: 1000;
-  color: #e85d04;
+  color: #b93800;
   text-shadow: 3px 3px 0 #fff1a8, 5px 5px 0 #2f2418;
 }
 
 .offline-claim-desc {
   margin: 0 0 18px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   color: #5b3b20;
 }
@@ -6452,13 +6452,13 @@ button.is-active:not(:disabled),
 }
 
 .offline-claim-row span {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 900;
   color: #7a4b24;
 }
 
 .offline-claim-row strong {
-  font-size: clamp(20px, 4vw, 28px);
+  font-size: 16px;
   font-weight: 1000;
   color: #2f2418;
   text-align: right;
@@ -6481,7 +6481,7 @@ button.is-active:not(:disabled),
   border-radius: 18px;
   background: linear-gradient(180deg, #86efac, #22c55e);
   color: #14331f;
-  font-size: 22px;
+  font-size: 16px;
   font-weight: 1000;
   box-shadow: 0 7px 0 #166534;
   cursor: pointer;
