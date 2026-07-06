@@ -5760,3 +5760,52 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
   padding: 8px 10px 2px !important;
   line-height: 1.1 !important;
 }
+
+/* Final draw-machine button skin override. */
+.draw-machine-panel .equipment-draw-button,
+.draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button {
+  border: 12px solid transparent !important;
+  border-image-source: var(--button-skin-normal) !important;
+  border-image-slice: 38 fill !important;
+  border-image-width: 12px !important;
+  border-image-repeat: stretch !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+  background-image: var(--button-skin-normal) !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  background-origin: border-box !important;
+  background-clip: border-box !important;
+  color: #3c260f !important;
+  font-weight: 900 !important;
+  -webkit-text-stroke: 0.2px rgba(74, 43, 23, 0.42);
+  text-shadow:
+    0 1px 0 rgba(255, 246, 198, 0.95),
+    1px 0 0 rgba(74, 43, 23, 0.25),
+    -1px 0 0 rgba(74, 43, 23, 0.18) !important;
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.38) !important;
+  filter: none !important;
+}
+
+.draw-machine-panel .equipment-draw-button:active:not(:disabled),
+.draw-machine-panel .auto-draw-button:active:not(:disabled),
+.draw-machine-panel .auto-draw-button.is-running,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:active:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button:active:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button.is-running {
+  border-image-source: var(--button-skin-pressed) !important;
+  background-image: var(--button-skin-pressed) !important;
+  box-shadow: 0 2px 0 rgba(74, 43, 23, 0.34) !important;
+}
+
+.draw-machine-panel .equipment-draw-button strong,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button strong {
+  border: 0 !important;
+  background: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  text-shadow: inherit !important;
+}
