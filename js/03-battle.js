@@ -10,7 +10,7 @@
   unitCombatTimers = {};
   combatEffects.enemyDebuffs = [];
   skillAttackCooldown = SKILL_ATTACK_RATE;
-  monsterAttackCooldown = MONSTER_ATTACK_RATE;
+  monsterAttackCooldown = Math.min(1.05, MONSTER_ATTACK_RATE);
   syncUnitHealth();
   recoverUnitsForNewWave();
   if (hasStartedGame) playBgm(getActiveBgmKey());
@@ -30,6 +30,7 @@ function createNormalWave() {
       y: getEnemyLaneY(index),
       lane: index,
       isBoss: false,
+      hasEngaged: false,
     };
     const monsterIndex = getNormalMonsterIndex(enemy);
     return {
@@ -55,6 +56,7 @@ function createBossWave() {
       y: 72,
       lane: 0,
       isBoss: true,
+      hasEngaged: false,
       image: getMonsterImage({ isBoss: true }),
       skillImage: getMonsterSkillImage({ isBoss: true, lane: 0 }),
       effectImage: getMonsterEffectImage({ isBoss: true, lane: 0 }),
@@ -141,7 +143,7 @@ function updateUnitHealth(delta = 0) {
   const units = getUnits();
   syncUnitHealth(units);
 
-  const pressured = state.enemies.some((enemy) => enemy.x <= getMonsterAttackRange(enemy));
+  const pressured = state.enemies.some((enemy) => enemy.hasEngaged || enemy.x <= getMonsterAttackRange(enemy));
   if (pressured || isSpawningNext) return;
 
   units.forEach((unit) => {
@@ -186,7 +188,7 @@ function updateMonsterAttacks(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
   const attackers = state.enemies
-    .filter((enemy) => enemy.x <= getMonsterAttackRange(enemy))
+    .filter((enemy) => enemy.hasEngaged || enemy.x <= getMonsterAttackRange(enemy))
     .sort((a, b) => a.x - b.x || a.y - b.y);
   if (!attackers.length) {
     monsterAttackCooldown = Math.min(monsterAttackCooldown, MONSTER_ATTACK_RATE);
@@ -638,6 +640,8 @@ function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
   const multiplier = getGlobalMultiplier() * (1 + enemyTypeBonus + debuffBonus) * (critical ? CRITICAL_MULTIPLIER : 1);
   const finalAmount = Math.max(1, Math.round(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
+  target.hasEngaged = true;
+  monsterAttackCooldown = Math.min(monsterAttackCooldown, getMonsterAttackType(target) === "ranged" ? 0.35 : 0.75);
   showDamage(finalAmount, target, { critical });
   pulseEnemy(target.id);
 

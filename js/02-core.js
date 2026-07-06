@@ -568,7 +568,7 @@ function normalizeEnemies(enemies) {
     .map((enemy, index) => {
       const lane = Number(enemy.lane) || index;
       const normalizedEnemy = { ...enemy, lane, isBoss: Boolean(enemy.isBoss) };
-      const monsterIndex = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(normalizedEnemy);
+      const monsterIndex = normalizedEnemy.isBoss ? 0 : getNormalMonsterIndex(normalizedEnemy);
       const withIndex = { ...normalizedEnemy, monsterIndex };
       return {
         id: enemy.id || `saved-${index}`,
@@ -579,11 +579,12 @@ function normalizeEnemies(enemies) {
         y: Number(enemy.y) || getEnemyLaneY(index),
         lane,
         isBoss: Boolean(enemy.isBoss),
+        hasEngaged: Boolean(enemy.hasEngaged),
         monsterIndex,
-        attackType: enemy.attackType || getMonsterAttackType(withIndex),
-        image: enemy.image || getMonsterImage(withIndex),
-        skillImage: enemy.skillImage || getMonsterSkillImage(withIndex),
-        effectImage: enemy.effectImage || getMonsterEffectImage(withIndex),
+        attackType: getMonsterAttackType(withIndex),
+        image: getMonsterImage(withIndex),
+        skillImage: getMonsterSkillImage(withIndex),
+        effectImage: getMonsterEffectImage(withIndex),
       };
     })
     .filter((enemy) => enemy.hp > 0);
