@@ -452,6 +452,7 @@ h1 {
 .company-campus {
   --company-image-width: clamp(210px, 41vw, 450px);
   --company-image-height: clamp(145px, 28vw, 300px);
+  --company-platform-bottom: clamp(42px, 8vw, 82px);
   position: absolute;
   inset: 58px 0 32px;
   pointer-events: none;
@@ -463,7 +464,7 @@ h1 {
 
 .office-building {
   position: absolute;
-  bottom: clamp(4px, 2.6vw, 18px);
+  bottom: var(--company-platform-bottom);
   left: 50%;
   z-index: 2;
   display: block;
@@ -1339,6 +1340,10 @@ h1 {
   transform: translateX(-50%) translateX(8px);
 }
 
+.enemy.is-skill-casting .enemy-sprite {
+  opacity: 0;
+}
+
 .enemy.is-defeated {
   opacity: 0;
   transform: translateX(-50%) translateX(48px);
@@ -1472,6 +1477,56 @@ h1 {
   image-rendering: auto;
   transform: translate(-50%, 50%) scale(0.96);
   z-index: 8;
+}
+
+.monster-cast-sprite,
+.monster-skill-effect {
+  position: absolute;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  image-rendering: auto;
+}
+
+.monster-cast-sprite {
+  left: var(--monster-cast-x);
+  bottom: var(--monster-cast-y);
+  width: var(--monster-cast-size, 122px);
+  height: var(--monster-cast-size, 122px);
+  background-image: var(--monster-cast-url);
+  transform: translate(-50%, 44%);
+  animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-cast-lunge 0.62s ease-out forwards;
+  z-index: 8;
+}
+
+.monster-cast-sprite.is-boss {
+  filter: drop-shadow(0 0 14px rgba(248, 113, 113, 0.42));
+}
+
+.monster-skill-effect {
+  left: var(--monster-skill-x);
+  bottom: var(--monster-skill-y);
+  width: var(--monster-skill-size, 112px);
+  height: var(--monster-skill-size, 112px);
+  background-image: var(--monster-skill-url);
+  transform: translate(-50%, 44%);
+  z-index: 9;
+}
+
+.monster-skill-effect.is-boss {
+  filter: drop-shadow(0 0 14px rgba(248, 113, 113, 0.42));
+}
+
+.monster-skill-effect.is-melee {
+  animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-skill-pop 0.62s ease-out forwards;
+}
+
+.monster-skill-effect.is-projectile {
+  left: var(--monster-skill-from-x);
+  bottom: var(--monster-skill-from-y);
+  transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
+  animation: monster-skill-6frame 0.68s steps(1, end) forwards, monster-projectile-flight 0.68s ease-in forwards;
 }
 
 .attack-sprite-effect.is-projectile {
@@ -1717,6 +1772,104 @@ h1 {
   80%,
   100% {
     background-position: 100% 100%;
+  }
+}
+
+@keyframes monster-skill-6frame {
+  0%,
+  15% {
+    background-position: 0 0;
+  }
+
+  16%,
+  31% {
+    background-position: 50% 0;
+  }
+
+  32%,
+  47% {
+    background-position: 100% 0;
+  }
+
+  48%,
+  63% {
+    background-position: 0 100%;
+  }
+
+  64%,
+  79% {
+    background-position: 50% 100%;
+  }
+
+  80%,
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes monster-skill-pop {
+  0% {
+    opacity: 0;
+    scale: 0.92;
+  }
+
+  12%,
+  78% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1.04;
+  }
+}
+
+@keyframes monster-cast-lunge {
+  0% {
+    opacity: 0;
+    translate: 10px 0;
+    scale: 0.92;
+  }
+
+  18%,
+  76% {
+    opacity: 1;
+    translate: -8px -4px;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    translate: -14px 0;
+    scale: 1.03;
+  }
+}
+
+@keyframes monster-projectile-flight {
+  0% {
+    opacity: 0;
+    left: var(--monster-skill-from-x);
+    bottom: var(--monster-skill-from-y);
+    transform: translate(-50%, 50%) scale(0.68) rotate(6deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 1;
+    left: var(--monster-skill-to-x);
+    bottom: var(--monster-skill-to-y);
+    transform: translate(-50%, 50%) scale(1) rotate(-5deg);
+  }
+
+  100% {
+    opacity: 0;
+    left: var(--monster-skill-to-x);
+    bottom: var(--monster-skill-to-y);
+    transform: translate(-50%, 50%) scale(0.92) rotate(0deg);
   }
 }
 
@@ -5118,4 +5271,414 @@ textarea {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
+}
+
+/* Tilemap UI skin: applies only to non-battle UI surfaces. */
+:root {
+  --ui-tilemap: url("Resource/UI/Background_Tilemap.png");
+}
+
+.game-shell {
+  background-image:
+    linear-gradient(180deg, rgba(234, 219, 189, 0.9), rgba(207, 170, 110, 0.9)),
+    var(--ui-tilemap);
+  background-size: auto, 860px 860px;
+  background-position: center, 42% 18%;
+}
+
+.top-bar {
+  background-image:
+    linear-gradient(180deg, rgba(255, 247, 229, 0.88), rgba(224, 190, 128, 0.9)),
+    var(--ui-tilemap);
+  background-size: auto, 560px 560px;
+  background-position: center, 12% 8%;
+  box-shadow: inset 0 -3px 0 rgba(74, 43, 23, 0.24);
+}
+
+.message-line {
+  background-image:
+    linear-gradient(180deg, rgba(255, 247, 229, 0.9), rgba(226, 194, 139, 0.88)),
+    var(--ui-tilemap);
+  background-size: auto, 620px 620px;
+  background-position: center, 52% 42%;
+}
+
+.panel-area {
+  background-image:
+    linear-gradient(180deg, rgba(227, 193, 132, 0.82), rgba(207, 170, 110, 0.88)),
+    var(--ui-tilemap);
+  background-size: auto, 720px 720px;
+  background-position: center, 24% 72%;
+}
+
+.tab-panel {
+  background-image:
+    linear-gradient(180deg, rgba(255, 239, 202, 0.3), rgba(139, 100, 60, 0.08)),
+    var(--ui-tilemap);
+  background-size: auto, 940px 940px;
+  background-position: center, 88% 36%;
+  background-blend-mode: normal, soft-light;
+}
+
+.resource-row span,
+.stat-grid div,
+.timer-board div,
+.company-status-strip > div,
+.equipped-item-panel,
+.equipment-upgrade-panel,
+.equipment-choice,
+.shop-item,
+.facility-card,
+.growth-card,
+.recruit-category,
+.recruit-placeholder,
+.squad-management {
+  background-image:
+    linear-gradient(180deg, rgba(255, 248, 232, 0.9), rgba(239, 216, 176, 0.9)),
+    var(--ui-tilemap);
+  background-size: auto, 480px 480px;
+  background-position: center, 18% 20%;
+  background-blend-mode: normal, soft-light;
+}
+
+.resource-row span:nth-child(2),
+.stat-grid div:nth-child(2),
+.shop-item:nth-child(2n),
+.facility-card:nth-child(2n),
+.growth-card:nth-child(2n),
+.squad-management {
+  background-position: center, 64% 35%;
+}
+
+.resource-row span:nth-child(3),
+.stat-grid div:nth-child(3),
+.shop-item:nth-child(3n),
+.facility-card:nth-child(3n),
+.growth-card:nth-child(3n),
+.equipment-upgrade-panel {
+  background-position: center, 82% 72%;
+}
+
+.action-row button,
+#manualWorkButton,
+.settings-row button,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.recruit-focus-action {
+  background-image:
+    linear-gradient(180deg, rgba(255, 216, 122, 0.76), rgba(184, 92, 34, 0.96)),
+    var(--ui-tilemap);
+  background-size: auto, 390px 390px;
+  background-position: center, 76% 10%;
+  background-blend-mode: normal, multiply;
+}
+
+.bottom-tabs {
+  background-image:
+    linear-gradient(180deg, rgba(96, 61, 34, 0.78), rgba(55, 38, 24, 0.88)),
+    var(--ui-tilemap);
+  background-size: auto, 620px 620px;
+  background-position: center, 50% 88%;
+}
+
+.tab-button {
+  background-image:
+    linear-gradient(180deg, rgba(255, 244, 215, 0.86), rgba(214, 174, 114, 0.92)),
+    var(--ui-tilemap);
+  background-size: auto, 430px 430px;
+  background-position: center, 22% 68%;
+  background-blend-mode: normal, soft-light;
+}
+
+.tab-button:nth-child(2) {
+  background-position: center, 46% 18%;
+}
+
+.tab-button:nth-child(3) {
+  background-position: center, 72% 46%;
+}
+
+.tab-button:nth-child(4) {
+  background-position: center, 92% 78%;
+}
+
+.tab-button.is-active {
+  background-image:
+    linear-gradient(180deg, rgba(47, 138, 103, 0.9), rgba(28, 95, 72, 0.96)),
+    var(--ui-tilemap);
+  background-size: auto, 430px 430px;
+  background-position: center, 7% 55%;
+  background-blend-mode: normal, multiply;
+}
+
+@media (max-width: 560px) {
+  .top-bar {
+    background-size: auto, 480px 480px;
+  }
+
+  .panel-area {
+    background-size: auto, 620px 620px;
+  }
+
+  .resource-row span,
+  .stat-grid div,
+  .equipped-item-panel,
+  .equipment-upgrade-panel,
+  .shop-item,
+  .facility-card,
+  .growth-card {
+    background-size: auto, 420px 420px;
+  }
+}
+
+/* Monster attack animation final alignment. */
+.enemy.is-skill-casting .enemy-sprite {
+  opacity: 0 !important;
+  visibility: hidden;
+}
+
+.enemy.is-melee-casting .enemy-hp-bar {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.monster-cast-sprite {
+  width: var(--monster-cast-size, 98px);
+  height: var(--monster-cast-size, 98px);
+  transform: translate(-50%, 44%);
+}
+
+.monster-cast-sprite.is-melee {
+  transform: translate(-58%, 44%);
+  z-index: 10;
+}
+
+.monster-cast-sprite.is-boss {
+  width: var(--monster-cast-size, 146px);
+  height: var(--monster-cast-size, 146px);
+}
+
+.monster-cast-hp-bar {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  overflow: hidden;
+  width: var(--monster-cast-hp-width, 100px);
+  height: 7px;
+  border: 1px solid rgba(17, 24, 39, 0.9);
+  border-radius: 999px;
+  background: rgba(254, 226, 226, 0.9);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.62), 0 2px 5px rgba(17, 24, 39, 0.22);
+  transform: translateX(-50%);
+}
+
+.monster-cast-hp-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #84cc16);
+}
+
+.monster-cast-sprite.is-boss .monster-cast-hp-bar {
+  top: -14px;
+  height: 9px;
+  border-width: 2px;
+}
+
+.monster-skill-effect {
+  transform: translate(-50%, 44%);
+}
+
+.monster-skill-effect.is-melee {
+  z-index: 12;
+}
+
+.monster-skill-effect.is-boss.is-melee {
+  transform: translate(-50%, 38%);
+  filter: drop-shadow(0 0 16px rgba(248, 113, 113, 0.48)) drop-shadow(0 0 10px rgba(250, 204, 21, 0.32));
+}
+
+.monster-skill-effect.is-projectile {
+  transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
+}
+
+/* Pixel button skin from Resource/UI tileset. */
+:root {
+  --button-skin-normal: url("Resource/UI/Button_Skin_Normal.png");
+  --button-skin-pressed: url("Resource/UI/Button_Skin_Pressed.png");
+  --button-skin-wide-normal: url("Resource/UI/Button_Skin_Wide_Normal.png");
+  --button-skin-wide-pressed: url("Resource/UI/Button_Skin_Wide_Pressed.png");
+}
+
+button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton,
+.battle-column-action,
+.equipment-panel-toggle,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.settings-row button,
+.mute-button,
+.title-return-button,
+.tab-button {
+  border: 12px solid transparent;
+  border-image-source: var(--button-skin-normal);
+  border-image-slice: 38 fill;
+  border-image-width: 12px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background-color: transparent;
+  background-image: var(--button-skin-normal) !important;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  background-origin: border-box;
+  background-clip: border-box;
+  color: #3c260f;
+  image-rendering: auto;
+  text-shadow: 0 1px 0 rgba(255, 243, 178, 0.72);
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.38);
+}
+
+button:hover:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton:hover:not(:disabled),
+.battle-column-action:hover:not(:disabled),
+.equipment-panel-toggle:hover:not(:disabled),
+.shop-item button:hover:not(:disabled),
+.facility-card button:hover:not(:disabled),
+.growth-upgrade-button:hover:not(:disabled),
+.equipment-actions button:hover:not(:disabled),
+.equipment-upgrade-actions button:hover:not(:disabled),
+.settings-row button:hover:not(:disabled),
+.mute-button:hover:not(:disabled),
+.title-return-button:hover:not(:disabled),
+.tab-button:hover:not(:disabled) {
+  filter: brightness(1.05) saturate(1.05);
+}
+
+button:active:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+button.is-active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.battle-column-action:active:not(:disabled),
+.equipment-panel-toggle:active:not(:disabled),
+.shop-item button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.equipment-actions button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.mute-button:active:not(:disabled),
+.mute-button.is-muted,
+.title-return-button:active:not(:disabled),
+.tab-button:active:not(:disabled),
+.tab-button.is-active,
+.auto-draw-button.is-running {
+  border-image-source: var(--button-skin-pressed);
+  background-image: var(--button-skin-pressed) !important;
+  filter: none;
+  box-shadow: 0 2px 0 rgba(74, 43, 23, 0.34);
+}
+
+button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) {
+  filter: grayscale(0.25) brightness(0.94);
+}
+
+.start-button,
+.title-return-button,
+#manualWorkButton,
+.battle-column-action,
+.settings-row button {
+  min-height: 50px;
+}
+
+.tab-button {
+  border-image-width: 10px;
+  text-shadow: 0 1px 0 rgba(255, 243, 178, 0.68);
+}
+
+/* Company scene final layering: align each transparent PNG by its visible bottom edge. */
+.company-campus {
+  --company-platform-bottom: clamp(13px, 3.5vw, 30px);
+  --company-ground-shift: 0px;
+}
+
+.company-campus[data-company-tier="1"] {
+  --company-ground-shift: clamp(-42px, -5.2vw, -24px);
+}
+
+.company-campus[data-company-tier="2"] {
+  --company-ground-shift: clamp(-54px, -6.2vw, -31px);
+}
+
+.company-campus[data-company-tier="3"] {
+  --company-ground-shift: clamp(-48px, -5.6vw, -28px);
+}
+
+.company-campus[data-company-tier="4"],
+.company-campus[data-company-tier="5"] {
+  --company-ground-shift: clamp(-46px, -5.3vw, -27px);
+}
+
+.company-campus[data-company-tier="6"] {
+  --company-ground-shift: clamp(-52px, -5.9vw, -30px);
+}
+
+.company-campus[data-company-tier="7"],
+.company-campus[data-company-tier="8"] {
+  --company-ground-shift: clamp(-25px, -3vw, -14px);
+}
+
+.company-campus[data-company-tier="9"] {
+  --company-ground-shift: clamp(-18px, -2.2vw, -9px);
+}
+
+.company-campus[data-company-tier="10"] {
+  --company-ground-shift: clamp(-26px, -2.8vw, -14px);
+}
+
+.company-campus[data-company-tier="11"],
+.company-campus[data-company-tier="12"] {
+  --company-ground-shift: clamp(-14px, -1.8vw, -7px);
+}
+
+.office-building {
+  bottom: calc(var(--company-platform-bottom) + var(--company-ground-shift));
+  z-index: 4;
+}
+
+.employee-crowd {
+  bottom: clamp(-4px, 0.8vw, 10px);
+  z-index: 6;
+}
+
+.scene-employee {
+  filter: drop-shadow(0 3px 0 rgba(45, 33, 25, 0.18));
+}
+
+.start-button,
+.title-return-button,
+#manualWorkButton,
+.battle-column-action,
+.settings-row button,
+.growth-upgrade-button,
+.facility-card button,
+.equipment-upgrade-actions button {
+  border-image-source: var(--button-skin-wide-normal);
+  background-image: var(--button-skin-wide-normal) !important;
+}
+
+.start-button:active,
+.title-return-button:active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.battle-column-action:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled) {
+  border-image-source: var(--button-skin-wide-pressed);
+  background-image: var(--button-skin-wide-pressed) !important;
 }

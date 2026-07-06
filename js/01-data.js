@@ -7,8 +7,9 @@ const NORMAL_STAGES_PER_CHAPTER = 5;
 const BASIC_ATTACK_RATE = 1;
 const SKILL_ATTACK_RATE = 4;
 const TICK_RATE = 1000 / 30;
-const MONSTER_ATTACK_RANGE = 45;
-const MONSTER_ATTACK_RATE = 3.2;
+const MONSTER_ATTACK_RANGE = 58;
+const MONSTER_RANGED_ATTACK_RANGE = ENEMY_SPAWN_X;
+const MONSTER_ATTACK_RATE = 2.85;
 const UNIT_HP_RECOVERY_RATE = 1.1;
 const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
@@ -22,12 +23,42 @@ const NORMAL_MONSTER_IMAGES = [
   "Resource/Monster/Normal_Monster/Field_Monster5.png",
   "Resource/Monster/Normal_Monster/Field_Monster6.png",
 ];
+const NORMAL_MONSTER_SKILL_IMAGES = [
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster1_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster2_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster3_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster4_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster5_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster6_Skill.png",
+];
+const NORMAL_MONSTER_EFFECT_IMAGES = [
+  "Resource/Effect/Field_Monster_Effect/Field_Monster1_Skill_Effect.png",
+  "Resource/Effect/Field_Monster_Effect/Field_Monster2_Skill_Effect.png",
+  "Resource/Effect/Field_Monster_Effect/Field_Monster3_Skill_Effect.png",
+  "Resource/Effect/Field_Monster_Effect/Field_Monster4_Skill_Effect.png",
+  "Resource/Effect/Field_Monster_Effect/Field_Monster5_Skill_Effect.png",
+  "Resource/Effect/Field_Monster_Effect/Field_Monster6_Skill_Effect.png",
+];
+const NORMAL_MONSTER_ATTACK_TYPES = ["melee", "ranged", "ranged", "melee", "ranged", "melee"];
 const BOSS_MONSTER_IMAGES = [
   "Resource/Monster/Boss_Monster/Stage1_Boss.png",
   "Resource/Monster/Boss_Monster/Stage2_Boss.png",
   "Resource/Monster/Boss_Monster/Stage3_Boss.png",
   "Resource/Monster/Boss_Monster/Stage4_Boss.png",
 ];
+const BOSS_MONSTER_SKILL_IMAGES = [
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage1_Boss_Skill.png",
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage2_Boss_Skill.png",
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage3_Boss_Skill.png",
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage4_Boss_Skill.png",
+];
+const BOSS_MONSTER_EFFECT_IMAGES = [
+  "Resource/Effect/Boss_Monster_Effect/Stage1_Boss_Skill_Effect.png",
+  "Resource/Effect/Boss_Monster_Effect/Stage2_Boss_Skill_Effect.png",
+  "Resource/Effect/Boss_Monster_Effect/Stage3_Boss_Skill_Effect.png",
+  "Resource/Effect/Boss_Monster_Effect/Stage4_Boss_Skill_Effect.png",
+];
+const BOSS_MONSTER_ATTACK_TYPES = ["melee", "melee", "ranged", "ranged"];
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",
@@ -627,6 +658,7 @@ let basicAttackCooldown = 0.35;
 let skillAttackCooldown = SKILL_ATTACK_RATE;
 let unitCombatTimers = {};
 let combatEffects = { buffs: [], enemyDebuffs: [], teamHp: 100, teamMaxHp: 100 };
+let monsterCastingUntil = {};
 let monsterAttackCooldown = MONSTER_ATTACK_RATE;
 let saveCooldown = 0;
 let lastTick = Date.now();
