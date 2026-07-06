@@ -234,6 +234,7 @@ function formatDurationHHMMSS(totalSeconds) {
 }
 
 function showOfflineRewardClaimPopup(result) {
+  console.log("custom offline claim modal v2", result);
   if (!refs.offlineClaimModal) return;
 
   const plan = result?.plan || window.FirebaseGame?.OFFLINE_REWARD_PLANS?.[state.offlineRewardPlan];
