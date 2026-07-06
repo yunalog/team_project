@@ -48,7 +48,7 @@ function renderBattle() {
     button.disabled = state.gold < cost;
   });
   refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
-  refs.upgradePlayerButton.disabled = state.gold < playerCost;
+  refs.upgradePlayerButton.disabled = false;
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
   renderEquipment();
 }
