@@ -5911,3 +5911,100 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
   border-image-source: var(--button-skin-orange-wide-pressed) !important;
   background-image: var(--button-skin-orange-wide-pressed) !important;
 }
+
+/* Final button geometry lock: image skins must not change layout or click boxes. */
+button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton,
+.battle-column-action,
+.equipment-panel-toggle,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.settings-row button,
+.mute-button,
+.title-return-button,
+.tab-button,
+.draw-machine-panel .equipment-draw-button,
+.draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button {
+  border: 0 !important;
+  border-image-source: none !important;
+  border-image-width: 0 !important;
+  border-image-slice: 0 !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 100% 100% !important;
+  background-origin: border-box !important;
+  background-clip: border-box !important;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.bottom-tabs {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.bottom-tabs .tab-button {
+  width: 100%;
+  height: 50px;
+  min-height: 50px;
+  max-height: 50px;
+  padding: 7px 8px 4px !important;
+  border: 0 !important;
+  transform: none !important;
+}
+
+#manualWorkButton,
+#manualWorkButton:hover:not(:disabled) {
+  min-width: 128px;
+  min-height: 36px;
+  padding: 7px 13px 4px !important;
+  background-image: var(--button-skin-wide-normal) !important;
+}
+
+#manualWorkButton:active:not(:disabled) {
+  background-image: var(--button-skin-wide-pressed) !important;
+}
+
+.battle-column-action {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-height: 39px;
+  padding: 7px 14px 4px !important;
+  pointer-events: auto !important;
+}
+
+#upgradePlayerButton,
+#upgradePlayerButton:hover:not(:disabled) {
+  background-image: var(--button-skin-green-wide-normal) !important;
+  color: #f4ffe8 !important;
+  pointer-events: auto !important;
+}
+
+#upgradePlayerButton:active:not(:disabled) {
+  background-image: var(--button-skin-green-wide-pressed) !important;
+}
+
+#nextStageButton,
+#nextStageButton:hover:not(:disabled) {
+  background-image: var(--button-skin-orange-wide-normal) !important;
+}
+
+#nextStageButton:active:not(:disabled) {
+  background-image: var(--button-skin-orange-wide-pressed) !important;
+}
+
+.battle-equipment-section .draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button {
+  min-height: 44px !important;
+  padding: 7px 10px 4px !important;
+}
+
+button:disabled {
+  cursor: not-allowed !important;
+}
