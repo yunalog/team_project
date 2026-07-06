@@ -271,6 +271,18 @@
               <strong id="volumeValue" data-audio-value>45%</strong>
             </label>
           </div>
+<div class="offline-reward-setting">
+  <strong>비접속 보상 설정</strong>
+  <p>게임 시작 시 선택한 시간 기준으로 비접속 보상을 수령합니다.</p>
+
+  <div class="offline-plan-buttons">
+    <button type="button" data-offline-plan="4">4시간 / 1.2배</button>
+    <button type="button" data-offline-plan="8">8시간 / 1배</button>
+    <button type="button" data-offline-plan="12">12시간 / 0.85배</button>
+  </div>
+
+  <small id="offlinePlanText">현재 설정: 8시간 / 1배</small>
+</div>
           <p class="save-state" id="saveStateText">자동 저장 준비 완료</p>
         </article>
       </section>
@@ -335,11 +347,17 @@
       </div>
     </div>
 
-    <script src="js/01-data.js"></script>
-    <script src="js/02-core.js"></script>
-    <script src="js/03-battle.js"></script>
-    <script src="js/04-recruits-company.js"></script>
-    <script src="js/05-equipment-growth.js"></script>
-    <script src="js/06-ui-render.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase.js"></script>
+
+<script src="js/01-data.js"></script>
+<script src="js/02-core.js"></script>
+<script src="js/03-battle.js"></script>
+<script src="js/04-recruits-company.js"></script>
+<script src="js/05-equipment-growth.js"></script>
+<script src="js/06-ui-render.js"></script>
   </body>
 </html>
