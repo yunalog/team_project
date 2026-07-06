@@ -5682,3 +5682,75 @@ button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) 
   border-image-source: var(--button-skin-wide-pressed);
   background-image: var(--button-skin-wide-pressed) !important;
 }
+
+/* Keep pixel-button labels optically centered inside the new image borders. */
+button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton,
+.battle-column-action,
+.equipment-panel-toggle,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.settings-row button,
+.mute-button,
+.title-return-button,
+.tab-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px 12px 6px !important;
+  line-height: 1.15 !important;
+  text-align: center;
+  white-space: normal;
+}
+
+.start-button,
+.title-return-button,
+#manualWorkButton,
+.battle-column-action,
+.settings-row button,
+.growth-upgrade-button,
+.facility-card button,
+.equipment-upgrade-actions button {
+  padding: 5px 18px 7px !important;
+}
+
+.tab-button {
+  flex-direction: row;
+  min-height: 48px;
+  padding: 4px 10px 6px !important;
+}
+
+.draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button {
+  display: inline-flex !important;
+  min-height: 54px !important;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px;
+  padding: 3px 10px 5px !important;
+  line-height: 1.05 !important;
+}
+
+.draw-machine-panel .equipment-draw-button span,
+.draw-machine-panel .equipment-draw-button strong,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button span,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button strong {
+  display: block;
+  margin: 0 !important;
+  line-height: 1.05 !important;
+  text-align: center;
+}
+
+.draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 4px 10px 6px !important;
+  line-height: 1.1 !important;
+}
