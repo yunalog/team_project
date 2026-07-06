@@ -277,7 +277,11 @@ function getManualPower() {
 
 function upgradePlayer() {
   const cost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
-  if (state.gold < cost) return;
+  if (state.gold < cost) {
+    log(`대표 역량 강화에는 자금 ${cost}이 필요합니다.`);
+    renderBattle();
+    return;
+  }
 
   state.gold -= cost;
   state.playerLevel += 1;

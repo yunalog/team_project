@@ -6008,3 +6008,36 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
 button:disabled {
   cursor: not-allowed !important;
 }
+
+/* Align the two main battle action buttons by the visible wide-button artwork. */
+.battle-equipment-section {
+  align-items: start;
+}
+
+.battle-equipment-column {
+  grid-template-rows: 42px auto auto;
+}
+
+#upgradePlayerButton,
+#nextStageButton,
+#upgradePlayerButton:hover:not(:disabled),
+#nextStageButton:hover:not(:disabled) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100%;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 0 18px 2px !important;
+  line-height: 1 !important;
+  background-position: center center !important;
+  background-size: 100% 100% !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#upgradePlayerButton:active:not(:disabled),
+#nextStageButton:active:not(:disabled) {
+  transform: translateY(1px) !important;
+}
