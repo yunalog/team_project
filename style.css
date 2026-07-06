@@ -5834,8 +5834,7 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
 }
 
 /* Company tab uses the blue button tileset variant. */
-.tab-panel[data-panel="tools"] .facility-card button,
-.tab-button[data-tab="tools"] {
+.tab-panel[data-panel="tools"] .facility-card button {
   border-image-source: var(--button-skin-blue-wide-normal) !important;
   background-image: var(--button-skin-blue-wide-normal) !important;
   color: #f2f8ff !important;
@@ -5846,17 +5845,14 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
     -1px 0 0 rgba(5, 34, 72, 0.36) !important;
 }
 
-.tab-panel[data-panel="tools"] .facility-card button:hover:not(:disabled),
-.tab-button[data-tab="tools"]:hover:not(:disabled) {
+.tab-panel[data-panel="tools"] .facility-card button:hover:not(:disabled) {
   border-image-source: var(--button-skin-blue-wide-normal) !important;
   background-image: var(--button-skin-blue-wide-normal) !important;
   opacity: 1 !important;
   filter: brightness(1.08) saturate(1.08) !important;
 }
 
-.tab-panel[data-panel="tools"] .facility-card button:active:not(:disabled),
-.tab-button[data-tab="tools"]:active:not(:disabled),
-.tab-button[data-tab="tools"].is-active {
+.tab-panel[data-panel="tools"] .facility-card button:active:not(:disabled) {
   border-image-source: var(--button-skin-blue-wide-pressed) !important;
   background-image: var(--button-skin-blue-wide-pressed) !important;
   color: #ffffff !important;
