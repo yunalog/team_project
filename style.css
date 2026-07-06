@@ -452,6 +452,7 @@ h1 {
 .company-campus {
   --company-image-width: clamp(210px, 41vw, 450px);
   --company-image-height: clamp(145px, 28vw, 300px);
+  --company-platform-bottom: clamp(42px, 8vw, 82px);
   position: absolute;
   inset: 58px 0 32px;
   pointer-events: none;
@@ -463,7 +464,7 @@ h1 {
 
 .office-building {
   position: absolute;
-  bottom: clamp(4px, 2.6vw, 18px);
+  bottom: var(--company-platform-bottom);
   left: 50%;
   z-index: 2;
   display: block;
@@ -5501,4 +5502,90 @@ textarea {
 
 .monster-skill-effect.is-projectile {
   transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
+}
+
+/* Pixel button skin from Resource/UI tileset. */
+:root {
+  --button-skin-normal: url("Resource/UI/Button_Skin_Normal.png");
+  --button-skin-pressed: url("Resource/UI/Button_Skin_Pressed.png");
+}
+
+button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton,
+.battle-column-action,
+.equipment-panel-toggle,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.settings-row button,
+.mute-button,
+.title-return-button,
+.tab-button {
+  border: 12px solid transparent;
+  border-image-source: var(--button-skin-normal);
+  border-image-slice: 38 fill;
+  border-image-width: 12px;
+  border-image-repeat: stretch;
+  border-radius: 0;
+  background: transparent;
+  color: #3c260f;
+  text-shadow: 0 1px 0 rgba(255, 243, 178, 0.72);
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.38);
+}
+
+button:hover:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton:hover:not(:disabled),
+.battle-column-action:hover:not(:disabled),
+.equipment-panel-toggle:hover:not(:disabled),
+.shop-item button:hover:not(:disabled),
+.facility-card button:hover:not(:disabled),
+.growth-upgrade-button:hover:not(:disabled),
+.equipment-actions button:hover:not(:disabled),
+.equipment-upgrade-actions button:hover:not(:disabled),
+.settings-row button:hover:not(:disabled),
+.mute-button:hover:not(:disabled),
+.title-return-button:hover:not(:disabled),
+.tab-button:hover:not(:disabled) {
+  filter: brightness(1.05) saturate(1.05);
+}
+
+button:active:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+button.is-active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.battle-column-action:active:not(:disabled),
+.equipment-panel-toggle:active:not(:disabled),
+.shop-item button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.equipment-actions button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.mute-button:active:not(:disabled),
+.mute-button.is-muted,
+.title-return-button:active:not(:disabled),
+.tab-button:active:not(:disabled),
+.tab-button.is-active,
+.auto-draw-button.is-running {
+  border-image-source: var(--button-skin-pressed);
+  filter: none;
+  box-shadow: 0 2px 0 rgba(74, 43, 23, 0.34);
+}
+
+button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) {
+  filter: grayscale(0.25) brightness(0.94);
+}
+
+.start-button,
+.title-return-button,
+#manualWorkButton,
+.battle-column-action,
+.settings-row button {
+  min-height: 50px;
+}
+
+.tab-button {
+  border-image-width: 10px;
+  text-shadow: 0 1px 0 rgba(255, 243, 178, 0.68);
 }
