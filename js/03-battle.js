@@ -34,6 +34,7 @@ function createNormalWave() {
     return {
       ...enemy,
       image: getMonsterImage(enemy),
+      skillImage: getMonsterSkillImage(enemy),
     };
   });
 }
@@ -51,6 +52,7 @@ function createBossWave() {
       lane: 0,
       isBoss: true,
       image: getMonsterImage({ isBoss: true }),
+      skillImage: getMonsterSkillImage({ isBoss: true, lane: 0 }),
     },
   ];
 }
@@ -62,6 +64,11 @@ function getMonsterImage(enemy) {
 
   const index = (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_IMAGES.length;
   return NORMAL_MONSTER_IMAGES[index];
+}
+
+function getMonsterSkillImage(enemy) {
+  const index = (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_SKILL_IMAGES.length;
+  return NORMAL_MONSTER_SKILL_IMAGES[index];
 }
 
 function getWaveEnemyCount() {
@@ -171,18 +178,44 @@ function updateMonsterAttacks(delta) {
 
   const extraPressure = Math.max(0, attackers.length - 1);
   const damage = getMonsterAttackDamage(attacker, target, extraPressure);
+  playMonsterSkillEffect(attacker);
+
+  monsterAttackCooldown += attacker.isBoss ? MONSTER_ATTACK_RATE + 0.55 : MONSTER_ATTACK_RATE;
+  window.setTimeout(() => applyMonsterAttackDamage(attacker, target, damage), 260);
+}
+
+function applyMonsterAttackDamage(attacker, target, damage) {
+  if (isSpawningNext || !isUnitAlive(target.id)) return;
+
   state.unitHp[target.id] = Math.max(0, getUnitHp(target.id) - damage);
   showUnitDamage(damage, target, attacker);
   pulseUnit(target.id, "is-damaged", 220);
-
-  monsterAttackCooldown += attacker.isBoss ? MONSTER_ATTACK_RATE + 0.55 : MONSTER_ATTACK_RATE;
-
   if (state.unitHp[target.id] <= 0) {
     log(`${target.shortName}이 잠시 전투에서 이탈했습니다.`);
     if (!getLivingUnits().length) handlePartyDown();
   } else {
     log(`${attacker.isBoss ? "보스" : "몬스터"}가 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
   }
+}
+
+function playMonsterSkillEffect(enemy) {
+  const spriteUrl = enemy.skillImage || getMonsterSkillImage(enemy);
+  if (!spriteUrl) return;
+
+  const enemyElement = refs.enemyLayer.querySelector(`[data-enemy-id="${enemy.id}"]`);
+  if (enemyElement) {
+    enemyElement.classList.add("is-skill-casting");
+    window.setTimeout(() => enemyElement.classList.remove("is-skill-casting"), 620);
+  }
+
+  const effect = document.createElement("span");
+  effect.className = `monster-skill-effect${enemy.isBoss ? " is-boss" : ""}`;
+  effect.style.setProperty("--monster-skill-url", `url("${spriteUrl}")`);
+  effect.style.setProperty("--monster-skill-x", `${enemy.x}%`);
+  effect.style.setProperty("--monster-skill-y", `${enemy.y + (enemy.isBoss ? 58 : 42)}px`);
+  effect.style.setProperty("--monster-skill-size", enemy.isBoss ? "156px" : "112px");
+  refs.effectLayer.appendChild(effect);
+  window.setTimeout(() => effect.remove(), 660);
 }
 
 function getMonsterAttackTarget() {

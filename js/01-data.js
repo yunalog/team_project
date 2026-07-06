@@ -22,6 +22,14 @@ const NORMAL_MONSTER_IMAGES = [
   "Resource/Monster/Normal_Monster/Field_Monster5.png",
   "Resource/Monster/Normal_Monster/Field_Monster6.png",
 ];
+const NORMAL_MONSTER_SKILL_IMAGES = [
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster1_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster2_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster3_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster4_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster5_Skill.png",
+  "Resource/Monster/Normal_Monster/Field_Monster_Skill/Field_Monster6_Skill.png",
+];
 const BOSS_MONSTER_IMAGES = [
   "Resource/Monster/Boss_Monster/Stage1_Boss.png",
   "Resource/Monster/Boss_Monster/Stage2_Boss.png",

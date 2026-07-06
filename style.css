@@ -1339,6 +1339,10 @@ h1 {
   transform: translateX(-50%) translateX(8px);
 }
 
+.enemy.is-skill-casting .enemy-sprite {
+  opacity: 0;
+}
+
 .enemy.is-defeated {
   opacity: 0;
   transform: translateX(-50%) translateX(48px);
@@ -1472,6 +1476,26 @@ h1 {
   image-rendering: auto;
   transform: translate(-50%, 50%) scale(0.96);
   z-index: 8;
+}
+
+.monster-skill-effect {
+  position: absolute;
+  left: var(--monster-skill-x);
+  bottom: var(--monster-skill-y);
+  width: var(--monster-skill-size, 112px);
+  height: var(--monster-skill-size, 112px);
+  background-image: var(--monster-skill-url);
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  background-position: 0 0;
+  pointer-events: none;
+  transform: translate(-50%, 44%) scaleX(-1);
+  animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-skill-pop 0.62s ease-out forwards;
+  z-index: 9;
+}
+
+.monster-skill-effect.is-boss {
+  filter: drop-shadow(0 0 14px rgba(248, 113, 113, 0.42));
 }
 
 .attack-sprite-effect.is-projectile {
@@ -1717,6 +1741,56 @@ h1 {
   80%,
   100% {
     background-position: 100% 100%;
+  }
+}
+
+@keyframes monster-skill-6frame {
+  0%,
+  15% {
+    background-position: 0 0;
+  }
+
+  16%,
+  31% {
+    background-position: 50% 0;
+  }
+
+  32%,
+  47% {
+    background-position: 100% 0;
+  }
+
+  48%,
+  63% {
+    background-position: 0 100%;
+  }
+
+  64%,
+  79% {
+    background-position: 50% 100%;
+  }
+
+  80%,
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes monster-skill-pop {
+  0% {
+    opacity: 0;
+    scale: 0.92;
+  }
+
+  12%,
+  78% {
+    opacity: 1;
+    scale: 1;
+  }
+
+  100% {
+    opacity: 0;
+    scale: 1.04;
   }
 }
 

@@ -575,6 +575,9 @@ function normalizeEnemies(enemies) {
       lane: Number(enemy.lane) || index,
       isBoss: Boolean(enemy.isBoss),
       image: enemy.image || getMonsterImage({ ...enemy, lane: Number(enemy.lane) || index, isBoss: Boolean(enemy.isBoss) }),
+      skillImage:
+        enemy.skillImage ||
+        getMonsterSkillImage({ ...enemy, lane: Number(enemy.lane) || index, isBoss: Boolean(enemy.isBoss) }),
     }))
     .filter((enemy) => enemy.hp > 0);
 }
