@@ -237,7 +237,44 @@ function performMonsterAttack(attacker, attackerCount = 1) {
   const extraPressure = Math.max(0, attackerCount - 1);
   const damage = getMonsterAttackDamage(attacker, target, extraPressure);
   const attackDelay = playMonsterSkillEffect(attacker, target);
-  window.setTimeout(() => applyMonsterAttackDamage(attacker, target, damage), attackDelay);
+  scheduleMonsterAttackDamage(attacker, target, damage, attackDelay);
+}
+
+function scheduleMonsterAttackDamage(attacker, target, damage, attackDelay) {
+  const hitCount = getMonsterAttackHitCount(attacker);
+  if (hitCount <= 1) {
+    window.setTimeout(() => applyMonsterAttackDamage(attacker, target, damage), attackDelay);
+    return;
+  }
+
+  const hitDamages = splitDamageIntoHits(damage, hitCount);
+  const firstHitDelay = Math.max(120, attackDelay - 80);
+  const hitInterval = attacker.isBoss ? 120 : 95;
+  hitDamages.forEach((hitDamage, index) => {
+    window.setTimeout(() => applyMonsterAttackDamage(attacker, target, hitDamage), firstHitDelay + index * hitInterval);
+  });
+}
+
+function getMonsterAttackHitCount(attacker) {
+  if (!attacker.isBoss || getMonsterAttackType(attacker) !== "melee") return 1;
+
+  const bossIndex = getBossMonsterIndex(attacker);
+  if (bossIndex === 0) return 4;
+  if (bossIndex === 1) return 3;
+  return 1;
+}
+
+function splitDamageIntoHits(totalDamage, hitCount) {
+  const safeTotal = Math.max(1, Math.round(totalDamage));
+  const safeHitCount = Math.max(1, hitCount);
+  const baseDamage = Math.floor(safeTotal / safeHitCount);
+  let remainder = safeTotal % safeHitCount;
+
+  return Array.from({ length: safeHitCount }, () => {
+    const bonus = remainder > 0 ? 1 : 0;
+    remainder = Math.max(0, remainder - 1);
+    return Math.max(1, baseDamage + bonus);
+  });
 }
 
 function applyMonsterAttackDamage(attacker, target, damage) {
