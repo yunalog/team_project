@@ -92,9 +92,9 @@ function createEquipmentItem() {
     slot: base.slot,
     name: base.name,
     icon: base.icon,
-    image: base.image,
     grade: grade.name,
     gradeColor: grade.color,
+    image: getEquipmentImageSrc(base.id, grade.name),
     powerBonus,
     skillBonus,
   };

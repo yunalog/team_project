@@ -83,8 +83,10 @@ function renderEquipment() {
   refs.equipmentChoice.classList.toggle("is-hidden", !pending);
   if (!pending) return;
 
-  refs.equipmentIcon.textContent = pending.icon;
+  refs.equipmentIcon.textContent = pending.image ? "" : pending.icon;
+  refs.equipmentIcon.classList.toggle("has-image", Boolean(pending.image));
   refs.equipmentIcon.style.setProperty("--equipment-color", pending.gradeColor);
+  refs.equipmentIcon.style.setProperty("--equipment-image", pending.image ? `url("${pending.image}")` : "none");
   refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
   refs.equipmentName.style.color = pending.gradeColor;
   refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
@@ -106,7 +108,8 @@ function renderEquippedItems() {
       const item = getEquippedItem(slot.id);
       const color = item ? item.gradeColor : "rgba(74, 43, 23, 0.28)";
       const label = item ? item.grade : "비어있음";
-      return `<span class="equipped-grade-block" title="${slot.name}: ${label}" style="--equipment-color: ${color};"></span>`;
+      const image = item?.image ? `url('${item.image}')` : "none";
+      return `<span class="equipped-grade-block${item?.image ? " has-image" : ""}" title="${slot.name}: ${label}" style="--equipment-color: ${color}; --equipment-image: ${image};"></span>`;
     })
     .join("");
   refs.equippedItemList.innerHTML = equipmentSlots
@@ -129,7 +132,7 @@ function renderEquippedItems() {
       return `
         <div class="equipped-list-item" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
           <span class="equipped-list-color" aria-hidden="true"></span>
-          <span class="equipped-list-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-list-image${item.image ? " has-image" : ""}">${item.image ? "" : item.icon}</span>
           <span class="equipped-list-copy">
             <span class="equipped-list-grade">${item.grade}</span>
             <strong>${item.name}</strong>

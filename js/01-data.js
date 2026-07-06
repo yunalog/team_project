@@ -583,6 +583,18 @@ const equipmentGrades = [
   { name: "유일", chance: 0.001, multiplier: 12, color: "#facc15" },
 ];
 
+const equipmentTileIds = ["glasses", "chair", "keyboard", "mug", "notebook"];
+
+function getEquipmentGradeIndexByName(gradeName) {
+  return Math.max(0, equipmentGrades.findIndex((grade) => grade.name === gradeName));
+}
+
+function getEquipmentImageSrc(baseId, gradeName) {
+  const tileId = equipmentTileIds.includes(baseId) ? baseId : equipmentTileIds[0];
+  const gradeIndex = getEquipmentGradeIndexByName(gradeName);
+  return `Resource/Equip/Cropped/equip_g${gradeIndex}_${tileId}.png`;
+}
+
 const equipmentUpgradeConfigs = [
   { level: 1, label: "1단계", maxGrade: 1, nextCost: 20, duration: 0, desc: "일반/희귀 장비 등장" },
   { level: 2, label: "2단계", maxGrade: 2, nextCost: 45, duration: 180, desc: "영웅 장비 등장" },
