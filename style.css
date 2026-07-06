@@ -5508,6 +5508,8 @@ textarea {
 :root {
   --button-skin-normal: url("Resource/UI/Button_Skin_Normal.png");
   --button-skin-pressed: url("Resource/UI/Button_Skin_Pressed.png");
+  --button-skin-wide-normal: url("Resource/UI/Button_Skin_Wide_Normal.png");
+  --button-skin-wide-pressed: url("Resource/UI/Button_Skin_Wide_Pressed.png");
 }
 
 button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
@@ -5588,4 +5590,26 @@ button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) 
 .tab-button {
   border-image-width: 10px;
   text-shadow: 0 1px 0 rgba(255, 243, 178, 0.68);
+}
+
+.start-button,
+.title-return-button,
+#manualWorkButton,
+.battle-column-action,
+.settings-row button,
+.growth-upgrade-button,
+.facility-card button,
+.equipment-upgrade-actions button {
+  border-image-source: var(--button-skin-wide-normal);
+}
+
+.start-button:active,
+.title-return-button:active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.battle-column-action:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled) {
+  border-image-source: var(--button-skin-wide-pressed);
 }
