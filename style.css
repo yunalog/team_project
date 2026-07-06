@@ -6037,7 +6037,29 @@ button:disabled {
   transform: none !important;
 }
 
+#upgradePlayerButton,
+#upgradePlayerButton:hover:not(:disabled) {
+  background-position: center -16px !important;
+  background-size: 100% 58px !important;
+}
+
+#nextStageButton,
+#nextStageButton:hover:not(:disabled) {
+  background-position: center top !important;
+  background-size: 100% 49px !important;
+}
+
 #upgradePlayerButton:active:not(:disabled),
 #nextStageButton:active:not(:disabled) {
   transform: translateY(1px) !important;
+}
+
+#upgradePlayerButton:active:not(:disabled) {
+  background-position: center -22px !important;
+  background-size: 100% 64px !important;
+}
+
+#nextStageButton:active:not(:disabled) {
+  background-position: center top !important;
+  background-size: 100% 48px !important;
 }
