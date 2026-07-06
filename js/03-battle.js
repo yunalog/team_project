@@ -249,7 +249,10 @@ function playMonsterSkillEffect(enemy, target) {
   const castY = ranged ? enemy.y + (enemy.isBoss ? 73 : 49) : meleePosition.y;
   const castDuration = ranged ? 660 : 620;
 
-  monsterCastingUntil[enemy.id] = Date.now() + castDuration + 120;
+  monsterCastingUntil[enemy.id] = {
+    until: Date.now() + castDuration + 120,
+    type: ranged ? "ranged" : "melee",
+  };
 
   const enemyElement = refs.enemyLayer.querySelector(`[data-enemy-id="${enemy.id}"]`);
   if (enemyElement) {
@@ -264,6 +267,19 @@ function playMonsterSkillEffect(enemy, target) {
     cast.style.setProperty("--monster-cast-x", `${castX}%`);
     cast.style.setProperty("--monster-cast-y", `${castY}px`);
     cast.style.setProperty("--monster-cast-size", enemy.isBoss ? "146px" : "98px");
+    cast.style.setProperty("--monster-cast-hp-width", enemy.isBoss ? "150px" : "100px");
+
+    if (!ranged) {
+      const hpBar = document.createElement("span");
+      hpBar.className = "monster-cast-hp-bar";
+      hpBar.setAttribute("aria-hidden", "true");
+
+      const hpFill = document.createElement("span");
+      hpFill.style.width = `${Math.max(0, Math.round((enemy.hp / enemy.maxHp) * 100))}%`;
+      hpBar.appendChild(hpFill);
+      cast.appendChild(hpBar);
+    }
+
     refs.effectLayer.appendChild(cast);
     window.setTimeout(() => cast.remove(), castDuration + 80);
   }
@@ -692,12 +708,21 @@ function engageAllMonsters() {
 }
 
 function isMonsterCasting(enemyId) {
-  const castingUntil = monsterCastingUntil[enemyId];
-  if (!castingUntil) return false;
+  const castingState = monsterCastingUntil[enemyId];
+  if (!castingState) return false;
+
+  const castingUntil = typeof castingState === "number" ? castingState : castingState.until;
   if (Date.now() <= castingUntil) return true;
 
   delete monsterCastingUntil[enemyId];
   return false;
+}
+
+function getMonsterCastingType(enemyId) {
+  if (!isMonsterCasting(enemyId)) return "";
+
+  const castingState = monsterCastingUntil[enemyId];
+  return typeof castingState === "object" ? castingState.type || "" : "";
 }
 
 function defeatEnemy(enemyId, manual) {
