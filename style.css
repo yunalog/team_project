@@ -6015,3 +6015,91 @@ button.is-active:not(:disabled),
   background-color: #52616f !important;
   background-image: linear-gradient(180deg, #7c8b98 0%, #52616f 100%) !important;
 }
+
+
+/* Firebase 비접속 보상 설정 */
+.offline-reward-setting {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px;
+  border: 2px solid #3b3328;
+  border-radius: 10px;
+  background: rgba(255, 246, 210, 0.94);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.45), 0 3px 0 rgba(42, 32, 24, 0.25);
+}
+
+.offline-reward-setting strong {
+  font-size: 15px;
+  color: #2f251b;
+}
+
+.offline-reward-setting p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #5d4a35;
+}
+
+.offline-plan-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+.offline-plan-buttons button {
+  display: flex;
+  min-width: 0;
+  min-height: 62px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 9px 4px;
+  border: 2px solid #5b3a1f;
+  border-radius: 8px;
+  color: #fff7dc;
+  text-align: center;
+  background-color: #9b5521 !important;
+  background-image: linear-gradient(180deg, #d88a32 0%, #934918 100%) !important;
+  box-shadow: 0 4px 0 #5b2d13, inset 1px 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+.offline-plan-buttons button span {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.offline-plan-buttons button small {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffe7a3;
+}
+
+.offline-plan-buttons button:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.offline-plan-buttons button.is-active {
+  border-color: #facc15;
+  color: #fffbe8;
+  background-color: #237457 !important;
+  background-image: linear-gradient(180deg, #41a77a 0%, #237457 100%) !important;
+  box-shadow: 0 4px 0 #14513c, 0 0 0 3px rgba(250, 204, 21, 0.45), inset 1px 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+#offlinePlanText {
+  display: block;
+  padding: 7px 8px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.48);
+  color: #3e3023;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+}

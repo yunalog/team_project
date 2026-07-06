@@ -39,9 +39,9 @@ function initGame() {
     clearCountText: document.querySelector("#clearCountText"),
     playTimeText: document.querySelector("#playTimeText"),
     attackTimerText: document.querySelector("#attackTimerText"),
-saveStateText: document.querySelector("#saveStateText"),
-offlinePlanText: document.querySelector("#offlinePlanText"),
-recruitList: document.querySelector("#recruitList"),
+    saveStateText: document.querySelector("#saveStateText"),
+    offlinePlanText: document.querySelector("#offlinePlanText"),
+    recruitList: document.querySelector("#recruitList"),
     recruitGrowthPanel: document.querySelector("#recruitGrowthPanel"),
     recruitDetailModal: document.querySelector("#recruitDetailModal"),
     recruitDetailBadge: document.querySelector("#recruitDetailBadge"),
@@ -124,6 +124,7 @@ function bindEvents() {
     const recruitPromotionDismiss = event.target.closest("[data-close-recruit-promotion]");
     const toolButton = event.target.closest("[data-buy-tool]");
     const growthButton = event.target.closest("[data-upgrade-growth]");
+    const offlinePlanButton = event.target.closest("[data-offline-plan]");
 
     if (tab) switchTab(tab);
     if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
@@ -134,6 +135,7 @@ function bindEvents() {
     if (recruitPromotionDismiss) closeRecruitPromotion();
     if (toolButton) buyTool(toolButton.dataset.buyTool);
     if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
+    if (offlinePlanButton) changeOfflineRewardPlan(Number(offlinePlanButton.dataset.offlinePlan));
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -166,13 +168,70 @@ function bindEvents() {
   document.addEventListener("change", handleSquadChange);
 }
 
-function startGame() {
+async function startGame() {
   hasStartedGame = true;
+
+  if (window.FirebaseGame) {
+    try {
+      const user = await FirebaseGame.loginWithGoogle();
+      if (user) {
+        const savedState = await FirebaseGame.loadUserGameState();
+
+        if (savedState) {
+          state = normalizeState({
+            ...cloneDefaultState(),
+            ...savedState,
+          });
+        }
+
+        const rewardResult = FirebaseGame.applyOfflineReward(state, getTotalDps());
+        await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+
+        if (rewardResult.applied) {
+          window.setTimeout(() => {
+            alert(FirebaseGame.formatOfflineRewardMessage(rewardResult));
+          }, 80);
+        }
+      }
+    } catch (error) {
+      console.error("Firebase 로그인/불러오기 실패:", error);
+      if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 연결 실패 · 로컬 저장으로 진행";
+    }
+  }
+
   refs.startScreen.classList.add("is-hidden");
   refs.gameShell.classList.remove("is-hidden");
   playBgm(getActiveBgmKey());
   renderAll();
   startLoop();
+}
+
+async function changeOfflineRewardPlan(hours) {
+  const plan = window.FirebaseGame?.OFFLINE_REWARD_PLANS?.[hours];
+  if (!plan) return;
+
+  state.offlineRewardPlan = Number(hours);
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // 로컬 저장 실패는 Firebase 저장을 계속 시도합니다.
+  }
+
+  if (window.FirebaseGame && FirebaseGame.getCurrentUser()) {
+    try {
+      await FirebaseGame.setOfflineRewardPlan(state, hours);
+      await FirebaseGame.saveUserGameState(state, { updateLastActive: true });
+      if (refs.saveStateText) refs.saveStateText.textContent = `비접속 보상 ${plan.label} 저장 완료`;
+    } catch (error) {
+      console.error("비접속 보상 설정 Firebase 저장 실패:", error);
+      if (refs.saveStateText) refs.saveStateText.textContent = `비접속 보상 ${plan.label} 로컬 저장 완료`;
+    }
+  } else if (refs.saveStateText) {
+    refs.saveStateText.textContent = `비접속 보상 ${plan.label} 로컬 저장 완료`;
+  }
+
+  renderAll();
 }
 
 function returnToTitle() {
@@ -415,6 +474,10 @@ function normalizeState(nextState) {
       idea: Math.max(0, Math.min(0.999999, Number(nextState.companyRewardRemainders?.idea) || 0)),
     },
     elapsed: Math.max(0, Number(nextState.elapsed) || 0),
+    offlineRewardPlan: [4, 8, 12].includes(Number(nextState.offlineRewardPlan))
+      ? Number(nextState.offlineRewardPlan)
+      : 8,
+    lastActiveAtMs: Number(nextState.lastActiveAtMs) || Date.now(),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
     squad:
       nextState.squadConfigured &&
@@ -541,12 +604,21 @@ function getEquipmentSlotId(slotId) {
 }
 
 function saveState(message) {
+  state.lastActiveAtMs = Date.now();
+
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
     message = "저장소 접근 불가";
   }
-  refs.saveStateText.textContent = message;
+
+  if (refs.saveStateText) refs.saveStateText.textContent = message;
+
+  if (window.FirebaseGame && FirebaseGame.getCurrentUser()) {
+    FirebaseGame.saveUserGameState(state, { updateLastActive: false }).catch((error) => {
+      console.error("Firebase 저장 실패:", error);
+    });
+  }
 }
 
 function resetGame() {

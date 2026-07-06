@@ -1,4 +1,4 @@
-﻿function switchTab(tab) {
+function switchTab(tab) {
   activeTab = tab.dataset.tab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
@@ -17,6 +17,24 @@ function renderAll() {
   renderRecruitPromotionModal();
   renderEnemies();
   renderBattle();
+  renderOfflineRewardSetting();
+}
+
+function renderOfflineRewardSetting() {
+  if (!refs.offlinePlanText || !window.FirebaseGame) return;
+
+  const plan =
+    FirebaseGame.OFFLINE_REWARD_PLANS[state.offlineRewardPlan] ||
+    FirebaseGame.OFFLINE_REWARD_PLANS[FirebaseGame.DEFAULT_OFFLINE_PLAN];
+
+  refs.offlinePlanText.textContent = `현재 설정: ${plan.label}`;
+
+  document.querySelectorAll("[data-offline-plan]").forEach((button) => {
+    const hours = Number(button.dataset.offlinePlan);
+    const isActive = hours === plan.hours;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
 }
 
 function renderBattle() {
