@@ -5764,8 +5764,12 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
 /* Final draw-machine button skin override. */
 .draw-machine-panel .equipment-draw-button,
 .draw-machine-panel .auto-draw-button,
+.draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.draw-machine-panel .auto-draw-button:hover:not(:disabled),
 .battle-equipment-section .draw-machine-panel .equipment-draw-button,
-.battle-equipment-section .draw-machine-panel .auto-draw-button {
+.battle-equipment-section .draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button:hover:not(:disabled) {
   border: 12px solid transparent !important;
   border-image-source: var(--button-skin-normal) !important;
   border-image-slice: 38 fill !important;
@@ -5788,6 +5792,17 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
     -1px 0 0 rgba(74, 43, 23, 0.18) !important;
   box-shadow: 0 4px 0 rgba(74, 43, 23, 0.38) !important;
   filter: none !important;
+}
+
+.draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.draw-machine-panel .auto-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button:hover:not(:disabled) {
+  border-image-source: var(--button-skin-normal) !important;
+  background-color: transparent !important;
+  background-image: var(--button-skin-normal) !important;
+  opacity: 1 !important;
+  filter: brightness(1.04) saturate(1.05) !important;
 }
 
 .draw-machine-panel .equipment-draw-button:active:not(:disabled),
