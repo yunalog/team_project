@@ -239,9 +239,12 @@ async function changeOfflineRewardPlan(hours) {
 }
 
 function checkOfflineRewardUnlockPopup() {
-  if (!refs.offlineUnlockModal) return;
+  if (!refs.offlineUnlockModal || !state) return;
 
-  const isUnlockedStage = Number(state.chapter) >= 3;
+  // 비접속 보상은 3-1부터 해금됩니다.
+  // 이 게임의 진행 표기는 chapter-subStage 구조이므로 1-3이 아니라 chapter 3 이상을 기준으로 봅니다.
+  const currentChapter = Math.max(1, Number(state.chapter) || Number(state.stage) || 1);
+  const isUnlockedStage = currentChapter >= 3;
   const alreadySelected = Boolean(state.offlineRewardUnlocked);
 
   if (!isUnlockedStage || alreadySelected) {

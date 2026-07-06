@@ -822,6 +822,8 @@ function completeWave(manual) {
     advanceBattleLayer();
     spawnWave();
     renderAll();
+    // 2스테이지 보스 클리어 후 3-1에 진입하는 순간 해금 팝업을 확실히 확인합니다.
+    if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
   }, 520);
 }
 

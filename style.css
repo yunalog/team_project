@@ -6104,6 +6104,18 @@ button.is-active:not(:disabled),
   text-align: center;
 }
 
+.offline-unlock-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(20, 14, 8, 0.62);
+  backdrop-filter: blur(3px);
+}
+
 
 .offline-unlock-modal h2 {
     font-size: 34px;      /* 기존보다 크게 */
@@ -6327,4 +6339,25 @@ button.is-active:not(:disabled),
   .offline-unlock-options .offline-plan-rate {
     font-size: 14px !important;
   }
+}
+
+
+/* 3-1 비접속 보상 해금 팝업 최종 보정 */
+.offline-unlock-modal.is-visible {
+  display: flex !important;
+}
+
+.offline-unlock-card {
+  max-width: 760px !important;
+}
+
+.offline-unlock-card h2,
+#offlineUnlockTitle {
+  font-size: clamp(34px, 5vw, 48px) !important;
+  font-weight: 900 !important;
+  color: #f4b400 !important;
+  text-shadow: 3px 3px 0 #3a2410, 0 0 14px rgba(255, 210, 0, 0.55) !important;
+  margin: 0 0 20px !important;
+  text-align: center !important;
+  letter-spacing: 1px !important;
 }
