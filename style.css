@@ -5504,110 +5504,6 @@ textarea {
   transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
 }
 
-/* Pixel button skin from Resource/UI tileset. */
-:root {
-  --button-skin-normal: url("Resource/UI/Button_Skin_Normal.png");
-  --button-skin-pressed: url("Resource/UI/Button_Skin_Pressed.png");
-  --button-skin-wide-normal: url("Resource/UI/Button_Skin_Wide_Normal.png");
-  --button-skin-wide-pressed: url("Resource/UI/Button_Skin_Wide_Pressed.png");
-  --button-skin-blue-normal: url("Resource/UI/Button_Skin_Blue_Normal.png");
-  --button-skin-blue-pressed: url("Resource/UI/Button_Skin_Blue_Pressed.png");
-  --button-skin-blue-wide-normal: url("Resource/UI/Button_Skin_Blue_Wide_Normal.png");
-  --button-skin-blue-wide-pressed: url("Resource/UI/Button_Skin_Blue_Wide_Pressed.png");
-  --button-skin-green-wide-normal: url("Resource/UI/Button_Skin_Green_Wide_Normal.png");
-  --button-skin-green-wide-pressed: url("Resource/UI/Button_Skin_Green_Wide_Pressed.png");
-  --button-skin-orange-wide-normal: url("Resource/UI/Button_Skin_Orange_Wide_Normal.png");
-  --button-skin-orange-wide-pressed: url("Resource/UI/Button_Skin_Orange_Wide_Pressed.png");
-}
-
-button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
-#manualWorkButton,
-.battle-column-action,
-.equipment-panel-toggle,
-.shop-item button,
-.facility-card button,
-.growth-upgrade-button,
-.equipment-actions button,
-.equipment-upgrade-actions button,
-.settings-row button,
-.mute-button,
-.title-return-button,
-.tab-button {
-  border: 12px solid transparent;
-  border-image-source: var(--button-skin-normal);
-  border-image-slice: 38 fill;
-  border-image-width: 12px;
-  border-image-repeat: stretch;
-  border-radius: 0;
-  background-color: transparent;
-  background-image: var(--button-skin-normal) !important;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 100% 100%;
-  background-origin: border-box;
-  background-clip: border-box;
-  color: #3c260f;
-  image-rendering: auto;
-  text-shadow: 0 1px 0 rgba(255, 243, 178, 0.72);
-  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.38);
-}
-
-button:hover:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
-#manualWorkButton:hover:not(:disabled),
-.battle-column-action:hover:not(:disabled),
-.equipment-panel-toggle:hover:not(:disabled),
-.shop-item button:hover:not(:disabled),
-.facility-card button:hover:not(:disabled),
-.growth-upgrade-button:hover:not(:disabled),
-.equipment-actions button:hover:not(:disabled),
-.equipment-upgrade-actions button:hover:not(:disabled),
-.settings-row button:hover:not(:disabled),
-.mute-button:hover:not(:disabled),
-.title-return-button:hover:not(:disabled),
-.tab-button:hover:not(:disabled) {
-  filter: brightness(1.05) saturate(1.05);
-}
-
-button:active:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
-button.is-active:not(:disabled),
-#manualWorkButton:active:not(:disabled),
-.battle-column-action:active:not(:disabled),
-.equipment-panel-toggle:active:not(:disabled),
-.shop-item button:active:not(:disabled),
-.facility-card button:active:not(:disabled),
-.growth-upgrade-button:active:not(:disabled),
-.equipment-actions button:active:not(:disabled),
-.equipment-upgrade-actions button:active:not(:disabled),
-.settings-row button:active:not(:disabled),
-.mute-button:active:not(:disabled),
-.mute-button.is-muted,
-.title-return-button:active:not(:disabled),
-.tab-button:active:not(:disabled),
-.tab-button.is-active,
-.auto-draw-button.is-running {
-  border-image-source: var(--button-skin-pressed);
-  background-image: var(--button-skin-pressed) !important;
-  filter: none;
-  box-shadow: 0 2px 0 rgba(74, 43, 23, 0.34);
-}
-
-button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) {
-  filter: grayscale(0.25) brightness(0.94);
-}
-
-.start-button,
-.title-return-button,
-#manualWorkButton,
-.battle-column-action,
-.settings-row button {
-  min-height: 50px;
-}
-
-.tab-button {
-  border-image-width: 10px;
-  text-shadow: 0 1px 0 rgba(255, 243, 178, 0.68);
-}
-
 /* Company scene final layering: align each transparent PNG by its visible bottom edge. */
 .company-campus {
   --company-platform-bottom: clamp(13px, 3.5vw, 30px);
@@ -5667,31 +5563,7 @@ button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) 
   filter: drop-shadow(0 3px 0 rgba(45, 33, 25, 0.18));
 }
 
-.start-button,
-.title-return-button,
-#manualWorkButton,
-.battle-column-action,
-.settings-row button,
-.growth-upgrade-button,
-.facility-card button,
-.equipment-upgrade-actions button {
-  border-image-source: var(--button-skin-wide-normal);
-  background-image: var(--button-skin-wide-normal) !important;
-}
-
-.start-button:active,
-.title-return-button:active:not(:disabled),
-#manualWorkButton:active:not(:disabled),
-.battle-column-action:active:not(:disabled),
-.settings-row button:active:not(:disabled),
-.growth-upgrade-button:active:not(:disabled),
-.facility-card button:active:not(:disabled),
-.equipment-upgrade-actions button:active:not(:disabled) {
-  border-image-source: var(--button-skin-wide-pressed);
-  background-image: var(--button-skin-wide-pressed) !important;
-}
-
-/* Keep pixel-button labels optically centered inside the new image borders. */
+/* Keep button labels centered after the company and combat layout refinements. */
 button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
 #manualWorkButton,
 .battle-column-action,
@@ -5769,61 +5641,6 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
   line-height: 1.1 !important;
 }
 
-/* Final draw-machine button skin override. */
-.draw-machine-panel .equipment-draw-button,
-.draw-machine-panel .auto-draw-button,
-.draw-machine-panel .equipment-draw-button:hover:not(:disabled),
-.draw-machine-panel .auto-draw-button:hover:not(:disabled),
-.battle-equipment-section .draw-machine-panel .equipment-draw-button,
-.battle-equipment-section .draw-machine-panel .auto-draw-button,
-.battle-equipment-section .draw-machine-panel .equipment-draw-button:hover:not(:disabled),
-.battle-equipment-section .draw-machine-panel .auto-draw-button:hover:not(:disabled) {
-  border: 12px solid transparent !important;
-  border-image-source: var(--button-skin-normal) !important;
-  border-image-slice: 38 fill !important;
-  border-image-width: 12px !important;
-  border-image-repeat: stretch !important;
-  border-radius: 0 !important;
-  background-color: transparent !important;
-  background-image: var(--button-skin-normal) !important;
-  background-repeat: no-repeat !important;
-  background-position: center !important;
-  background-size: 100% 100% !important;
-  background-origin: border-box !important;
-  background-clip: border-box !important;
-  color: #3c260f !important;
-  font-weight: 900 !important;
-  -webkit-text-stroke: 0.2px rgba(74, 43, 23, 0.42);
-  text-shadow:
-    0 1px 0 rgba(255, 246, 198, 0.95),
-    1px 0 0 rgba(74, 43, 23, 0.25),
-    -1px 0 0 rgba(74, 43, 23, 0.18) !important;
-  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.38) !important;
-  filter: none !important;
-}
-
-.draw-machine-panel .equipment-draw-button:hover:not(:disabled),
-.draw-machine-panel .auto-draw-button:hover:not(:disabled),
-.battle-equipment-section .draw-machine-panel .equipment-draw-button:hover:not(:disabled),
-.battle-equipment-section .draw-machine-panel .auto-draw-button:hover:not(:disabled) {
-  border-image-source: var(--button-skin-normal) !important;
-  background-color: transparent !important;
-  background-image: var(--button-skin-normal) !important;
-  opacity: 1 !important;
-  filter: brightness(1.04) saturate(1.05) !important;
-}
-
-.draw-machine-panel .equipment-draw-button:active:not(:disabled),
-.draw-machine-panel .auto-draw-button:active:not(:disabled),
-.draw-machine-panel .auto-draw-button.is-running,
-.battle-equipment-section .draw-machine-panel .equipment-draw-button:active:not(:disabled),
-.battle-equipment-section .draw-machine-panel .auto-draw-button:active:not(:disabled),
-.battle-equipment-section .draw-machine-panel .auto-draw-button.is-running {
-  border-image-source: var(--button-skin-pressed) !important;
-  background-image: var(--button-skin-pressed) !important;
-  box-shadow: 0 2px 0 rgba(74, 43, 23, 0.34) !important;
-}
-
 .draw-machine-panel .equipment-draw-button strong,
 .battle-equipment-section .draw-machine-panel .equipment-draw-button strong {
   border: 0 !important;
@@ -5833,82 +5650,7 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
   text-shadow: inherit !important;
 }
 
-/* Company tab uses the blue button tileset variant. */
-.tab-panel[data-panel="tools"] .facility-card button {
-  border-image-source: var(--button-skin-blue-wide-normal) !important;
-  background-image: var(--button-skin-blue-wide-normal) !important;
-  color: #f2f8ff !important;
-  -webkit-text-stroke: 0.25px rgba(16, 54, 94, 0.66);
-  text-shadow:
-    0 1px 0 rgba(19, 72, 125, 0.9),
-    1px 0 0 rgba(5, 34, 72, 0.42),
-    -1px 0 0 rgba(5, 34, 72, 0.36) !important;
-}
-
-.tab-panel[data-panel="tools"] .facility-card button:hover:not(:disabled) {
-  border-image-source: var(--button-skin-blue-wide-normal) !important;
-  background-image: var(--button-skin-blue-wide-normal) !important;
-  opacity: 1 !important;
-  filter: brightness(1.08) saturate(1.08) !important;
-}
-
-.tab-panel[data-panel="tools"] .facility-card button:active:not(:disabled) {
-  border-image-source: var(--button-skin-blue-wide-pressed) !important;
-  background-image: var(--button-skin-blue-wide-pressed) !important;
-  color: #ffffff !important;
-  filter: none !important;
-}
-
-/* Battle action buttons use distinct wide tiles so hover never exposes neighboring tiles. */
-#manualWorkButton,
-#manualWorkButton:hover:not(:disabled) {
-  border-image-source: var(--button-skin-wide-normal) !important;
-  background-image: var(--button-skin-wide-normal) !important;
-  opacity: 1 !important;
-}
-
-#manualWorkButton:active:not(:disabled) {
-  border-image-source: var(--button-skin-wide-pressed) !important;
-  background-image: var(--button-skin-wide-pressed) !important;
-}
-
-#upgradePlayerButton,
-#upgradePlayerButton:hover:not(:disabled) {
-  border-image-source: var(--button-skin-green-wide-normal) !important;
-  background-image: var(--button-skin-green-wide-normal) !important;
-  color: #f4ffe8 !important;
-  -webkit-text-stroke: 0.25px rgba(39, 76, 26, 0.7);
-  text-shadow:
-    0 1px 0 rgba(39, 76, 26, 0.86),
-    1px 0 0 rgba(20, 50, 16, 0.44),
-    -1px 0 0 rgba(20, 50, 16, 0.36) !important;
-  opacity: 1 !important;
-}
-
-#upgradePlayerButton:active:not(:disabled) {
-  border-image-source: var(--button-skin-green-wide-pressed) !important;
-  background-image: var(--button-skin-green-wide-pressed) !important;
-}
-
-#nextStageButton,
-#nextStageButton:hover:not(:disabled) {
-  border-image-source: var(--button-skin-orange-wide-normal) !important;
-  background-image: var(--button-skin-orange-wide-normal) !important;
-  color: #fff8df !important;
-  -webkit-text-stroke: 0.25px rgba(122, 58, 8, 0.72);
-  text-shadow:
-    0 1px 0 rgba(122, 58, 8, 0.88),
-    1px 0 0 rgba(84, 37, 4, 0.42),
-    -1px 0 0 rgba(84, 37, 4, 0.34) !important;
-  opacity: 1 !important;
-}
-
-#nextStageButton:active:not(:disabled) {
-  border-image-source: var(--button-skin-orange-wide-pressed) !important;
-  background-image: var(--button-skin-orange-wide-pressed) !important;
-}
-
-/* Final button geometry lock: image skins must not change layout or click boxes. */
+/* Final button geometry lock: button styling must not change layout or click boxes. */
 button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
 #manualWorkButton,
 .battle-column-action,
@@ -5959,11 +5701,6 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
   min-width: 128px;
   min-height: 36px;
   padding: 7px 13px 4px !important;
-  background-image: var(--button-skin-wide-normal) !important;
-}
-
-#manualWorkButton:active:not(:disabled) {
-  background-image: var(--button-skin-wide-pressed) !important;
 }
 
 .battle-column-action {
@@ -5973,26 +5710,6 @@ button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
   min-height: 39px;
   padding: 7px 14px 4px !important;
   pointer-events: auto !important;
-}
-
-#upgradePlayerButton,
-#upgradePlayerButton:hover:not(:disabled) {
-  background-image: var(--button-skin-green-wide-normal) !important;
-  color: #f4ffe8 !important;
-  pointer-events: auto !important;
-}
-
-#upgradePlayerButton:active:not(:disabled) {
-  background-image: var(--button-skin-green-wide-pressed) !important;
-}
-
-#nextStageButton,
-#nextStageButton:hover:not(:disabled) {
-  background-image: var(--button-skin-orange-wide-normal) !important;
-}
-
-#nextStageButton:active:not(:disabled) {
-  background-image: var(--button-skin-orange-wide-pressed) !important;
 }
 
 .battle-equipment-section .draw-machine-panel .equipment-draw-button,
@@ -6005,7 +5722,7 @@ button:disabled {
   cursor: not-allowed !important;
 }
 
-/* Align the two main battle action buttons by the visible wide-button artwork. */
+/* Align the two main battle action buttons. */
 .battle-equipment-section {
   align-items: start;
 }
@@ -6033,29 +5750,125 @@ button:disabled {
   transform: none !important;
 }
 
-#upgradePlayerButton,
-#upgradePlayerButton:hover:not(:disabled) {
-  background-position: center -16px !important;
-  background-size: 100% 58px !important;
-}
-
-#nextStageButton,
-#nextStageButton:hover:not(:disabled) {
-  background-position: center top !important;
-  background-size: 100% 49px !important;
-}
-
 #upgradePlayerButton:active:not(:disabled),
 #nextStageButton:active:not(:disabled) {
   transform: translateY(1px) !important;
 }
 
+/* Resource button skins removed: restore CSS-drawn buttons for team handoff. */
+button:not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton,
+.battle-column-action,
+.equipment-panel-toggle,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.settings-row button,
+.mute-button,
+.title-return-button,
+.tab-button,
+.draw-machine-panel .equipment-draw-button,
+.draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button {
+  border: 2px solid var(--ui-ink) !important;
+  border-image-source: none !important;
+  border-image-slice: 0 !important;
+  border-image-width: 0 !important;
+  border-radius: 4px !important;
+  background-color: var(--ui-accent) !important;
+  background-image: linear-gradient(180deg, var(--ui-accent) 0%, var(--ui-accent-deep) 100%) !important;
+  background-position: center !important;
+  background-size: auto !important;
+  background-repeat: repeat !important;
+  color: #fff7e5 !important;
+  font-weight: 900;
+  line-height: 1.05 !important;
+  text-align: center;
+  text-shadow: 1px 1px 0 rgba(45, 33, 25, 0.72) !important;
+  -webkit-text-stroke: 0 !important;
+  box-shadow: 0 4px 0 var(--ui-accent-deep), 2px 2px 0 rgba(255, 255, 255, 0.18) inset !important;
+  filter: none;
+  opacity: 1 !important;
+}
+
+button:hover:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+#manualWorkButton:hover:not(:disabled),
+.battle-column-action:hover:not(:disabled),
+.equipment-panel-toggle:hover:not(:disabled),
+.shop-item button:hover:not(:disabled),
+.facility-card button:hover:not(:disabled),
+.growth-upgrade-button:hover:not(:disabled),
+.equipment-actions button:hover:not(:disabled),
+.equipment-upgrade-actions button:hover:not(:disabled),
+.settings-row button:hover:not(:disabled),
+.mute-button:hover:not(:disabled),
+.title-return-button:hover:not(:disabled),
+.tab-button:hover:not(:disabled),
+.draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.draw-machine-panel .auto-draw-button:hover:not(:disabled) {
+  background-image: linear-gradient(180deg, #ffd36a 0%, var(--ui-accent) 100%) !important;
+  filter: brightness(1.04) saturate(1.04);
+}
+
+button:active:not(:disabled):not(.recruit-modal__close):not(.recruit-evolution-modal__close),
+button.is-active:not(:disabled),
+#manualWorkButton:active:not(:disabled),
+.battle-column-action:active:not(:disabled),
+.equipment-panel-toggle:active:not(:disabled),
+.shop-item button:active:not(:disabled),
+.facility-card button:active:not(:disabled),
+.growth-upgrade-button:active:not(:disabled),
+.equipment-actions button:active:not(:disabled),
+.equipment-upgrade-actions button:active:not(:disabled),
+.settings-row button:active:not(:disabled),
+.mute-button:active:not(:disabled),
+.mute-button.is-muted,
+.title-return-button:active:not(:disabled),
+.tab-button:active:not(:disabled),
+.tab-button.is-active,
+.auto-draw-button.is-running {
+  background-image: linear-gradient(180deg, #b85c22 0%, #7d3d18 100%) !important;
+  color: #fff7e5 !important;
+  box-shadow: 0 2px 0 rgba(74, 43, 23, 0.44), 1px 1px 0 rgba(255, 255, 255, 0.14) inset !important;
+  transform: translateY(1px);
+}
+
+.bottom-tabs .tab-button {
+  height: 50px;
+  min-height: 50px;
+  max-height: 50px;
+  padding: 8px 10px 4px !important;
+}
+
+#upgradePlayerButton,
+#upgradePlayerButton:hover:not(:disabled) {
+  background-color: #3f7a31 !important;
+  background-image: linear-gradient(180deg, #77a83f 0%, #3f7a31 100%) !important;
+}
+
 #upgradePlayerButton:active:not(:disabled) {
-  background-position: center -22px !important;
-  background-size: 100% 64px !important;
+  background-image: linear-gradient(180deg, #4f812c 0%, #2f5e22 100%) !important;
+}
+
+#nextStageButton,
+#nextStageButton:hover:not(:disabled) {
+  background-color: var(--ui-accent) !important;
+  background-image: linear-gradient(180deg, var(--ui-accent) 0%, var(--ui-accent-deep) 100%) !important;
 }
 
 #nextStageButton:active:not(:disabled) {
-  background-position: center top !important;
-  background-size: 100% 48px !important;
+  background-image: linear-gradient(180deg, #b85c22 0%, #7d3d18 100%) !important;
+}
+
+.tab-panel[data-panel="tools"] .facility-card button,
+.tab-panel[data-panel="tools"] .facility-card button:hover:not(:disabled) {
+  background-color: #2f73a7 !important;
+  background-image: linear-gradient(180deg, #65afe1 0%, #2f73a7 100%) !important;
+}
+
+.tab-panel[data-panel="tools"] .facility-card button:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #2f73a7 0%, #1e4f78 100%) !important;
 }
