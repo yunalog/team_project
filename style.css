@@ -5600,6 +5600,24 @@ button:disabled:not(.recruit-modal__close):not(.recruit-evolution-modal__close) 
   text-shadow: 0 1px 0 rgba(255, 243, 178, 0.68);
 }
 
+/* Company scene final layering: building sits on the background platform, employees stay behind it. */
+.company-campus {
+  --company-platform-bottom: clamp(18px, 4.2vw, 38px);
+}
+
+.office-building {
+  z-index: 4;
+}
+
+.employee-crowd {
+  bottom: clamp(10px, 2.8vw, 28px);
+  z-index: 1;
+}
+
+.scene-employee {
+  filter: drop-shadow(0 3px 0 rgba(45, 33, 25, 0.18));
+}
+
 .start-button,
 .title-return-button,
 #manualWorkButton,
