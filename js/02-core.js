@@ -42,6 +42,11 @@ function initGame() {
     saveStateText: document.querySelector("#saveStateText"),
     offlinePlanText: document.querySelector("#offlinePlanText"),
     offlineUnlockModal: document.querySelector("#offlineUnlockModal"),
+    offlineClaimModal: document.querySelector("#offlineClaimModal"),
+    offlineClaimPlan: document.querySelector("#offlineClaimPlan"),
+    offlineClaimTime: document.querySelector("#offlineClaimTime"),
+    offlineClaimGold: document.querySelector("#offlineClaimGold"),
+    offlineClaimCloseButton: document.querySelector("#offlineClaimCloseButton"),
     recruitList: document.querySelector("#recruitList"),
     recruitGrowthPanel: document.querySelector("#recruitGrowthPanel"),
     recruitDetailModal: document.querySelector("#recruitDetailModal"),
@@ -187,13 +192,23 @@ async function startGame() {
           });
         }
 
-        const rewardResult = FirebaseGame.applyOfflineReward(state, getTotalDps());
-        await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+        const currentChapter = Math.max(1, Number(state.chapter) || Number(state.stage) || 1);
+        const canReceiveOfflineReward = currentChapter >= 3 && Boolean(state.offlineRewardUnlocked);
 
-        if (rewardResult.applied) {
-          window.setTimeout(() => {
-            alert(FirebaseGame.formatOfflineRewardMessage(rewardResult));
-          }, 80);
+        if (canReceiveOfflineReward) {
+          const rewardResult = FirebaseGame.applyOfflineReward(state, getTotalDps());
+          await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+
+          if (rewardResult.applied) {
+            window.setTimeout(() => {
+              showOfflineRewardClaimPopup(rewardResult);
+            }, 120);
+          }
+        } else {
+          // 3-1 이전이거나 아직 해금 보상 시간을 선택하지 않은 상태에서는
+          // 비접속 보상을 지급하지 않고 기준 시간만 현재로 맞춥니다.
+          state.lastActiveAtMs = Date.now();
+          await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
         }
       }
     } catch (error) {
@@ -208,6 +223,34 @@ async function startGame() {
   renderAll();
   checkOfflineRewardUnlockPopup();
   startLoop();
+}
+
+function formatDurationHHMMSS(totalSeconds) {
+  const safeSeconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+  return [hours, minutes, seconds].map((value) => String(value).padStart(2, "0")).join(":");
+}
+
+function showOfflineRewardClaimPopup(result) {
+  if (!refs.offlineClaimModal) return;
+
+  const plan = result?.plan || window.FirebaseGame?.OFFLINE_REWARD_PLANS?.[state.offlineRewardPlan];
+  const rewardGold = Math.max(0, Math.floor(Number(result?.rewardGold || 0)));
+
+  if (refs.offlineClaimPlan) refs.offlineClaimPlan.textContent = plan?.label || "비접속 보상";
+  if (refs.offlineClaimTime) refs.offlineClaimTime.textContent = formatDurationHHMMSS(result?.rewardSeconds || 0);
+  if (refs.offlineClaimGold) refs.offlineClaimGold.textContent = rewardGold.toLocaleString("ko-KR");
+
+  refs.offlineClaimModal.classList.add("is-visible");
+  refs.offlineClaimModal.setAttribute("aria-hidden", "false");
+}
+
+function closeOfflineRewardClaimPopup() {
+  if (!refs.offlineClaimModal) return;
+  refs.offlineClaimModal.classList.remove("is-visible");
+  refs.offlineClaimModal.setAttribute("aria-hidden", "true");
 }
 
 async function changeOfflineRewardPlan(hours) {
@@ -263,6 +306,7 @@ async function chooseInitialOfflineRewardPlan(hours) {
 
   state.offlineRewardPlan = Number(hours);
   state.offlineRewardUnlocked = true;
+  state.lastActiveAtMs = Date.now();
 
   if (refs.offlineUnlockModal) {
     refs.offlineUnlockModal.classList.remove("is-visible");

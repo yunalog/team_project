@@ -331,6 +331,29 @@
       </div>
     </div>
 
+    <div class="offline-claim-modal" id="offlineClaimModal" aria-hidden="true">
+      <div class="offline-claim-card" role="dialog" aria-modal="true" aria-labelledby="offlineClaimTitle">
+        <strong class="offline-claim-badge">REWARD</strong>
+        <h2 id="offlineClaimTitle">비접속 보상 수령!</h2>
+        <p class="offline-claim-desc">퇴근 중에도 회사는 열심히 성장했어요.</p>
+        <div class="offline-claim-summary">
+          <div class="offline-claim-row">
+            <span>설정</span>
+            <strong id="offlineClaimPlan">8시간 / 1배</strong>
+          </div>
+          <div class="offline-claim-row">
+            <span>인정 시간</span>
+            <strong id="offlineClaimTime">00:00:00</strong>
+          </div>
+          <div class="offline-claim-row is-reward">
+            <span>획득 자금</span>
+            <strong><span id="offlineClaimGold">0</span> G</strong>
+          </div>
+        </div>
+        <button class="offline-claim-confirm" type="button" id="offlineClaimCloseButton" data-close-offline-claim>확인</button>
+      </div>
+    </div>
+
     <audio id="bgmAudio" src="Resource/Sound/BGM_Main_Theme.mp3" preload="auto" loop></audio>
     <div class="recruit-modal is-hidden" id="recruitDetailModal" role="dialog" aria-modal="true" aria-labelledby="recruitDetailTitle">
       <div class="recruit-modal__overlay" data-close-recruit-modal></div>
