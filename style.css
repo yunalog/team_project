@@ -5119,3 +5119,164 @@ textarea {
     grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
+
+/* Tilemap UI skin: applies only to non-battle UI surfaces. */
+:root {
+  --ui-tilemap: url("Resource/UI/Background_Tilemap.png");
+}
+
+.game-shell {
+  background-image:
+    linear-gradient(180deg, rgba(234, 219, 189, 0.9), rgba(207, 170, 110, 0.9)),
+    var(--ui-tilemap);
+  background-size: auto, 860px 860px;
+  background-position: center, 42% 18%;
+}
+
+.top-bar {
+  background-image:
+    linear-gradient(180deg, rgba(255, 247, 229, 0.88), rgba(224, 190, 128, 0.9)),
+    var(--ui-tilemap);
+  background-size: auto, 560px 560px;
+  background-position: center, 12% 8%;
+  box-shadow: inset 0 -3px 0 rgba(74, 43, 23, 0.24);
+}
+
+.message-line {
+  background-image:
+    linear-gradient(180deg, rgba(255, 247, 229, 0.9), rgba(226, 194, 139, 0.88)),
+    var(--ui-tilemap);
+  background-size: auto, 620px 620px;
+  background-position: center, 52% 42%;
+}
+
+.panel-area {
+  background-image:
+    linear-gradient(180deg, rgba(227, 193, 132, 0.82), rgba(207, 170, 110, 0.88)),
+    var(--ui-tilemap);
+  background-size: auto, 720px 720px;
+  background-position: center, 24% 72%;
+}
+
+.tab-panel {
+  background-image:
+    linear-gradient(180deg, rgba(255, 239, 202, 0.3), rgba(139, 100, 60, 0.08)),
+    var(--ui-tilemap);
+  background-size: auto, 940px 940px;
+  background-position: center, 88% 36%;
+  background-blend-mode: normal, soft-light;
+}
+
+.resource-row span,
+.stat-grid div,
+.timer-board div,
+.company-status-strip > div,
+.equipped-item-panel,
+.equipment-upgrade-panel,
+.equipment-choice,
+.shop-item,
+.facility-card,
+.growth-card,
+.recruit-category,
+.recruit-placeholder,
+.squad-management {
+  background-image:
+    linear-gradient(180deg, rgba(255, 248, 232, 0.9), rgba(239, 216, 176, 0.9)),
+    var(--ui-tilemap);
+  background-size: auto, 480px 480px;
+  background-position: center, 18% 20%;
+  background-blend-mode: normal, soft-light;
+}
+
+.resource-row span:nth-child(2),
+.stat-grid div:nth-child(2),
+.shop-item:nth-child(2n),
+.facility-card:nth-child(2n),
+.growth-card:nth-child(2n),
+.squad-management {
+  background-position: center, 64% 35%;
+}
+
+.resource-row span:nth-child(3),
+.stat-grid div:nth-child(3),
+.shop-item:nth-child(3n),
+.facility-card:nth-child(3n),
+.growth-card:nth-child(3n),
+.equipment-upgrade-panel {
+  background-position: center, 82% 72%;
+}
+
+.action-row button,
+#manualWorkButton,
+.settings-row button,
+.shop-item button,
+.facility-card button,
+.growth-upgrade-button,
+.equipment-actions button,
+.equipment-upgrade-actions button,
+.recruit-focus-action {
+  background-image:
+    linear-gradient(180deg, rgba(255, 216, 122, 0.76), rgba(184, 92, 34, 0.96)),
+    var(--ui-tilemap);
+  background-size: auto, 390px 390px;
+  background-position: center, 76% 10%;
+  background-blend-mode: normal, multiply;
+}
+
+.bottom-tabs {
+  background-image:
+    linear-gradient(180deg, rgba(96, 61, 34, 0.78), rgba(55, 38, 24, 0.88)),
+    var(--ui-tilemap);
+  background-size: auto, 620px 620px;
+  background-position: center, 50% 88%;
+}
+
+.tab-button {
+  background-image:
+    linear-gradient(180deg, rgba(255, 244, 215, 0.86), rgba(214, 174, 114, 0.92)),
+    var(--ui-tilemap);
+  background-size: auto, 430px 430px;
+  background-position: center, 22% 68%;
+  background-blend-mode: normal, soft-light;
+}
+
+.tab-button:nth-child(2) {
+  background-position: center, 46% 18%;
+}
+
+.tab-button:nth-child(3) {
+  background-position: center, 72% 46%;
+}
+
+.tab-button:nth-child(4) {
+  background-position: center, 92% 78%;
+}
+
+.tab-button.is-active {
+  background-image:
+    linear-gradient(180deg, rgba(47, 138, 103, 0.9), rgba(28, 95, 72, 0.96)),
+    var(--ui-tilemap);
+  background-size: auto, 430px 430px;
+  background-position: center, 7% 55%;
+  background-blend-mode: normal, multiply;
+}
+
+@media (max-width: 560px) {
+  .top-bar {
+    background-size: auto, 480px 480px;
+  }
+
+  .panel-area {
+    background-size: auto, 620px 620px;
+  }
+
+  .resource-row span,
+  .stat-grid div,
+  .equipped-item-panel,
+  .equipment-upgrade-panel,
+  .shop-item,
+  .facility-card,
+  .growth-card {
+    background-size: auto, 420px 420px;
+  }
+}
