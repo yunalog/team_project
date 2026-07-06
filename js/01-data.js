@@ -645,6 +645,7 @@ let basicAttackCooldown = 0.35;
 let skillAttackCooldown = SKILL_ATTACK_RATE;
 let unitCombatTimers = {};
 let combatEffects = { buffs: [], enemyDebuffs: [], teamHp: 100, teamMaxHp: 100 };
+let monsterCastingUntil = {};
 let monsterAttackCooldown = MONSTER_ATTACK_RATE;
 let saveCooldown = 0;
 let lastTick = Date.now();

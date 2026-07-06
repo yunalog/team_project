@@ -5432,3 +5432,33 @@ textarea {
     background-size: auto, 420px 420px;
   }
 }
+
+/* Monster attack animation final alignment. */
+.enemy.is-skill-casting .enemy-sprite {
+  opacity: 0 !important;
+  visibility: hidden;
+}
+
+.monster-cast-sprite {
+  width: var(--monster-cast-size, 98px);
+  height: var(--monster-cast-size, 98px);
+  transform: translate(-50%, 44%);
+}
+
+.monster-cast-sprite.is-melee {
+  transform: translate(-58%, 44%);
+  z-index: 10;
+}
+
+.monster-cast-sprite.is-boss {
+  width: var(--monster-cast-size, 146px);
+  height: var(--monster-cast-size, 146px);
+}
+
+.monster-skill-effect {
+  transform: translate(-50%, 44%);
+}
+
+.monster-skill-effect.is-projectile {
+  transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
+}

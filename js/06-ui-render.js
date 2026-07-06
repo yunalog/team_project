@@ -278,8 +278,9 @@ function renderEnemies() {
     .map((enemy) => {
       const hpPercent = Math.max(0, Math.round((enemy.hp / enemy.maxHp) * 100));
       const imageSrc = enemy.image || getMonsterImage(enemy);
+      const castingClass = isMonsterCasting(enemy.id) ? " is-skill-casting" : "";
       return `
-        <div class="enemy${enemy.isBoss ? " is-boss" : ""}" data-enemy-id="${enemy.id}" style="--enemy-x: ${enemy.x}%; --enemy-y: ${enemy.y}px;">
+        <div class="enemy${enemy.isBoss ? " is-boss" : ""}${castingClass}" data-enemy-id="${enemy.id}" style="--enemy-x: ${enemy.x}%; --enemy-y: ${enemy.y}px;">
           <div class="enemy-hp-bar" aria-label="상대 체력">
             <span style="width: ${hpPercent}%"></span>
           </div>
