@@ -248,7 +248,7 @@ function applyAudioSettings() {
     value.textContent = `${volumePercent}%`;
   });
   refs.audioMuteButtons.forEach((button) => {
-    button.textContent = isMuted ? "?뚯냼嫄??댁젣" : "?뚯냼嫄?;
+    button.textContent = isMuted ? "음소거 해제" : "음소거";
     button.classList.toggle("is-muted", isMuted);
     button.setAttribute("aria-pressed", String(isMuted));
   });
