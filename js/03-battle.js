@@ -246,7 +246,7 @@ function playMonsterSkillEffect(enemy, target) {
     cast.style.setProperty("--monster-cast-url", `url("${skillSpriteUrl}")`);
     cast.style.setProperty("--monster-cast-x", `${enemy.x}%`);
     cast.style.setProperty("--monster-cast-y", `${enemy.y + (enemy.isBoss ? 58 : 46)}px`);
-    cast.style.setProperty("--monster-cast-size", enemy.isBoss ? "164px" : "122px");
+    cast.style.setProperty("--monster-cast-size", enemy.isBoss ? "146px" : "98px");
     refs.effectLayer.appendChild(cast);
     window.setTimeout(() => cast.remove(), 680);
   }
@@ -263,7 +263,7 @@ function playMonsterSkillEffect(enemy, target) {
     effect.style.setProperty("--monster-skill-to-y", `${targetPosition ? targetPosition.y + 70 : enemy.y + 56}px`);
     effect.style.setProperty("--monster-skill-x", `${ranged ? enemy.x : enemy.x}%`);
     effect.style.setProperty("--monster-skill-y", `${enemy.y + (enemy.isBoss ? 68 : 54)}px`);
-    effect.style.setProperty("--monster-skill-size", enemy.isBoss ? "156px" : ranged ? "96px" : "118px");
+    effect.style.setProperty("--monster-skill-size", enemy.isBoss ? "146px" : ranged ? "88px" : "98px");
     refs.effectLayer.appendChild(effect);
     window.setTimeout(() => effect.remove(), ranged ? 760 : 660);
   }

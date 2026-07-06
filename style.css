@@ -1494,7 +1494,7 @@ h1 {
   width: var(--monster-cast-size, 122px);
   height: var(--monster-cast-size, 122px);
   background-image: var(--monster-cast-url);
-  transform: translate(-50%, 44%) scaleX(-1);
+  transform: translate(-50%, 44%);
   animation: monster-skill-6frame 0.62s steps(1, end) forwards, monster-cast-lunge 0.62s ease-out forwards;
   z-index: 8;
 }
@@ -1509,7 +1509,7 @@ h1 {
   width: var(--monster-skill-size, 112px);
   height: var(--monster-skill-size, 112px);
   background-image: var(--monster-skill-url);
-  transform: translate(-50%, 44%) scaleX(-1);
+  transform: translate(-50%, 44%);
   z-index: 9;
 }
 
@@ -1524,7 +1524,7 @@ h1 {
 .monster-skill-effect.is-projectile {
   left: var(--monster-skill-from-x);
   bottom: var(--monster-skill-from-y);
-  transform: translate(-50%, 50%) scaleX(-1) scale(0.78) rotate(4deg);
+  transform: translate(-50%, 50%) scale(0.78) rotate(4deg);
   animation: monster-skill-6frame 0.68s steps(1, end) forwards, monster-projectile-flight 0.68s ease-in forwards;
 }
 
@@ -1850,7 +1850,7 @@ h1 {
     opacity: 0;
     left: var(--monster-skill-from-x);
     bottom: var(--monster-skill-from-y);
-    transform: translate(-50%, 50%) scaleX(-1) scale(0.68) rotate(6deg);
+    transform: translate(-50%, 50%) scale(0.68) rotate(6deg);
   }
 
   12% {
@@ -1861,14 +1861,14 @@ h1 {
     opacity: 1;
     left: var(--monster-skill-to-x);
     bottom: var(--monster-skill-to-y);
-    transform: translate(-50%, 50%) scaleX(-1) scale(1) rotate(-5deg);
+    transform: translate(-50%, 50%) scale(1) rotate(-5deg);
   }
 
   100% {
     opacity: 0;
     left: var(--monster-skill-to-x);
     bottom: var(--monster-skill-to-y);
-    transform: translate(-50%, 50%) scaleX(-1) scale(0.92) rotate(0deg);
+    transform: translate(-50%, 50%) scale(0.92) rotate(0deg);
   }
 }
 
