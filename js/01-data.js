@@ -46,6 +46,19 @@ const BOSS_MONSTER_IMAGES = [
   "Resource/Monster/Boss_Monster/Stage3_Boss.png",
   "Resource/Monster/Boss_Monster/Stage4_Boss.png",
 ];
+const BOSS_MONSTER_SKILL_IMAGES = [
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage1_Boss_Skill.png",
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage2_Boss_Skill.png",
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage3_Boss_Skill.png",
+  "Resource/Monster/Boss_Monster/Boss_Monster_Skill/Stage4_Boss_Skill.png",
+];
+const BOSS_MONSTER_EFFECT_IMAGES = [
+  "Resource/Effect/Boss_Monster_Effect/Stage1_Boss_Skill_Effect.png",
+  "Resource/Effect/Boss_Monster_Effect/Stage2_Boss_Skill_Effect.png",
+  "Resource/Effect/Boss_Monster_Effect/Stage3_Boss_Skill_Effect.png",
+  "Resource/Effect/Boss_Monster_Effect/Stage4_Boss_Skill_Effect.png",
+];
+const BOSS_MONSTER_ATTACK_TYPES = ["melee", "melee", "ranged", "ranged"];
 const BGM_TRACKS = {
   title: "Resource/Sound/BGM_Main_Theme.mp3",
   field: "Resource/Sound/BGM_Field.mp3",

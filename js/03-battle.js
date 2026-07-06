@@ -47,6 +47,8 @@ function createNormalWave() {
 
 function createBossWave() {
   const hp = getBossHp();
+  const bossIndex = getBossMonsterIndex();
+  const bossSeed = { isBoss: true, bossIndex, lane: 0 };
   return [
     {
       id: `boss-${Date.now()}-${enemySeq++}`,
@@ -58,10 +60,11 @@ function createBossWave() {
       lane: 0,
       isBoss: true,
       hasEngaged: false,
-      image: getMonsterImage({ isBoss: true }),
-      skillImage: getMonsterSkillImage({ isBoss: true, lane: 0 }),
-      effectImage: getMonsterEffectImage({ isBoss: true, lane: 0 }),
-      attackType: "melee",
+      bossIndex,
+      image: getMonsterImage(bossSeed),
+      skillImage: getMonsterSkillImage(bossSeed),
+      effectImage: getMonsterEffectImage(bossSeed),
+      attackType: getMonsterAttackType(bossSeed),
     },
   ];
 }
@@ -70,9 +73,17 @@ function getNormalMonsterIndex(enemy) {
   return (state.chapter + state.subStage + Number(enemy.lane || 0) - 2) % NORMAL_MONSTER_IMAGES.length;
 }
 
+function getBossMonsterIndex(enemy = {}) {
+  if (Number.isInteger(enemy.bossIndex)) {
+    return ((enemy.bossIndex % BOSS_MONSTER_IMAGES.length) + BOSS_MONSTER_IMAGES.length) % BOSS_MONSTER_IMAGES.length;
+  }
+
+  return (state.chapter - 1) % BOSS_MONSTER_IMAGES.length;
+}
+
 function getMonsterImage(enemy) {
   if (enemy.isBoss) {
-    return BOSS_MONSTER_IMAGES[(state.chapter - 1) % BOSS_MONSTER_IMAGES.length];
+    return BOSS_MONSTER_IMAGES[getBossMonsterIndex(enemy)];
   }
 
   const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
@@ -80,18 +91,25 @@ function getMonsterImage(enemy) {
 }
 
 function getMonsterSkillImage(enemy) {
+  if (enemy.isBoss) {
+    return BOSS_MONSTER_SKILL_IMAGES[getBossMonsterIndex(enemy)];
+  }
+
   const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
   return NORMAL_MONSTER_SKILL_IMAGES[index];
 }
 
 function getMonsterEffectImage(enemy) {
-  if (enemy.isBoss) return enemy.skillImage || getMonsterSkillImage(enemy);
+  if (enemy.isBoss) {
+    return BOSS_MONSTER_EFFECT_IMAGES[getBossMonsterIndex(enemy)];
+  }
+
   const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
   return NORMAL_MONSTER_EFFECT_IMAGES[index];
 }
 
 function getMonsterAttackType(enemy) {
-  if (enemy.isBoss) return enemy.attackType || "melee";
+  if (enemy.isBoss) return BOSS_MONSTER_ATTACK_TYPES[getBossMonsterIndex(enemy)] || "melee";
   const index = Number.isInteger(enemy.monsterIndex) ? enemy.monsterIndex : getNormalMonsterIndex(enemy);
   return NORMAL_MONSTER_ATTACK_TYPES[index] || "melee";
 }

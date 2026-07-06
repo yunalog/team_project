@@ -568,8 +568,9 @@ function normalizeEnemies(enemies) {
     .map((enemy, index) => {
       const lane = Number(enemy.lane) || index;
       const normalizedEnemy = { ...enemy, lane, isBoss: Boolean(enemy.isBoss) };
-      const monsterIndex = normalizedEnemy.isBoss ? 0 : getNormalMonsterIndex(normalizedEnemy);
-      const withIndex = { ...normalizedEnemy, monsterIndex };
+      const monsterIndex = normalizedEnemy.isBoss ? null : getNormalMonsterIndex(normalizedEnemy);
+      const bossIndex = normalizedEnemy.isBoss ? getBossMonsterIndex(normalizedEnemy) : null;
+      const withIndex = { ...normalizedEnemy, monsterIndex, bossIndex };
       return {
         id: enemy.id || `saved-${index}`,
         name: enemy.name || getEnemyName(),
@@ -581,6 +582,7 @@ function normalizeEnemies(enemies) {
         isBoss: Boolean(enemy.isBoss),
         hasEngaged: Boolean(enemy.hasEngaged),
         monsterIndex,
+        bossIndex,
         attackType: getMonsterAttackType(withIndex),
         image: getMonsterImage(withIndex),
         skillImage: getMonsterSkillImage(withIndex),
