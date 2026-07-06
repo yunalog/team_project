@@ -41,6 +41,7 @@ function initGame() {
     attackTimerText: document.querySelector("#attackTimerText"),
     saveStateText: document.querySelector("#saveStateText"),
     offlinePlanText: document.querySelector("#offlinePlanText"),
+    offlineUnlockModal: document.querySelector("#offlineUnlockModal"),
     recruitList: document.querySelector("#recruitList"),
     recruitGrowthPanel: document.querySelector("#recruitGrowthPanel"),
     recruitDetailModal: document.querySelector("#recruitDetailModal"),
@@ -125,6 +126,7 @@ function bindEvents() {
     const toolButton = event.target.closest("[data-buy-tool]");
     const growthButton = event.target.closest("[data-upgrade-growth]");
     const offlinePlanButton = event.target.closest("[data-offline-plan]");
+    const offlineUnlockPlanButton = event.target.closest("[data-offline-unlock-plan]");
 
     if (tab) switchTab(tab);
     if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
@@ -136,6 +138,7 @@ function bindEvents() {
     if (toolButton) buyTool(toolButton.dataset.buyTool);
     if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
     if (offlinePlanButton) changeOfflineRewardPlan(Number(offlinePlanButton.dataset.offlinePlan));
+    if (offlineUnlockPlanButton) chooseInitialOfflineRewardPlan(Number(offlineUnlockPlanButton.dataset.offlineUnlockPlan));
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -203,6 +206,7 @@ async function startGame() {
   refs.gameShell.classList.remove("is-hidden");
   playBgm(getActiveBgmKey());
   renderAll();
+  checkOfflineRewardUnlockPopup();
   startLoop();
 }
 
@@ -229,6 +233,56 @@ async function changeOfflineRewardPlan(hours) {
     }
   } else if (refs.saveStateText) {
     refs.saveStateText.textContent = `비접속 보상 ${plan.label} 로컬 저장 완료`;
+  }
+
+  renderAll();
+}
+
+function checkOfflineRewardUnlockPopup() {
+  if (!refs.offlineUnlockModal) return;
+
+  const isUnlockedStage = Number(state.chapter) >= 3;
+  const alreadySelected = Boolean(state.offlineRewardUnlocked);
+
+  if (!isUnlockedStage || alreadySelected) {
+    refs.offlineUnlockModal.classList.remove("is-visible");
+    refs.offlineUnlockModal.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  refs.offlineUnlockModal.classList.add("is-visible");
+  refs.offlineUnlockModal.setAttribute("aria-hidden", "false");
+}
+
+async function chooseInitialOfflineRewardPlan(hours) {
+  const plan = window.FirebaseGame?.OFFLINE_REWARD_PLANS?.[hours];
+  if (!plan) return;
+
+  state.offlineRewardPlan = Number(hours);
+  state.offlineRewardUnlocked = true;
+
+  if (refs.offlineUnlockModal) {
+    refs.offlineUnlockModal.classList.remove("is-visible");
+    refs.offlineUnlockModal.setAttribute("aria-hidden", "true");
+  }
+
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // 로컬 저장 실패는 Firebase 저장을 계속 시도합니다.
+  }
+
+  if (window.FirebaseGame && FirebaseGame.getCurrentUser()) {
+    try {
+      await FirebaseGame.setOfflineRewardPlan(state, hours);
+      await FirebaseGame.saveUserGameState(state, { updateLastActive: true });
+      if (refs.saveStateText) refs.saveStateText.textContent = `비접속 보상 ${plan.label} 선택 완료`;
+    } catch (error) {
+      console.error("비접속 보상 첫 선택 Firebase 저장 실패:", error);
+      if (refs.saveStateText) refs.saveStateText.textContent = `비접속 보상 ${plan.label} 로컬 선택 완료`;
+    }
+  } else if (refs.saveStateText) {
+    refs.saveStateText.textContent = `비접속 보상 ${plan.label} 로컬 선택 완료`;
   }
 
   renderAll();
@@ -477,6 +531,7 @@ function normalizeState(nextState) {
     offlineRewardPlan: [4, 8, 12].includes(Number(nextState.offlineRewardPlan))
       ? Number(nextState.offlineRewardPlan)
       : 8,
+    offlineRewardUnlocked: Boolean(nextState.offlineRewardUnlocked),
     lastActiveAtMs: Number(nextState.lastActiveAtMs) || Date.now(),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
     squad:

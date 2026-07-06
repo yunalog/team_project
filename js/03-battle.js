@@ -852,6 +852,7 @@ function advanceBattleLayer() {
     state.subStage += 1;
   }
   state.stage = state.chapter;
+  if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
 }
 
 function getTargetEnemy() {

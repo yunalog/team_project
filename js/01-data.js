@@ -627,6 +627,7 @@ const defaultState = {
   },
   elapsed: 0,
   offlineRewardPlan: 8,
+  offlineRewardUnlocked: false,
   lastActiveAtMs: Date.now(),
   recruits: {},
   squad: Array(SQUAD_MEMBER_LIMIT).fill(null),

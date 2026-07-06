@@ -302,6 +302,29 @@
       </nav>
     </main>
 
+    <div class="offline-unlock-modal" id="offlineUnlockModal" aria-hidden="true">
+      <div class="offline-unlock-card" role="dialog" aria-modal="true" aria-labelledby="offlineUnlockTitle">
+        <strong class="offline-unlock-badge">NEW SYSTEM</strong>
+        <h2 id="offlineUnlockTitle">비접속 보상 해금!</h2>
+        <p class="offline-unlock-main">3스테이지에 진입했습니다. 이제 게임을 꺼둔 시간만큼 자금을 받을 수 있으며 최대 비접속 시간을 설정할 수 있습니다.</p>
+        <p class="offline-unlock-help">처음 사용할 보상 시간을 선택해주세요. 선택한 값은 아래 <b>설정</b> 탭에서 언제든 변경할 수 있습니다.</p>
+        <div class="offline-unlock-options" aria-label="비접속 보상 시간 첫 선택">
+          <button type="button" data-offline-unlock-plan="4">
+            <span>최대 4시간</span>
+            <small>1.2배 보상</small>
+          </button>
+          <button type="button" data-offline-unlock-plan="8">
+            <span>최대 8시간</span>
+            <small>1배 보상</small>
+          </button>
+          <button type="button" data-offline-unlock-plan="12">
+            <span>최대 12시간</span>
+            <small>0.85배 보상</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <audio id="bgmAudio" src="Resource/Sound/BGM_Main_Theme.mp3" preload="auto" loop></audio>
     <div class="recruit-modal is-hidden" id="recruitDetailModal" role="dialog" aria-modal="true" aria-labelledby="recruitDetailTitle">
       <div class="recruit-modal__overlay" data-close-recruit-modal></div>
