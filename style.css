@@ -5872,3 +5872,146 @@ button.is-active:not(:disabled),
 .tab-panel[data-panel="tools"] .facility-card button:active:not(:disabled) {
   background-image: linear-gradient(180deg, #2f73a7 0%, #1e4f78 100%) !important;
 }
+
+/* Image-free button color roles. */
+#manualWorkButton,
+#manualWorkButton:hover:not(:disabled) {
+  background-color: #9f3d20 !important;
+  background-image: linear-gradient(180deg, #c86638 0%, #8f341b 100%) !important;
+  box-shadow: 0 4px 0 #5f2417, 2px 2px 0 rgba(255, 255, 255, 0.18) inset !important;
+}
+
+#manualWorkButton:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #8f341b 0%, #642115 100%) !important;
+}
+
+#equipmentPanelToggleButton,
+#equipmentPanelToggleButton:hover:not(:disabled),
+.equipment-actions button:first-child,
+.equipment-actions button:first-child:hover:not(:disabled) {
+  background-color: #277158 !important;
+  background-image: linear-gradient(180deg, #45a17a 0%, #277158 100%) !important;
+  box-shadow: 0 4px 0 #184737, 2px 2px 0 rgba(255, 255, 255, 0.18) inset !important;
+}
+
+#equipmentPanelToggleButton:active:not(:disabled),
+.equipment-actions button:first-child:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #277158 0%, #183f32 100%) !important;
+}
+
+.equipment-actions button:last-child,
+.equipment-actions button:last-child:hover:not(:disabled) {
+  background-color: #6f5b47 !important;
+  background-image: linear-gradient(180deg, #9b8063 0%, #6f5b47 100%) !important;
+  box-shadow: 0 4px 0 #423429, 2px 2px 0 rgba(255, 255, 255, 0.14) inset !important;
+}
+
+.equipment-actions button:last-child:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #6f5b47 0%, #46362b 100%) !important;
+}
+
+#equipmentDrawButton,
+#equipmentDrawButton:hover:not(:disabled),
+.draw-machine-panel .equipment-draw-button,
+.draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:hover:not(:disabled) {
+  background-color: #d99a1f !important;
+  background-image: linear-gradient(180deg, #ffd166 0%, #d48a18 100%) !important;
+  color: #4a2b17 !important;
+  text-shadow: 0 1px 0 rgba(255, 244, 190, 0.85) !important;
+  box-shadow: 0 4px 0 #8d4d12, 2px 2px 0 rgba(255, 255, 255, 0.25) inset !important;
+}
+
+#equipmentDrawButton:active:not(:disabled),
+.draw-machine-panel .equipment-draw-button:active:not(:disabled),
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #d48a18 0%, #9a5513 100%) !important;
+}
+
+#autoDrawButton,
+#autoDrawButton:hover:not(:disabled),
+.draw-machine-panel .auto-draw-button,
+.draw-machine-panel .auto-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button:hover:not(:disabled) {
+  background-color: #236656 !important;
+  background-image: linear-gradient(180deg, #368b74 0%, #236656 100%) !important;
+  box-shadow: 0 4px 0 #143f36, 2px 2px 0 rgba(255, 255, 255, 0.18) inset !important;
+}
+
+#autoDrawButton:active:not(:disabled),
+#autoDrawButton.is-running,
+.draw-machine-panel .auto-draw-button:active:not(:disabled),
+.draw-machine-panel .auto-draw-button.is-running,
+.battle-equipment-section .draw-machine-panel .auto-draw-button:active:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button.is-running {
+  background-image: linear-gradient(180deg, #8f5ec7 0%, #5b3b89 100%) !important;
+  box-shadow: 0 2px 0 #352352, 1px 1px 0 rgba(255, 255, 255, 0.16) inset !important;
+}
+
+#equipmentUpgradeButton,
+#equipmentUpgradeButton:hover:not(:disabled) {
+  background-color: #2f73a7 !important;
+  background-image: linear-gradient(180deg, #65afe1 0%, #2f73a7 100%) !important;
+  box-shadow: 0 4px 0 #1e4f78, 2px 2px 0 rgba(255, 255, 255, 0.18) inset !important;
+}
+
+#equipmentUpgradeButton:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #2f73a7 0%, #1e4f78 100%) !important;
+}
+
+#speedTicketButton,
+#speedTicketButton:hover:not(:disabled) {
+  background-color: #8f5ec7 !important;
+  background-image: linear-gradient(180deg, #b78ee5 0%, #8f5ec7 100%) !important;
+  box-shadow: 0 4px 0 #5b3b89, 2px 2px 0 rgba(255, 255, 255, 0.18) inset !important;
+}
+
+#speedTicketButton:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #8f5ec7 0%, #5b3b89 100%) !important;
+}
+
+.settings-row button,
+.settings-row button:hover:not(:disabled),
+.mute-button,
+.mute-button:hover:not(:disabled),
+.title-return-button,
+.title-return-button:hover:not(:disabled) {
+  background-color: #52616f !important;
+  background-image: linear-gradient(180deg, #7c8b98 0%, #52616f 100%) !important;
+  box-shadow: 0 4px 0 #323d47, 2px 2px 0 rgba(255, 255, 255, 0.16) inset !important;
+}
+
+.settings-row button:active:not(:disabled),
+.mute-button:active:not(:disabled),
+.mute-button.is-muted,
+.title-return-button:active:not(:disabled) {
+  background-image: linear-gradient(180deg, #52616f 0%, #323d47 100%) !important;
+}
+
+.bottom-tabs .tab-button {
+  background-color: #9b5521 !important;
+  background-image: linear-gradient(180deg, #c27a2e 0%, #934918 100%) !important;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.16) !important;
+}
+
+.bottom-tabs .tab-button[data-tab="battle"].is-active {
+  background-color: #237457 !important;
+  background-image: linear-gradient(180deg, #41a77a 0%, #237457 100%) !important;
+}
+
+.bottom-tabs .tab-button[data-tab="recruit"].is-active {
+  background-color: #c07823 !important;
+  background-image: linear-gradient(180deg, #e8ac44 0%, #b76519 100%) !important;
+}
+
+.bottom-tabs .tab-button[data-tab="tools"].is-active {
+  background-color: #2f73a7 !important;
+  background-image: linear-gradient(180deg, #65afe1 0%, #2f73a7 100%) !important;
+}
+
+.bottom-tabs .tab-button[data-tab="settings"].is-active {
+  background-color: #52616f !important;
+  background-image: linear-gradient(180deg, #7c8b98 0%, #52616f 100%) !important;
+}
