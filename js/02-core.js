@@ -1,4 +1,4 @@
-function initGame() {
+﻿function initGame() {
   refs = {
     allyLayer: document.querySelector("#allyLayer"),
     startScreen: document.querySelector("#startScreen"),
@@ -162,7 +162,7 @@ function bindEvents() {
   refs.discardItemButton.addEventListener("click", discardPendingEquipment);
   refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
   refs.speedTicketButton.addEventListener("click", useSpeedTicket);
-  refs.saveButton.addEventListener("click", () => saveState("수동 저장 완료"));
+  refs.saveButton.addEventListener("click", () => saveState("?섎룞 ????꾨즺"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
   refs.startButton.addEventListener("click", startGame);
@@ -360,7 +360,7 @@ function playBgm(trackKey, options = {}) {
   const playPromise = refs.bgmAudio.play();
   if (playPromise && typeof playPromise.catch === "function") {
     playPromise.catch(() => {
-      if (!options.silentFail) log("BGM 재생이 브라우저에서 차단되었습니다.");
+      if (!options.silentFail) log("BGM ?ъ깮??釉뚮씪?곗??먯꽌 李⑤떒?섏뿀?듬땲??");
     });
   }
 }
@@ -389,7 +389,7 @@ function saveAudioSettings() {
   try {
     window.localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify(audioSettings));
   } catch {
-    log("오디오 설정 저장에 실패했습니다.");
+    log("?ㅻ뵒???ㅼ젙 ??μ뿉 ?ㅽ뙣?덉뒿?덈떎.");
   }
 }
 
@@ -451,7 +451,7 @@ function handleSquadChange(event) {
     const isRecruited = getRecruitCount(nextId) > 0;
     const isDeployedElsewhere = state.squad.some((id, index) => index !== slotIndex && id === nextId);
     if (!recruits.some((recruit) => recruit.id === nextId) || !isRecruited || isDeployedElsewhere) {
-      log("영입하지 않은 동료이거나 이미 다른 자리에 배치된 동료입니다.");
+      log("?곸엯?섏? ?딆? ?숇즺?닿굅???대? ?ㅻⅨ ?먮━??諛곗튂???숇즺?낅땲??");
       renderSquadManagement();
       return;
     }
@@ -462,7 +462,7 @@ function handleSquadChange(event) {
   lastRosterKey = "";
   const recruit = recruits.find((item) => item.id === nextId);
   const positionNumber = slotIndex + 2;
-  log(recruit ? `${positionNumber}번 자리에 ${recruit.name} 배치 완료` : `${positionNumber}번 자리를 비웠습니다.`);
+  log(recruit ? `${positionNumber}踰??먮━??${recruit.name} 諛곗튂 ?꾨즺` : `${positionNumber}踰??먮━瑜?鍮꾩썱?듬땲??`);
   renderAll();
 }
 
@@ -525,12 +525,12 @@ function tick(delta) {
 
     if (saveCooldown >= 10) {
       saveCooldown = 0;
-      saveState("자동 저장 완료");
+      saveState("?먮룞 ????꾨즺");
     }
 
     renderBattle();
   } catch (error) {
-    log(`전투 루프 오류: ${error.message}`);
+    log(`?꾪닾 猷⑦봽 ?ㅻ쪟: ${error.message}`);
   }
 }
 
@@ -684,13 +684,15 @@ function normalizeEquipmentItem(item) {
   if (!item || typeof item !== "object") return null;
 
   const slot = getEquipmentSlotId(item.slot || inferEquipmentSlot(item.id));
+  const grade = String(item.grade || equipmentGrades[0].name);
+  const base = equipmentPool.find((equipment) => equipment.id === item.id || String(item.id || "").startsWith(`${equipment.id}-`));
   return {
     id: String(item.id || "unknown"),
     slot,
-    name: String(item.name || "이름 없는 장비"),
+    name: String(item.name || "?대쫫 ?녿뒗 ?λ퉬"),
     icon: String(item.icon || "?"),
-    image: String(item.image || ""),
-    grade: String(item.grade || "일반"),
+    image: String(item.image || (base ? getEquipmentImageSrc(base.id, grade) : "")),
+    grade,
     gradeColor: String(item.gradeColor || "#6f6251"),
     powerBonus: Math.max(0, Number(item.powerBonus) || 0),
     skillBonus: Math.max(0, Number(item.skillBonus ?? item.clickBonus) || 0),
@@ -712,7 +714,7 @@ function saveState(message) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    message = "저장소 접근 불가";
+    message = "??μ냼 ?묎렐 遺덇?";
   }
 
   if (refs.saveStateText) refs.saveStateText.textContent = message;
@@ -728,14 +730,14 @@ function resetGame() {
   try {
     window.localStorage.removeItem(STORAGE_KEY);
   } catch {
-    refs.saveStateText.textContent = "저장소 접근 불가";
+    refs.saveStateText.textContent = "??μ냼 ?묎렐 遺덇?";
   }
   state = cloneDefaultState();
   lastRosterKey = "";
   lastCompanyVisualKey = "";
   spawnWave();
   renderAll();
-  saveState("초기화 완료");
+  saveState("珥덇린???꾨즺");
 }
 
 function normalizeEnemies(enemies) {

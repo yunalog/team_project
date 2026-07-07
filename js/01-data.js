@@ -15,6 +15,7 @@ const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
+const RECRUIT_UNLOCK_CHAPTER = 2;
 const NORMAL_MONSTER_IMAGES = [
   "Resource/Monster/Normal_Monster/Field_Monster1.png",
   "Resource/Monster/Normal_Monster/Field_Monster2.png",
@@ -581,6 +582,18 @@ const equipmentGrades = [
   { name: "초월", chance: 0.003, multiplier: 8.5, color: "#4f46e5" },
   { name: "유일", chance: 0.001, multiplier: 12, color: "#facc15" },
 ];
+
+const equipmentTileIds = ["glasses", "chair", "keyboard", "mug", "notebook"];
+
+function getEquipmentGradeIndexByName(gradeName) {
+  return Math.max(0, equipmentGrades.findIndex((grade) => grade.name === gradeName));
+}
+
+function getEquipmentImageSrc(baseId, gradeName) {
+  const tileId = equipmentTileIds.includes(baseId) ? baseId : equipmentTileIds[0];
+  const gradeIndex = getEquipmentGradeIndexByName(gradeName);
+  return `Resource/Equip/Cropped/equip_g${gradeIndex}_${tileId}.png`;
+}
 
 const equipmentUpgradeConfigs = [
   { level: 1, label: "1단계", maxGrade: 1, nextCost: 20, duration: 0, desc: "일반/희귀 장비 등장" },

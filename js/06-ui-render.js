@@ -1,4 +1,10 @@
-function switchTab(tab) {
+﻿function switchTab(tab) {
+  if (tab.dataset.tab === "recruit" && !isRecruitUnlocked()) {
+    log(`동료 영입은 ${RECRUIT_UNLOCK_CHAPTER}스테이지 진입 후 해금됩니다.`);
+    renderBattle();
+    return;
+  }
+
   activeTab = tab.dataset.tab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
@@ -68,6 +74,12 @@ function renderBattle() {
   refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
   refs.upgradePlayerButton.disabled = false;
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
+  document.querySelectorAll('.tab-button[data-tab="recruit"]').forEach((button) => {
+    const locked = !isRecruitUnlocked();
+    button.classList.toggle("is-locked", locked);
+    button.disabled = locked;
+    button.textContent = locked ? `동료 영입 (${RECRUIT_UNLOCK_CHAPTER}스테이지)` : "동료 영입";
+  });
   renderEquipment();
 }
 
@@ -89,8 +101,10 @@ function renderEquipment() {
   refs.equipmentChoice.classList.toggle("is-hidden", !pending);
   if (!pending) return;
 
-  refs.equipmentIcon.textContent = pending.icon;
+  refs.equipmentIcon.textContent = pending.image ? "" : pending.icon;
+  refs.equipmentIcon.classList.toggle("has-image", Boolean(pending.image));
   refs.equipmentIcon.style.setProperty("--equipment-color", pending.gradeColor);
+  refs.equipmentIcon.style.setProperty("--equipment-image", pending.image ? `url("${pending.image}")` : "none");
   refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
   refs.equipmentName.style.color = pending.gradeColor;
   refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
@@ -112,7 +126,8 @@ function renderEquippedItems() {
       const item = getEquippedItem(slot.id);
       const color = item ? item.gradeColor : "rgba(74, 43, 23, 0.28)";
       const label = item ? item.grade : "비어있음";
-      return `<span class="equipped-grade-block" title="${slot.name}: ${label}" style="--equipment-color: ${color};"></span>`;
+      const image = item?.image ? `url('${item.image}')` : "none";
+      return `<span class="equipped-grade-block${item?.image ? " has-image" : ""}" title="${slot.name}: ${label}" style="--equipment-color: ${color}; --equipment-image: ${image};"></span>`;
     })
     .join("");
   refs.equippedItemList.innerHTML = equipmentSlots
@@ -135,7 +150,7 @@ function renderEquippedItems() {
       return `
         <div class="equipped-list-item" style="--equipment-color: ${item.gradeColor}; --equipment-image: ${item.image ? `url('${item.image}')` : "none"};">
           <span class="equipped-list-color" aria-hidden="true"></span>
-          <span class="equipped-list-image">${item.image ? "" : item.icon}</span>
+          <span class="equipped-list-image${item.image ? " has-image" : ""}">${item.image ? "" : item.icon}</span>
           <span class="equipped-list-copy">
             <span class="equipped-list-grade">${item.grade}</span>
             <strong>${item.name}</strong>
@@ -373,29 +388,44 @@ function getAllyPosition(index, unitCount = 1) {
 function renderShop() {
   if (!activeRecruitPanelId && recruits.length) activeRecruitPanelId = recruits[0].id;
 
-  refs.recruitList.innerHTML = recruits
-    .map((recruit) => {
-      const isSelected = recruit.id === activeRecruitPanelId;
-      return `
-        <div class="shop-item recruit-class-card${isSelected ? " is-selected" : ""}" data-select-recruit="${recruit.id}" role="button" tabindex="0" style="--recruit-color: ${recruit.color};">
-          <div class="recruit-class-title">
-            <span>${recruit.category}</span>
-            <strong>${getRecruitRankLabel(recruit, getRecruitCount(recruit.id))}</strong>
-          </div>
-          <div class="recruit-class-body">
-            <div class="recruit-class-head">
-              ${getRecruitAvatarMarkup(recruit, "recruit-card-avatar")}
+  if (!isRecruitUnlocked()) {
+    refs.recruitList.innerHTML = `
+      <div class="recruit-lock-card">
+        <strong>동료 영입 준비 중</strong>
+        <p>${RECRUIT_UNLOCK_CHAPTER}스테이지에 진입하면 개발자, 기획자, 아트 등 동료 영입이 열립니다.</p>
+      </div>
+    `;
+    refs.recruitGrowthPanel.innerHTML = `
+      <div class="recruit-focus-empty">
+        <strong>${RECRUIT_UNLOCK_CHAPTER}스테이지에서 해금</strong>
+        <p>초반에는 대표 성장과 장비 뽑기로 전투 흐름을 익히고, 2스테이지부터 팀을 확장합니다.</p>
+      </div>
+    `;
+  } else {
+    refs.recruitList.innerHTML = recruits
+      .map((recruit) => {
+        const isSelected = recruit.id === activeRecruitPanelId;
+        return `
+          <div class="shop-item recruit-class-card${isSelected ? " is-selected" : ""}" data-select-recruit="${recruit.id}" role="button" tabindex="0" style="--recruit-color: ${recruit.color};">
+            <div class="recruit-class-title">
+              <span>${recruit.category}</span>
+              <strong>${getRecruitRankLabel(recruit, getRecruitCount(recruit.id))}</strong>
             </div>
-            <div class="recruit-class-stats">
-              ${formatRecruitStatRows(recruit)}
+            <div class="recruit-class-body">
+              <div class="recruit-class-head">
+                ${getRecruitAvatarMarkup(recruit, "recruit-card-avatar")}
+              </div>
+              <div class="recruit-class-stats">
+                ${formatRecruitStatRows(recruit)}
+              </div>
             </div>
           </div>
-        </div>
-      `;
-    })
-    .join("");
+        `;
+      })
+      .join("");
 
-  renderRecruitGrowthPanel();
+    renderRecruitGrowthPanel();
+  }
 
   refs.toolList.innerHTML = tools
     .map((tool) => {
