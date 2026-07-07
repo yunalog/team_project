@@ -643,6 +643,7 @@ const defaultState = {
   offlineRewardPlan: 8,
   offlineRewardUnlocked: false,
   recruitCompanyUnlockShown: false,
+  startTutorialCompleted: false,
   lastActiveAtMs: Date.now(),
   recruits: {},
   squad: Array(SQUAD_MEMBER_LIMIT).fill(null),
@@ -694,3 +695,5 @@ let activeRecruitDetailId = null;
 let activeRecruitPromotionId = null;
 let activeRecruitPromotionResult = null;
 let activeRecruitPanelId = null;
+let activeTutorialStepIndex = 0;
+let activeTutorialTarget = null;

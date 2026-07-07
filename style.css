@@ -6784,3 +6784,199 @@ button.is-active:not(:disabled),
     transform: translateY(0) scale(1);
   }
 }
+
+/* 시작 튜토리얼 */
+.world-tutorial-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 4300;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(8, 12, 10, 0.72);
+}
+
+.world-tutorial-card {
+  width: min(100%, 430px);
+  padding: 22px 20px 20px;
+  border: 3px solid #4a2b17;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 0, rgba(255, 231, 163, 0.96), transparent 36%),
+    linear-gradient(180deg, #fff8e9 0%, #efd2a0 100%);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  animation: tutorial-card-pop 0.34s cubic-bezier(0.16, 0.86, 0.28, 1) both;
+}
+
+.world-tutorial-badge {
+  display: inline-grid;
+  place-items: center;
+  min-height: 26px;
+  padding: 5px 10px;
+  border: 2px solid #4a2b17;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #3f7a60 0%, #1f4636 100%);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  box-shadow: 0 3px 0 rgba(74, 43, 23, 0.35);
+}
+
+.world-tutorial-card h2 {
+  margin: 14px 0 10px;
+  font-size: 23px;
+  line-height: 1.25;
+}
+
+.world-tutorial-card p {
+  margin: 8px 0 0;
+  color: #5f4c3e;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.world-tutorial-confirm {
+  min-width: 120px;
+  min-height: 42px;
+  margin-top: 18px;
+  border: 2px solid #4a2b17;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ffd780 0%, #b85c22 100%);
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.65);
+  box-shadow: 0 4px 0 rgba(74, 43, 23, 0.52), 0 0 16px rgba(242, 184, 75, 0.42);
+}
+
+.guided-tutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 3900;
+  pointer-events: none;
+}
+
+.guided-tutorial__dim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+}
+
+.guided-tutorial__spotlight {
+  position: fixed;
+  z-index: 3901;
+  border: 3px solid rgba(255, 244, 188, 0.96);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 9999px rgba(0, 0, 0, 0.54),
+    0 0 18px rgba(255, 231, 128, 0.9),
+    inset 0 0 14px rgba(255, 255, 255, 0.45);
+  transition: left 0.2s ease, top 0.2s ease, width 0.2s ease, height 0.2s ease;
+}
+
+.is-tutorial-highlight {
+  position: relative !important;
+  z-index: 4002 !important;
+  border-radius: 12px;
+  filter: brightness(1.08) saturate(1.05);
+  box-shadow: 0 0 0 4px rgba(255, 244, 188, 0.95), 0 0 24px rgba(255, 217, 121, 0.9) !important;
+}
+
+.guided-tutorial__bubble {
+  position: fixed;
+  z-index: 4100;
+  width: min(310px, calc(100vw - 28px));
+  padding: 14px;
+  border: 3px solid #4a2b17;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff8e9 0%, #f0d8aa 100%);
+  color: var(--ink);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  pointer-events: auto;
+  animation: tutorial-bubble-pop 0.22s ease both;
+}
+
+.guided-tutorial__counter {
+  display: inline-block;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #1f604b;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.guided-tutorial__bubble h3 {
+  margin: 8px 0 5px;
+  font-size: 18px;
+}
+
+.guided-tutorial__bubble p {
+  margin: 0;
+  color: #5f4c3e;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.guided-tutorial__actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.guided-tutorial__actions button {
+  min-height: 38px;
+  border: 2px solid #4a2b17;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(45, 33, 25, 0.62);
+  box-shadow: 0 3px 0 rgba(74, 43, 23, 0.42);
+}
+
+#guidedTutorialSkipButton {
+  background: linear-gradient(180deg, #8b9b92 0%, #42554d 100%);
+}
+
+#guidedTutorialNextButton {
+  background: linear-gradient(180deg, #ffd780 0%, #b85c22 100%);
+}
+
+@keyframes tutorial-card-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tutorial-bubble-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 560px) {
+  .world-tutorial-card {
+    padding: 18px 15px 16px;
+  }
+
+  .world-tutorial-card h2 {
+    font-size: 20px;
+  }
+
+  .world-tutorial-card p,
+  .guided-tutorial__bubble p {
+    font-size: 12px;
+  }
+}
