@@ -3,6 +3,7 @@
     allyLayer: document.querySelector("#allyLayer"),
     startScreen: document.querySelector("#startScreen"),
     gameShell: document.querySelector("#gameShell"),
+    loginButton: document.querySelector("#loginButton"),
     startButton: document.querySelector("#startButton"),
     titleMuteButton: document.querySelector("#titleMuteButton"),
     titleVolumeSlider: document.querySelector("#titleVolumeSlider"),
@@ -125,6 +126,7 @@
 
   bindEvents();
   applyAudioSettings();
+  setupStartAuthGate();
   renderAll();
   playBgm("title", { silentFail: true });
   armTitleBgmUnlock();
@@ -186,6 +188,7 @@ function bindEvents() {
   refs.saveButton.addEventListener("click", () => saveState("?섎룞 ????꾨즺"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
+  if (refs.loginButton) refs.loginButton.addEventListener("click", loginFromTitle);
   refs.startButton.addEventListener("click", startGame);
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-audio-mute]")) toggleMute();
@@ -199,13 +202,74 @@ function bindEvents() {
   window.addEventListener("scroll", positionGuidedTutorial, true);
 }
 
+function setupStartAuthGate() {
+  updateStartAuthGate(window.FirebaseGame?.getCurrentUser?.() || null);
+
+  if (window.FirebaseGame?.onAuthStateChanged) {
+    FirebaseGame.onAuthStateChanged((user) => {
+      titleAuthUser = user || null;
+      updateStartAuthGate(titleAuthUser);
+    });
+  }
+}
+
+function updateStartAuthGate(user = titleAuthUser) {
+  titleAuthUser = user || null;
+  const isLoggedIn = Boolean(titleAuthUser);
+
+  if (refs.loginButton) {
+    refs.loginButton.classList.toggle("is-hidden", isLoggedIn);
+    refs.loginButton.disabled = isTitleLoginInProgress;
+    refs.loginButton.textContent = isTitleLoginInProgress ? "로그인 중..." : "Google 로그인";
+  }
+
+  if (refs.startButton) {
+    refs.startButton.classList.toggle("is-hidden", !isLoggedIn);
+    refs.startButton.disabled = !isLoggedIn || isGameStartInProgress;
+    refs.startButton.textContent = isGameStartInProgress ? "불러오는 중..." : "게임 시작";
+  }
+}
+
+async function loginFromTitle() {
+  if (isTitleLoginInProgress || hasStartedGame) return;
+
+  if (!window.FirebaseGame?.loginWithGoogle) {
+    if (refs.loginButton) refs.loginButton.textContent = "로그인 준비 실패";
+    return;
+  }
+
+  isTitleLoginInProgress = true;
+  updateStartAuthGate(null);
+
+  try {
+    const user = await FirebaseGame.loginWithGoogle();
+    titleAuthUser = user || FirebaseGame.getCurrentUser?.() || null;
+  } catch (error) {
+    console.error("Firebase 로그인 실패:", error);
+    if (refs.loginButton) refs.loginButton.textContent = "다시 로그인";
+  } finally {
+    isTitleLoginInProgress = false;
+    updateStartAuthGate(titleAuthUser);
+  }
+}
 
 async function startGame() {
+  if (hasStartedGame || isGameStartInProgress) return;
+
+  titleAuthUser = window.FirebaseGame?.getCurrentUser?.() || titleAuthUser;
+  if (window.FirebaseGame && !titleAuthUser) {
+    await loginFromTitle();
+    titleAuthUser = FirebaseGame.getCurrentUser?.() || titleAuthUser;
+    if (!titleAuthUser) return;
+  }
+
+  isGameStartInProgress = true;
+  updateStartAuthGate(titleAuthUser);
   hasStartedGame = true;
 
   if (window.FirebaseGame) {
     try {
-      const user = await FirebaseGame.loginWithGoogle();
+      const user = FirebaseGame.getCurrentUser();
       if (user) {
         const savedState = await FirebaseGame.loadUserGameState();
 
@@ -252,6 +316,8 @@ async function startGame() {
     checkOfflineRewardUnlockPopup();
   }
   startLoop();
+  isGameStartInProgress = false;
+  updateStartAuthGate(titleAuthUser);
 }
 
 function formatDurationHHMMSS(totalSeconds) {
@@ -358,7 +424,7 @@ const START_TUTORIAL_STEPS = [
   {
     selector: ".draw-machine-panel",
     title: "뽑기 / 자동 뽑기",
-    text: "자금을 사용해 장비를 뽑습니다. 자동 뽑기는 더 좋은 장비가 나올 때까지 반복 시도하는 기능입니다.",
+    text: "자금을 사용해 장비를 뽑습니다. 자동 뽑기는 더 좋은 장비가 나올 때까지 반복 시도하는 기능입니다. 보스를 처치하면 장비 연구 시간을 줄이는 가속티켓을 얻을 수 있습니다.",
     placement: "left",
   },
 ];
@@ -703,6 +769,8 @@ function returnToTitle() {
   stopLoop();
   refs.gameShell.classList.add("is-hidden");
   refs.startScreen.classList.remove("is-hidden");
+  titleAuthUser = window.FirebaseGame?.getCurrentUser?.() || titleAuthUser;
+  updateStartAuthGate(titleAuthUser);
   playBgm("title");
   armTitleBgmUnlock();
 }

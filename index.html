@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>스튜디오 크루 RPG</title>
-    <link rel="stylesheet" href="style.css?v=draw-cost-state-v5" />
+    <link rel="stylesheet" href="style.css?v=login-flow-v1" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
   <body>
@@ -13,7 +13,8 @@
         <div class="title-image-frame" aria-label="스튜디오 크루 RPG">
           <img src="Resource/UI/Title_Image.png" alt="" class="title-image" />
         </div>
-        <button id="startButton" class="start-button" type="button">게임 시작</button>
+        <button id="loginButton" class="start-button" type="button">Google 로그인</button>
+        <button id="startButton" class="start-button is-hidden" type="button">게임 시작</button>
         <div class="audio-control start-audio-control" aria-label="타이틀 BGM 설정">
           <button id="titleMuteButton" class="mute-button" type="button" data-audio-mute>음소거</button>
           <label class="volume-control" for="titleVolumeSlider">
@@ -459,13 +460,13 @@
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
 
-<script src="js/firebase.js?v=draw-cost-state-v4"></script>
+<script src="js/firebase.js?v=login-flow-v1"></script>
 
-<script src="js/01-data.js?v=draw-cost-state-v4"></script>
-<script src="js/02-core.js?v=draw-cost-state-v4"></script>
-<script src="js/03-battle.js?v=draw-cost-state-v4"></script>
-<script src="js/04-recruits-company.js?v=draw-cost-state-v4"></script>
-<script src="js/05-equipment-growth.js?v=draw-cost-state-v4"></script>
-<script src="js/06-ui-render.js?v=draw-cost-state-v4"></script>
+<script src="js/01-data.js?v=login-flow-v1"></script>
+<script src="js/02-core.js?v=login-flow-v1"></script>
+<script src="js/03-battle.js?v=login-flow-v1"></script>
+<script src="js/04-recruits-company.js?v=login-flow-v1"></script>
+<script src="js/05-equipment-growth.js?v=login-flow-v1"></script>
+<script src="js/06-ui-render.js?v=login-flow-v1"></script>
   </body>
 </html>

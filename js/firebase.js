@@ -53,6 +53,19 @@
     return auth.currentUser;
   }
 
+  function onAuthStateChanged(callback) {
+    if (!initFirebase()) return () => {};
+    return auth.onAuthStateChanged((user) => {
+      if (user) {
+        ensureUserDocument(user).catch((error) => {
+          console.error("Firebase 사용자 문서 확인 실패:", error);
+        });
+      }
+
+      if (typeof callback === "function") callback(user || null);
+    });
+  }
+
   async function loginWithGoogle() {
     if (!initFirebase()) return null;
 
@@ -218,5 +231,6 @@
     formatOfflineRewardMessage,
     normalizeOfflinePlan,
     getCurrentUser,
+    onAuthStateChanged,
   };
 })();
