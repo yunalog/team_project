@@ -721,6 +721,7 @@ let currentBgmKey = "title";
 let hasStartedGame = false;
 let titleBgmUnlockArmed = false;
 let titleAuthUser = null;
+let isAuthGateReady = false;
 let isTitleLoginInProgress = false;
 let isGameStartInProgress = false;
 let isLogoutInProgress = false;

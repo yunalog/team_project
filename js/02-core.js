@@ -211,40 +211,47 @@ function bindEvents() {
 }
 
 function setupStartAuthGate() {
-  updateStartAuthGate(window.FirebaseGame?.getCurrentUser?.() || null);
+  isAuthGateReady = false;
+  updateStartAuthGate(null);
 
   if (window.FirebaseGame?.onAuthStateChanged) {
     FirebaseGame.onAuthStateChanged((user) => {
+      isAuthGateReady = true;
       titleAuthUser = user || null;
       updateStartAuthGate(titleAuthUser);
     });
+  } else {
+    isAuthGateReady = true;
+    updateStartAuthGate(null);
   }
 }
 
 function updateStartAuthGate(user = titleAuthUser) {
-  titleAuthUser = user || null;
-  const isLoggedIn = Boolean(titleAuthUser);
+  if (isAuthGateReady) titleAuthUser = user || null;
+  const isLoggedIn = isAuthGateReady && Boolean(titleAuthUser);
+  const showLogin = isAuthGateReady && !isLoggedIn;
+  const showAccountActions = isAuthGateReady && isLoggedIn;
 
   if (refs.loginButton) {
-    refs.loginButton.classList.toggle("is-hidden", isLoggedIn);
-    refs.loginButton.disabled = isTitleLoginInProgress;
+    refs.loginButton.classList.toggle("is-hidden", !showLogin);
+    refs.loginButton.disabled = !showLogin || isTitleLoginInProgress;
     refs.loginButton.textContent = isTitleLoginInProgress ? "로그인 중..." : "Google 로그인";
   }
 
   if (refs.startButton) {
-    refs.startButton.classList.toggle("is-hidden", !isLoggedIn);
-    refs.startButton.disabled = !isLoggedIn || isGameStartInProgress;
+    refs.startButton.classList.toggle("is-hidden", !showAccountActions);
+    refs.startButton.disabled = !showAccountActions || isGameStartInProgress;
     refs.startButton.textContent = isGameStartInProgress ? "불러오는 중..." : "게임 시작";
   }
 
   if (refs.titleLogoutButton) {
-    refs.titleLogoutButton.classList.toggle("is-hidden", !isLoggedIn);
-    refs.titleLogoutButton.disabled = !isLoggedIn || isLogoutInProgress || isGameStartInProgress;
+    refs.titleLogoutButton.classList.toggle("is-hidden", !showAccountActions);
+    refs.titleLogoutButton.disabled = !showAccountActions || isLogoutInProgress || isGameStartInProgress;
     refs.titleLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
   }
 
   if (refs.settingLogoutButton) {
-    refs.settingLogoutButton.disabled = !isLoggedIn || isLogoutInProgress;
+    refs.settingLogoutButton.disabled = !showAccountActions || isLogoutInProgress;
     refs.settingLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
   }
 }
