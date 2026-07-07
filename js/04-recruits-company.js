@@ -316,11 +316,28 @@ function closeRecruitDetail() {
   renderRecruitDetailModal();
 }
 
+function getRecruitPromotionPreview(recruit) {
+  const rankNames = recruitRankNames[recruit.id] || [recruit.name];
+  const count = getRecruitCount(recruit.id);
+  const currentPromotionTier = Math.min(5, Number(state.recruitPromotions?.[recruit.id]) || 0);
+  const nextPromotionTier = Math.min(5, currentPromotionTier + 1);
+  const achievedTier = Math.min(5, getRecruitPromotionTierByCount(count));
+  const currentTier = Math.min(achievedTier, currentPromotionTier);
+  const targetTier = Math.min(achievedTier, nextPromotionTier);
+
+  return {
+    beforeRank: rankNames[currentTier] || recruit.name,
+    afterRank: rankNames[targetTier] || rankNames[currentTier] || recruit.name,
+    targetTier,
+  };
+}
+
 function renderRecruitPromotionModal() {
   if (!refs.recruitPromotionModal) return;
 
   if (!activeRecruitPromotionId) {
     refs.recruitPromotionModal.classList.add("is-hidden");
+    refs.recruitPromotionModal.classList.remove("is-ready", "is-evolving", "is-complete");
     return;
   }
 
@@ -330,13 +347,26 @@ function renderRecruitPromotionModal() {
     return;
   }
 
+  const isComplete = Boolean(activeRecruitPromotionResult?.complete);
+  const preview = activeRecruitPromotionResult || getRecruitPromotionPreview(recruit);
+  const promotionCost = getRecruitPromotionCost(recruit);
+
   refs.recruitPromotionModal.classList.remove("is-hidden");
+  refs.recruitPromotionModal.classList.toggle("is-ready", !isComplete);
+  refs.recruitPromotionModal.classList.toggle("is-evolving", isComplete);
+  refs.recruitPromotionModal.classList.toggle("is-complete", isComplete);
+
   refs.recruitPromotionAvatar.innerHTML = recruit.sprites?.idle
-    ? `<img src="${recruit.sprites.idle}" alt="${recruit.name}" />`
-    : `<span>${recruit.mark}</span>`;
-  refs.recruitPromotionTitle.textContent = `${recruit.name} 승급`;
-  refs.recruitPromotionDesc.textContent = `${recruit.category} 직군이 진화합니다. 승급 완료 후 추가 능력치가 크게 상승합니다. 승급 비용은 ${getRecruitPromotionCost(recruit)} 자금입니다.`;
-  refs.recruitPromotionConfirmButton.disabled = state.gold < getRecruitPromotionCost(recruit);
+    ? `<span class="recruit-evolution-aura" aria-hidden="true"></span><img src="${recruit.sprites.idle}" alt="${recruit.name}" />`
+    : `<span class="recruit-evolution-aura" aria-hidden="true"></span><span>${recruit.mark}</span>`;
+
+  refs.recruitPromotionTitle.textContent = isComplete ? "승급 완료!" : `${recruit.name} 승급`;
+  refs.recruitPromotionDesc.innerHTML = isComplete
+    ? `<strong class="recruit-evolution-message">'${preview.beforeRank}'이 '${preview.afterRank}'로 승급했습니다!</strong>`
+    : `${recruit.category} 직군이 진화합니다.<br />승급 후 <b>${preview.beforeRank}</b>에서 <b>${preview.afterRank}</b>로 변경됩니다.<br />승급 비용은 ${promotionCost} 자금입니다.`;
+
+  refs.recruitPromotionConfirmButton.textContent = isComplete ? "확인" : "승급 진행";
+  refs.recruitPromotionConfirmButton.disabled = !isComplete && state.gold < promotionCost;
 }
 
 function openRecruitPromotion(id) {
@@ -344,16 +374,24 @@ function openRecruitPromotion(id) {
   if (!recruit) return;
 
   activeRecruitPromotionId = recruit.id;
+  activeRecruitPromotionResult = null;
   renderRecruitPromotionModal();
 }
 
 function closeRecruitPromotion() {
   activeRecruitPromotionId = null;
+  activeRecruitPromotionResult = null;
   renderRecruitPromotionModal();
+  renderAll();
 }
 
 function confirmRecruitPromotion() {
   if (!activeRecruitPromotionId) return;
+
+  if (activeRecruitPromotionResult?.complete) {
+    closeRecruitPromotion();
+    return;
+  }
 
   const recruit = recruits.find((item) => item.id === activeRecruitPromotionId);
   if (!recruit) return;
@@ -361,20 +399,24 @@ function confirmRecruitPromotion() {
   const cost = getRecruitPromotionCost(recruit);
   if (state.gold < cost) {
     log(`${recruit.name} 승급에는 자금 ${cost}가 필요합니다.`);
+    renderRecruitPromotionModal();
     return;
   }
+
+  const preview = getRecruitPromotionPreview(recruit);
 
   state.gold -= cost;
   activeRecruitPanelId = recruit.id;
   state.recruitPromotions[recruit.id] = (state.recruitPromotions[recruit.id] || 0) + 1;
   addCompanyXp(6);
-  refs.recruitPromotionConfirmButton.disabled = true;
-  log(`${recruit.name} 승급 완료! 진화 연출이 시작됩니다.`);
 
-  window.setTimeout(() => {
-    closeRecruitPromotion();
-    renderAll();
-  }, 1100);
+  activeRecruitPromotionResult = {
+    ...preview,
+    complete: true,
+  };
+
+  log(`${preview.beforeRank}이 ${preview.afterRank}로 승급했습니다!`);
+  renderAll();
 }
 
 function enhanceRecruitDetail() {

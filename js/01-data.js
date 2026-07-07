@@ -691,4 +691,5 @@ let autoDrawTimer = null;
 let equipmentPanelExpanded = true;
 let activeRecruitDetailId = null;
 let activeRecruitPromotionId = null;
+let activeRecruitPromotionResult = null;
 let activeRecruitPanelId = null;
