@@ -65,7 +65,7 @@ function getCompanyRewardAmount(baseAmount, resource, additionalMultiplier = 1) 
   if (amount <= 0) return 0;
 
   const adjustedAmount = Math.floor(amount * Math.max(1, Number(additionalMultiplier) || 1));
-  const bonusRate = getCompanyBrandBonusValue(`${resource}Gain`);
+  const bonusRate = getCompanyBrandBonusValue(`${resource}Gain`) + (resource === "idea" ? IDEA_GAIN_BONUS_RATE : 0);
   if (!state.companyRewardRemainders) state.companyRewardRemainders = { gold: 0, idea: 0 };
 
   const carriedBonus = Math.max(0, Number(state.companyRewardRemainders[resource]) || 0);
@@ -99,13 +99,13 @@ function isRecruitUnlocked() {
 function getRecruitBuyCost(recruit, count = getRecruitCount(recruit.id)) {
   const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
   const firstHireCost = Math.round(baseCost * 5);
-  if (count <= 0) return firstHireCost;
+  if (count <= 0) return Math.max(1, Math.round(firstHireCost * RECRUIT_HIRE_COST_RATE));
 
   const earlyLevels = Math.min(count, 10);
   const lateLevels = Math.max(0, count - 10);
   const earlyCost = firstHireCost * Math.pow(1.18, earlyLevels);
   const softenedLateCost = earlyCost * Math.pow(1.08, lateLevels);
-  return Math.round(softenedLateCost + lateLevels * baseCost * 0.6);
+  return Math.max(1, Math.round((softenedLateCost + lateLevels * baseCost * 0.6) * RECRUIT_HIRE_COST_RATE));
 }
 
 function getRecruitEnhancementCost(id) {
@@ -114,7 +114,7 @@ function getRecruitEnhancementCost(id) {
   const boostLevel = getRecruitBoostLevel(id);
   const earlyLevels = Math.min(boostLevel, 8);
   const lateLevels = Math.max(0, boostLevel - 8);
-  return Math.round(baseCost * 2.2 * Math.pow(1.24, earlyLevels) * Math.pow(1.1, lateLevels));
+  return Math.max(1, Math.round(baseCost * 2.2 * Math.pow(1.24, earlyLevels) * Math.pow(1.1, lateLevels) * RECRUIT_LEVEL_UP_COST_RATE));
 }
 
 function getRecruitPromotionCount(id) {

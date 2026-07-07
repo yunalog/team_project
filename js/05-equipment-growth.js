@@ -267,7 +267,7 @@ function getPlayerUpgradeCost(level = state.playerLevel) {
   const completedLevels = Math.max(0, (Number(level) || 1) - 1);
   const earlyLevels = Math.min(completedLevels, 12);
   const lateLevels = Math.max(0, completedLevels - 12);
-  return Math.floor(18 * Math.pow(1.2, earlyLevels) * Math.pow(1.09, lateLevels));
+  return Math.max(1, Math.floor(18 * Math.pow(1.2, earlyLevels) * Math.pow(1.09, lateLevels) * PLAYER_UPGRADE_COST_RATE));
 }
 
 function getPlayerPower() {

@@ -816,7 +816,11 @@ function completeWave(manual) {
   const baseBonusIdea = clearedBoss ? 8 + state.chapter * 2 : manual ? 1 : 2;
   const bonusIdea = getCompanyRewardAmount(baseBonusIdea, "idea");
   state.idea += bonusIdea;
-  log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}` : `${getProgressLabel()} 클리어!`);
+  if (clearedBoss) {
+    state.equipment = state.equipment || {};
+    state.equipment.speedTickets = Math.max(0, Number(state.equipment.speedTickets) || 0) + 1;
+  }
+  log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}, 가속티켓 +1` : `${getProgressLabel()} 클리어!`);
 
   window.setTimeout(() => {
     advanceBattleLayer();
@@ -825,7 +829,7 @@ function completeWave(manual) {
     // 새 스테이지 진입 시 해금 팝업을 확인합니다.
     if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
     if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
-  if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
+    if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
   }, 520);
 }
 
