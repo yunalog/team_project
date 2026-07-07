@@ -58,6 +58,9 @@ function renderBattle() {
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
   setText(refs.clickPowerText, formatStatValue(getManualPower()));
+  const manualWorkRemaining = getManualWorkRemaining();
+  setText(refs.manualWorkLimitText, `${manualWorkRemaining}/${MANUAL_WORK_MAX_COUNT}`);
+  refs.manualWorkButton.disabled = manualWorkRemaining <= 0;
   setText(refs.clearCountText, `${state.clearCount}건`);
   setText(refs.playTimeText, formatTime(state.elapsed));
   setText(refs.attackTimerText, `${Math.max(0, Math.min(basicAttackCooldown, skillAttackCooldown)).toFixed(1)}초`);
@@ -182,7 +185,7 @@ function renderEquipmentUpgrade() {
   refs.equipmentUpgradeButton.textContent = upgrading ? "연구 진행 중" : nextConfig ? "등급 업그레이드" : "최대 단계";
   refs.equipmentUpgradeButton.disabled = upgrading || !nextConfig || state.idea < nextConfig.nextCost;
   refs.speedTicketButton.disabled = !upgrading || state.equipment.speedTickets <= 0;
-  refs.speedTicketText.textContent = `보유 ${state.equipment.speedTickets}장 · 1장당 10분`;
+  refs.speedTicketText.textContent = `보유 ${state.equipment.speedTickets}/${SPEED_TICKET_MAX_COUNT}장 · 1장당 10분`;
 }
 
 function formatEquipmentBonus(item, equipped) {

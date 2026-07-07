@@ -15,11 +15,15 @@ const CRITICAL_CHANCE = 0.16;
 const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
+const SPEED_TICKET_MAX_COUNT = 10;
+const MANUAL_WORK_MAX_COUNT = 10;
 const RECRUIT_UNLOCK_CHAPTER = 2;
 const RECRUIT_HIRE_COST_RATE = 0.6;
 const RECRUIT_LEVEL_UP_COST_RATE = 0.6;
 const PLAYER_UPGRADE_COST_RATE = 0.6;
 const IDEA_GAIN_BONUS_RATE = 0.15;
+const PLAYER_UPGRADE_STAT_RATE = 0.8;
+const RECRUIT_LEVEL_UP_STAT_RATE = 1.3;
 
 function roundStat(value, precision = 10) {
   return Math.round(Math.max(0, Number(value) || 0) * precision) / precision;
@@ -659,6 +663,8 @@ const defaultState = {
   unitHp: {},
   unitMaxHp: {},
   clickPower: 1,
+  manualWorkUses: 0,
+  manualWorkChapter: 1,
   playerLevel: 1,
   clearCount: 0,
   companyXp: 0,
