@@ -7309,3 +7309,81 @@ button:disabled:hover,
   min-height: 42px !important;
   transform: none !important;
 }
+
+/* Button layout v2: override older title/settings button movement rules. */
+.start-actions,
+.start-scene .start-actions {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: clamp(34px, 8vh, 78px) !important;
+  width: min(240px, calc(100% - 48px)) !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  justify-items: stretch !important;
+  align-items: center !important;
+  gap: 12px !important;
+  transform: translateX(-50%) !important;
+}
+
+.start-actions .start-button,
+.start-actions .start-button:hover,
+.start-actions .start-button:focus-visible,
+.start-actions .start-button:active {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 52px !important;
+  margin: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+.start-actions .start-button:active {
+  box-shadow: 0 7px 0 rgba(74, 43, 23, 0.72), 0 0 18px rgba(255, 217, 121, 0.35) !important;
+}
+
+.settings-row,
+.tab-panel[data-panel="settings"] .settings-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  grid-auto-rows: 44px !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+}
+
+.settings-row #saveButton {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+}
+
+.settings-row #returnTitleButton {
+  grid-column: 2 !important;
+  grid-row: 1 !important;
+}
+
+.settings-row #resetButton {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+}
+
+.settings-row #settingLogoutButton {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+}
+
+.settings-row button,
+.settings-row button:hover:not(:disabled),
+.settings-row button:active:not(:disabled) {
+  width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  display: inline-grid !important;
+  place-items: center !important;
+  transform: none !important;
+  translate: none !important;
+}
