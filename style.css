@@ -1642,6 +1642,16 @@ h1 {
     0 0 8px rgba(249, 115, 22, 0.62);
 }
 
+.damage-number.is-unit-heal {
+  color: #22c55e;
+  font-size: 20px;
+  font-weight: 900;
+  text-shadow:
+    0 2px 0 #ecfdf5,
+    0 0 8px rgba(34, 197, 94, 0.72),
+    0 0 14px rgba(21, 128, 61, 0.44);
+}
+
 .critical-burst,
 .critical-particle {
   position: absolute;
@@ -4021,6 +4031,11 @@ textarea {
 
 .damage-number.is-critical {
   font-size: 36px !important;
+  line-height: 1 !important;
+}
+
+.damage-number.is-unit-heal {
+  font-size: 20px !important;
   line-height: 1 !important;
 }
 

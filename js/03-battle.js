@@ -199,7 +199,10 @@ function recoverUnitsForNewWave() {
     const currentHp = getUnitHp(unit.id);
     const recoveryFloor = Math.ceil(maxHp * 0.56);
     const recoveryGain = Math.ceil(maxHp * 0.18);
-    state.unitHp[unit.id] = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
+    const nextHp = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
+    const healedAmount = roundStat(nextHp - currentHp);
+    state.unitHp[unit.id] = nextHp;
+    if (healedAmount > 0) showUnitHeal(healedAmount, unit);
   });
 }
 
@@ -756,7 +759,7 @@ function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
   const enemyTypeBonus = target.isBoss ? getSquadSynergyValue("bossDamage") : getSquadSynergyValue("normalDamage");
   const debuffBonus = getEnemyDebuffValue("damageTaken");
   const multiplier = getGlobalMultiplier() * (1 + enemyTypeBonus + debuffBonus) * (critical ? CRITICAL_MULTIPLIER : 1);
-  const finalAmount = Math.max(1, Math.round(amount * multiplier));
+  const finalAmount = Math.max(1, roundStat(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
   engageAllMonsters();
   monsterAttackCooldown = Math.min(monsterAttackCooldown, getMonsterAttackType(target) === "ranged" ? 0.35 : 0.75);
@@ -819,7 +822,11 @@ function completeWave(manual) {
   const baseBonusIdea = clearedBoss ? 8 + state.chapter * 2 : manual ? 1 : 2;
   const bonusIdea = getCompanyRewardAmount(baseBonusIdea, "idea");
   state.idea += bonusIdea;
-  log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}` : `${getProgressLabel()} 클리어!`);
+  if (clearedBoss) {
+    state.equipment = state.equipment || {};
+    state.equipment.speedTickets = Math.max(0, Number(state.equipment.speedTickets) || 0) + 1;
+  }
+  log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}, 가속티켓 +1` : `${getProgressLabel()} 클리어!`);
 
   window.setTimeout(() => {
     advanceBattleLayer();
@@ -828,7 +835,7 @@ function completeWave(manual) {
     // 새 스테이지 진입 시 해금 팝업을 확인합니다.
     if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
     if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
-  if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
+    if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
   }, 520);
 }
 
@@ -954,6 +961,32 @@ function showUnitDamage(amount, unit, enemy) {
   window.setTimeout(() => damage.remove(), 920);
 }
 
+function showUnitHeal(amount, unit) {
+  if (!refs.effectLayer) return;
+
+  const position = getUnitPosition(unit.id);
+  const heal = document.createElement("span");
+  heal.className = "damage-number is-unit-heal";
+  heal.textContent = `+${formatStatValue(amount)}`;
+  heal.style.setProperty("--hit-x", `${position.x}%`);
+  heal.style.setProperty("--hit-y", `${position.y + 112}px`);
+  heal.style.setProperty("--damage-x-pop", "0px");
+  heal.style.setProperty("--damage-x-apex", "0px");
+  heal.style.setProperty("--damage-x-drop", "0px");
+  heal.style.setProperty("--damage-x-end", "0px");
+  heal.style.setProperty("--damage-y-pop", "-20px");
+  heal.style.setProperty("--damage-y-apex", "-44px");
+  heal.style.setProperty("--damage-y-drop", "-18px");
+  heal.style.setProperty("--damage-y-end", "-8px");
+  heal.style.setProperty("--damage-tilt-start", "0deg");
+  heal.style.setProperty("--damage-tilt-pop", "-3deg");
+  heal.style.setProperty("--damage-tilt-apex", "2deg");
+  heal.style.setProperty("--damage-tilt-drop", "0deg");
+  heal.style.setProperty("--damage-tilt-end", "0deg");
+  refs.effectLayer.appendChild(heal);
+  window.setTimeout(() => heal.remove(), 980);
+}
+
 function pulseUnit(unitId, className, duration) {
   const ally = refs.allyLayer.querySelector(`[data-unit-id="${unitId}"]`);
   if (!ally) return;
@@ -1008,8 +1041,8 @@ function applyUnitDerivedStats(unit) {
   const skillPower = unit.skillPower || attackPower;
   return {
     ...unit,
-    power: Math.max(1, Math.round(attackPower * getSquadAttackPowerMultiplier() * (1 + attackPowerBuff))),
-    skillPower: Math.max(1, Math.round(skillPower * getSquadSkillDamageMultiplier() * (1 + skillDamageBuff))),
+    power: Math.max(1, roundStat(attackPower * getSquadAttackPowerMultiplier() * (1 + attackPowerBuff))),
+    skillPower: Math.max(1, roundStat(skillPower * getSquadSkillDamageMultiplier() * (1 + skillDamageBuff))),
   };
 }
 

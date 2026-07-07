@@ -16,6 +16,20 @@ const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
 const RECRUIT_UNLOCK_CHAPTER = 2;
+const RECRUIT_HIRE_COST_RATE = 0.6;
+const RECRUIT_LEVEL_UP_COST_RATE = 0.6;
+const PLAYER_UPGRADE_COST_RATE = 0.6;
+const IDEA_GAIN_BONUS_RATE = 0.15;
+
+function roundStat(value, precision = 10) {
+  return Math.round(Math.max(0, Number(value) || 0) * precision) / precision;
+}
+
+function formatStatValue(value) {
+  const rounded = roundStat(value);
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
 const NORMAL_MONSTER_IMAGES = [
   "Resource/Monster/Normal_Monster/Field_Monster1.png",
   "Resource/Monster/Normal_Monster/Field_Monster2.png",

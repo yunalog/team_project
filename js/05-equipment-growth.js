@@ -263,20 +263,33 @@ function getEquipmentScore(item) {
   return item.powerBonus + item.skillBonus;
 }
 
+function getPlayerUpgradeCost(level = state.playerLevel) {
+  const completedLevels = Math.max(0, (Number(level) || 1) - 1);
+  const earlyLevels = Math.min(completedLevels, 12);
+  const lateLevels = Math.max(0, completedLevels - 12);
+  return Math.max(1, Math.floor(18 * Math.pow(1.2, earlyLevels) * Math.pow(1.09, lateLevels) * PLAYER_UPGRADE_COST_RATE));
+}
+
 function getPlayerPower() {
-  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
+  const levelBonus = Math.max(0, state.playerLevel - 1) * 0.22;
+  const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
+  return roundStat(1 + levelBonus + equipmentBonus);
 }
 
 function getPlayerSkillPower() {
-  return state.playerLevel + getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
+  const levelBonus = Math.max(0, state.playerLevel - 1) * 0.26;
+  const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
+  return roundStat(1 + levelBonus + equipmentBonus);
 }
 
 function getManualPower() {
-  return state.clickPower + Math.max(0, (state.growthLevels?.process || 0));
+  const representativeBonus = Math.max(0, state.clickPower - 1) * 0.2;
+  const processBonus = Math.max(0, (state.growthLevels?.process || 0)) * 0.5;
+  return roundStat(1 + representativeBonus + processBonus);
 }
 
 function upgradePlayer() {
-  const cost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
+  const cost = getPlayerUpgradeCost();
   if (state.gold < cost) {
     log(`대표 역량 강화에는 자금 ${cost}이 필요합니다.`);
     renderBattle();
@@ -286,7 +299,7 @@ function upgradePlayer() {
   state.gold -= cost;
   state.playerLevel += 1;
   state.clickPower += 1;
-  log("대표 역량이 강화되었습니다.");
+  log("대표 역량이 조금 상승했습니다.");
   renderAll();
 }
 
