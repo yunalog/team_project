@@ -232,28 +232,28 @@ function updateStartAuthGate(user = titleAuthUser) {
   const showLogin = isAuthGateReady && !isLoggedIn;
   const showAccountActions = isAuthGateReady && isLoggedIn;
 
-  if (refs.loginButton) {
-    refs.loginButton.classList.toggle("is-hidden", !showLogin);
-    refs.loginButton.disabled = !showLogin || isTitleLoginInProgress;
-    refs.loginButton.textContent = isTitleLoginInProgress ? "로그인 중..." : "Google 로그인";
-  }
-
-  if (refs.startButton) {
-    refs.startButton.classList.toggle("is-hidden", !showAccountActions);
-    refs.startButton.disabled = !showAccountActions || isGameStartInProgress;
-    refs.startButton.textContent = isGameStartInProgress ? "불러오는 중..." : "게임 시작";
-  }
-
-  if (refs.titleLogoutButton) {
-    refs.titleLogoutButton.classList.toggle("is-hidden", !showAccountActions);
-    refs.titleLogoutButton.disabled = !showAccountActions || isLogoutInProgress || isGameStartInProgress;
-    refs.titleLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
-  }
+  setTitleActionButton(refs.loginButton, showLogin, isTitleLoginInProgress, isTitleLoginInProgress ? "로그인 중..." : "Google 로그인");
+  setTitleActionButton(refs.startButton, showAccountActions, isGameStartInProgress, isGameStartInProgress ? "불러오는 중..." : "게임 시작");
+  setTitleActionButton(
+    refs.titleLogoutButton,
+    showAccountActions,
+    isLogoutInProgress || isGameStartInProgress,
+    isLogoutInProgress ? "로그아웃 중..." : "로그아웃"
+  );
 
   if (refs.settingLogoutButton) {
     refs.settingLogoutButton.disabled = !showAccountActions || isLogoutInProgress;
     refs.settingLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
   }
+}
+
+function setTitleActionButton(button, isVisible, isDisabled, text) {
+  if (!button) return;
+  button.classList.toggle("is-hidden", !isVisible);
+  button.hidden = !isVisible;
+  button.setAttribute("aria-hidden", String(!isVisible));
+  button.disabled = !isVisible || isDisabled;
+  button.textContent = text;
 }
 
 async function loginFromTitle() {
@@ -266,16 +266,19 @@ async function loginFromTitle() {
 
   isTitleLoginInProgress = true;
   updateStartAuthGate(null);
+  let didLoginFail = false;
 
   try {
     const user = await FirebaseGame.loginWithGoogle();
     titleAuthUser = user || FirebaseGame.getCurrentUser?.() || null;
+    if (!titleAuthUser) throw new Error("Google login did not return a user.");
   } catch (error) {
+    didLoginFail = true;
     console.error("Firebase 로그인 실패:", error);
-    if (refs.loginButton) refs.loginButton.textContent = "다시 로그인";
   } finally {
     isTitleLoginInProgress = false;
     updateStartAuthGate(titleAuthUser);
+    if (didLoginFail && !titleAuthUser && refs.loginButton) refs.loginButton.textContent = "다시 로그인";
   }
 }
 

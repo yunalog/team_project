@@ -7395,6 +7395,13 @@ button:disabled:hover,
   box-shadow: 0 7px 0 rgba(74, 43, 23, 0.72), 0 0 18px rgba(255, 217, 121, 0.35) !important;
 }
 
+.start-actions .start-button.is-hidden,
+.start-actions .start-button.is-hidden:hover,
+.start-actions .start-button.is-hidden:focus-visible,
+.start-actions .start-button.is-hidden:active {
+  display: none !important;
+}
+
 .settings-row,
 .tab-panel[data-panel="settings"] .settings-row {
   display: grid !important;

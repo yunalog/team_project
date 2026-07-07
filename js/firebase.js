@@ -54,7 +54,11 @@
   }
 
   function onAuthStateChanged(callback) {
-    if (!initFirebase()) return () => {};
+    if (!initFirebase()) {
+      if (typeof callback === "function") window.setTimeout(() => callback(null), 0);
+      return () => {};
+    }
+
     return auth.onAuthStateChanged((user) => {
       if (user) {
         ensureUserDocument(user).catch((error) => {
