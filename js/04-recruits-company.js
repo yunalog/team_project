@@ -576,6 +576,11 @@ function buyRecruit(id) {
 }
 
 function buyTool(id) {
+  if (typeof isRecruitCompanyUnlocked === "function" && !isRecruitCompanyUnlocked()) {
+    log("회사 성장은 2스테이지부터 사용할 수 있습니다.");
+    return;
+  }
+
   const tool = tools.find((item) => item.id === id);
   const level = getToolLevel(id);
   const cost = costFor(tool.baseCost, level);

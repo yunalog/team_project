@@ -42,6 +42,7 @@
     saveStateText: document.querySelector("#saveStateText"),
     offlinePlanText: document.querySelector("#offlinePlanText"),
     offlineUnlockModal: document.querySelector("#offlineUnlockModal"),
+    recruitCompanyUnlockModal: document.querySelector("#recruitCompanyUnlockModal"),
     offlineClaimModal: document.querySelector("#offlineClaimModal"),
     offlineClaimPlan: document.querySelector("#offlineClaimPlan"),
     offlineClaimTime: document.querySelector("#offlineClaimTime"),
@@ -132,7 +133,8 @@ function bindEvents() {
     const growthButton = event.target.closest("[data-upgrade-growth]");
     const offlinePlanButton = event.target.closest("[data-offline-plan]");
     const offlineUnlockPlanButton = event.target.closest("[data-offline-unlock-plan]");
-    const offlineClaimDismiss = event.target.closest("[data-close-offline-claim]");
+    const recruitCompanyUnlockClose = event.target.closest("[data-close-recruit-company-unlock]");
+    const offlineClaimClose = event.target.closest("[data-close-offline-claim]");
 
     if (tab) switchTab(tab);
     if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
@@ -145,7 +147,8 @@ function bindEvents() {
     if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
     if (offlinePlanButton) changeOfflineRewardPlan(Number(offlinePlanButton.dataset.offlinePlan));
     if (offlineUnlockPlanButton) chooseInitialOfflineRewardPlan(Number(offlineUnlockPlanButton.dataset.offlineUnlockPlan));
-    if (offlineClaimDismiss) closeOfflineRewardClaimPopup();
+    if (recruitCompanyUnlockClose) closeRecruitCompanyUnlockPopup();
+    if (offlineClaimClose) closeOfflineRewardClaimPopup();
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -223,6 +226,7 @@ async function startGame() {
   refs.gameShell.classList.remove("is-hidden");
   playBgm(getActiveBgmKey());
   renderAll();
+  checkRecruitCompanyUnlockPopup();
   checkOfflineRewardUnlockPopup();
   startLoop();
 }
@@ -282,6 +286,38 @@ async function changeOfflineRewardPlan(hours) {
   }
 
   renderAll();
+}
+
+
+function isRecruitCompanyUnlocked() {
+  const currentChapter = Math.max(1, Number(state?.chapter) || Number(state?.stage) || 1);
+  return currentChapter >= 2;
+}
+
+function checkRecruitCompanyUnlockPopup() {
+  if (!refs.recruitCompanyUnlockModal || !state) return;
+
+  const isUnlockedStage = isRecruitCompanyUnlocked();
+  const alreadyShown = Boolean(state.recruitCompanyUnlockShown);
+
+  if (!isUnlockedStage || alreadyShown) {
+    refs.recruitCompanyUnlockModal.classList.remove("is-visible");
+    refs.recruitCompanyUnlockModal.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  refs.recruitCompanyUnlockModal.classList.add("is-visible");
+  refs.recruitCompanyUnlockModal.setAttribute("aria-hidden", "false");
+}
+
+function closeRecruitCompanyUnlockPopup() {
+  if (!refs.recruitCompanyUnlockModal) return;
+
+  state.recruitCompanyUnlockShown = true;
+  refs.recruitCompanyUnlockModal.classList.remove("is-visible");
+  refs.recruitCompanyUnlockModal.setAttribute("aria-hidden", "true");
+  renderAll();
+  saveState("동료 영입 / 회사 시스템 안내 확인 완료");
 }
 
 function checkOfflineRewardUnlockPopup() {
@@ -582,6 +618,7 @@ function normalizeState(nextState) {
       ? Number(nextState.offlineRewardPlan)
       : 8,
     offlineRewardUnlocked: Boolean(nextState.offlineRewardUnlocked),
+    recruitCompanyUnlockShown: Boolean(nextState.recruitCompanyUnlockShown),
     lastActiveAtMs: Number(nextState.lastActiveAtMs) || Date.now(),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
     squad:

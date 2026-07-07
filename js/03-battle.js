@@ -822,8 +822,10 @@ function completeWave(manual) {
     advanceBattleLayer();
     spawnWave();
     renderAll();
-    // 2스테이지 보스 클리어 후 3-1에 진입하는 순간 해금 팝업을 확실히 확인합니다.
-    if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
+    // 새 스테이지 진입 시 해금 팝업을 확인합니다.
+    if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
+    if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
+  if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
   }, 520);
 }
 
@@ -854,6 +856,7 @@ function advanceBattleLayer() {
     state.subStage += 1;
   }
   state.stage = state.chapter;
+  if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
   if (typeof checkOfflineRewardUnlockPopup === "function") checkOfflineRewardUnlockPopup();
 }
 
