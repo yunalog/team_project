@@ -756,7 +756,7 @@ function damageEnemy(enemyId, amount, manual, sourceUnit = null) {
   const enemyTypeBonus = target.isBoss ? getSquadSynergyValue("bossDamage") : getSquadSynergyValue("normalDamage");
   const debuffBonus = getEnemyDebuffValue("damageTaken");
   const multiplier = getGlobalMultiplier() * (1 + enemyTypeBonus + debuffBonus) * (critical ? CRITICAL_MULTIPLIER : 1);
-  const finalAmount = Math.max(1, Math.round(amount * multiplier));
+  const finalAmount = Math.max(1, roundStat(amount * multiplier));
   target.hp = Math.max(0, target.hp - finalAmount);
   engageAllMonsters();
   monsterAttackCooldown = Math.min(monsterAttackCooldown, getMonsterAttackType(target) === "ranged" ? 0.35 : 0.75);
@@ -1005,8 +1005,8 @@ function applyUnitDerivedStats(unit) {
   const skillPower = unit.skillPower || attackPower;
   return {
     ...unit,
-    power: Math.max(1, Math.round(attackPower * getSquadAttackPowerMultiplier() * (1 + attackPowerBuff))),
-    skillPower: Math.max(1, Math.round(skillPower * getSquadSkillDamageMultiplier() * (1 + skillDamageBuff))),
+    power: Math.max(1, roundStat(attackPower * getSquadAttackPowerMultiplier() * (1 + attackPowerBuff))),
+    skillPower: Math.max(1, roundStat(skillPower * getSquadSkillDamageMultiplier() * (1 + skillDamageBuff))),
   };
 }
 

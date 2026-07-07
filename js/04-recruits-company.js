@@ -101,14 +101,20 @@ function getRecruitBuyCost(recruit, count = getRecruitCount(recruit.id)) {
   const firstHireCost = Math.round(baseCost * 5);
   if (count <= 0) return firstHireCost;
 
-  return Math.round(firstHireCost * Math.pow(1.55, count));
+  const earlyLevels = Math.min(count, 10);
+  const lateLevels = Math.max(0, count - 10);
+  const earlyCost = firstHireCost * Math.pow(1.18, earlyLevels);
+  const softenedLateCost = earlyCost * Math.pow(1.08, lateLevels);
+  return Math.round(softenedLateCost + lateLevels * baseCost * 0.6);
 }
 
 function getRecruitEnhancementCost(id) {
   const recruit = recruits.find((item) => item.id === id);
   const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
   const boostLevel = getRecruitBoostLevel(id);
-  return Math.round(baseCost * 2.4 * Math.pow(1.62, boostLevel));
+  const earlyLevels = Math.min(boostLevel, 8);
+  const lateLevels = Math.max(0, boostLevel - 8);
+  return Math.round(baseCost * 2.2 * Math.pow(1.24, earlyLevels) * Math.pow(1.1, lateLevels));
 }
 
 function getRecruitPromotionCount(id) {
@@ -118,7 +124,7 @@ function getRecruitPromotionCount(id) {
 function getRecruitPromotionCost(recruit) {
   const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
   const promotionCount = getRecruitPromotionCount(recruit?.id);
-  return Math.round(baseCost * 12 * Math.pow(1.28, promotionCount));
+  return Math.round(baseCost * 10 * Math.pow(1.2, promotionCount));
 }
 
 function shouldShowRecruitPromotionButton(recruit, count = getRecruitCount(recruit.id)) {
@@ -162,20 +168,20 @@ function getRecruitBattleStats(recruit) {
     .filter((tool) => tool.target === recruit.id)
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
   const boostBonus = getRecruitBoostLevel(recruit.id);
-  const attackPower = base.attackPower + levelBonus * 0.12 + promotionTier * 1.2 + toolBonus + boostBonus;
+  const attackPower = base.attackPower + levelBonus * 0.07 + promotionTier * 0.85 + toolBonus + boostBonus * 0.65;
   const skillPower = hasRecruitSkillPowerStat(recruit)
-    ? (base.skillPower || base.attackPower || 1) + levelBonus * 0.15 + promotionTier * 1.5 + Math.floor(boostBonus * 0.5)
+    ? (base.skillPower || base.attackPower || 1) + levelBonus * 0.09 + promotionTier * 1.05 + boostBonus * 0.45
     : 0;
   const attackInterval = Math.max(
     0.35,
-    (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.25, promotionTier * 0.015 + levelBonus * 0.001))
+    (base.attackInterval || BASIC_ATTACK_RATE) * (1 - Math.min(0.22, promotionTier * 0.012 + levelBonus * 0.0007))
   );
-  const criticalChance = Math.min(0.55, (base.criticalChance || 0) + levelBonus * 0.001 + promotionTier * 0.01);
+  const criticalChance = Math.min(0.55, (base.criticalChance || 0) + levelBonus * 0.0007 + promotionTier * 0.008);
   return {
-    attackPower,
-    skillPower,
-    attackInterval,
-    criticalChance,
+    attackPower: roundStat(attackPower),
+    skillPower: roundStat(skillPower),
+    attackInterval: roundStat(attackInterval, 100),
+    criticalChance: roundStat(criticalChance, 10000),
     basicTargets: recruit.basicTargets || 1,
   };
 }

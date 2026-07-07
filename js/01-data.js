@@ -16,6 +16,16 @@ const CRITICAL_MULTIPLIER = 1.85;
 const EQUIPMENT_DRAW_COST = 10;
 const SPEED_TICKET_SECONDS = 600;
 const RECRUIT_UNLOCK_CHAPTER = 2;
+
+function roundStat(value, precision = 10) {
+  return Math.round(Math.max(0, Number(value) || 0) * precision) / precision;
+}
+
+function formatStatValue(value) {
+  const rounded = roundStat(value);
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
 const NORMAL_MONSTER_IMAGES = [
   "Resource/Monster/Normal_Monster/Field_Monster1.png",
   "Resource/Monster/Normal_Monster/Field_Monster2.png",

@@ -45,7 +45,7 @@ function renderOfflineRewardSetting() {
 }
 
 function renderBattle() {
-  const playerCost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
+  const playerCost = getPlayerUpgradeCost();
 
   refs.goldText.textContent = Math.floor(state.gold);
   refs.ideaText.textContent = Math.floor(state.idea);
@@ -57,7 +57,7 @@ function renderBattle() {
   renderAllies();
   renderEnemies();
   setText(refs.teamCountText, `${getTeamCount()}명`);
-  setText(refs.clickPowerText, getManualPower());
+  setText(refs.clickPowerText, formatStatValue(getManualPower()));
   setText(refs.clearCountText, `${state.clearCount}건`);
   setText(refs.playTimeText, formatTime(state.elapsed));
   setText(refs.attackTimerText, `${Math.max(0, Math.min(basicAttackCooldown, skillAttackCooldown)).toFixed(1)}초`);
