@@ -7269,3 +7269,43 @@ button:disabled:hover,
   transform: none !important;
   translate: none !important;
 }
+
+/* Logout flow layout: title actions stay centered and settings actions form a 2x2 grid. */
+.start-actions {
+  width: min(260px, calc(100% - 48px)) !important;
+  justify-items: stretch !important;
+  text-align: center !important;
+}
+
+.start-actions .start-button,
+.start-actions .start-button:hover,
+.start-actions .start-button:focus-visible,
+.start-actions .start-button:active {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  transform: none !important;
+  translate: none !important;
+}
+
+.start-actions .start-button:active {
+  filter: brightness(0.96) saturate(0.98) !important;
+}
+
+.settings-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.settings-row button,
+.settings-row button:hover:not(:disabled),
+.settings-row button:active:not(:disabled) {
+  width: 100% !important;
+  min-height: 42px !important;
+  transform: none !important;
+}
