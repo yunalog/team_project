@@ -248,7 +248,7 @@ function renderRecruitGrowthPanel() {
   const actionDataset = promotionReady ? `data-recruit-promote="${recruit.id}"` : `data-buy-recruit="${recruit.id}"`;
   const actionClass = promotionReady ? "shop-promote-button recruit-focus-action" : "recruit-focus-action";
   const actionDisabled = promotionReady ? state.gold < promotionCost : state.gold < cost;
-  const buttonText = promotionReady ? `승급 🪙 ${promotionCost}` : count <= 0 ? `동료 획득 🪙 ${cost}` : `레벨업 🪙 ${cost}`;
+  const buttonText = promotionReady ? `승급 💵 ${promotionCost}` : count <= 0 ? `동료 획득 💵 ${cost}` : `레벨업 💵 ${cost}`;
 
   refs.recruitGrowthPanel.innerHTML = `
     <div class="recruit-focus-card" style="--recruit-color: ${recruit.color};">
