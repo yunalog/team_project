@@ -118,7 +118,7 @@ function getRecruitPromotionCount(id) {
 function getRecruitPromotionCost(recruit) {
   const baseCost = Math.max(1, Number(recruit?.baseCost) || 25);
   const promotionCount = getRecruitPromotionCount(recruit?.id);
-  return Math.round(baseCost * 12 * Math.pow(1.95, promotionCount));
+  return Math.round(baseCost * 12 * Math.pow(1.28, promotionCount));
 }
 
 function shouldShowRecruitPromotionButton(recruit, count = getRecruitCount(recruit.id)) {
@@ -453,8 +453,7 @@ function enhanceRecruitDetail() {
 
   state.gold -= cost;
   state.recruitBoosts[recruit.id] = (state.recruitBoosts[recruit.id] || 0) + 1;
-  addCompanyXp(2);
-  log(`${recruit.name} 전문성이 강화되었습니다. 회사 EXP +2`);
+  log(`${recruit.name} 전문성이 강화되었습니다.`);
   renderAll();
 }
 
