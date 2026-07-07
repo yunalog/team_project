@@ -891,6 +891,7 @@ function tick(delta) {
     }
 
     renderBattle();
+    if (typeof refreshCostSensitiveButtonStates === "function") refreshCostSensitiveButtonStates();
   } catch (error) {
     log(`전투 루프 오류: ${error.message}`);
   }

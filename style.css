@@ -7022,3 +7022,141 @@ button:disabled,
   filter: grayscale(0.5) saturate(0.65);
   opacity: 0.7;
 }
+
+
+/* Cost-state disabled buttons: always dark/gray while resources are insufficient.
+   This state is controlled by JS, not by hover. */
+button.is-unaffordable,
+button:disabled,
+#upgradePlayerButton.is-unaffordable,
+#upgradePlayerButton:disabled,
+.growth-upgrade-button.is-unaffordable,
+.growth-upgrade-button:disabled,
+.recruit-focus-action.is-unaffordable,
+.recruit-focus-action:disabled,
+.shop-promote-button.is-unaffordable,
+.shop-promote-button:disabled,
+.facility-card button.is-unaffordable,
+.facility-card button:disabled,
+.shop-item button.is-unaffordable,
+.shop-item button:disabled,
+.equipment-upgrade-actions button.is-unaffordable,
+.equipment-upgrade-actions button:disabled {
+  cursor: default !important;
+  pointer-events: auto;
+  border-color: #4f463b !important;
+  background: linear-gradient(180deg, #7f7569 0%, #4d463f 100%) !important;
+  color: #d8d1c7 !important;
+  text-shadow: none !important;
+  filter: grayscale(0.85) saturate(0.45) brightness(0.86) !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+button.is-unaffordable:hover,
+button:disabled:hover,
+#upgradePlayerButton.is-unaffordable:hover,
+#upgradePlayerButton:disabled:hover,
+.growth-upgrade-button.is-unaffordable:hover,
+.growth-upgrade-button:disabled:hover,
+.recruit-focus-action.is-unaffordable:hover,
+.recruit-focus-action:disabled:hover,
+.shop-promote-button.is-unaffordable:hover,
+.shop-promote-button:disabled:hover,
+.facility-card button.is-unaffordable:hover,
+.facility-card button:disabled:hover,
+.shop-item button.is-unaffordable:hover,
+.shop-item button:disabled:hover,
+.equipment-upgrade-actions button.is-unaffordable:hover,
+.equipment-upgrade-actions button:disabled:hover {
+  transform: none !important;
+  filter: grayscale(0.85) saturate(0.45) brightness(0.86) !important;
+  background: linear-gradient(180deg, #7f7569 0%, #4d463f 100%) !important;
+}
+
+
+/* Cost-state fix v4: draw buttons also become disabled immediately when funds are insufficient. */
+.equipment-draw-button.is-unaffordable,
+.equipment-draw-button:disabled:not(.has-pending) {
+  cursor: default !important;
+  border-color: #4f463b !important;
+  background: radial-gradient(circle at 35% 28%, #9a9187 0 18%, #6e665d 42%, #443f39 100%) !important;
+  color: #d8d1c7 !important;
+  text-shadow: none !important;
+  filter: grayscale(0.9) saturate(0.35) brightness(0.82) !important;
+  opacity: 1 !important;
+  transform: translateX(-50%) !important;
+  box-shadow: 0 3px 0 rgba(45, 33, 25, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.equipment-draw-button.is-unaffordable:hover,
+.equipment-draw-button:disabled:not(.has-pending):hover {
+  background: radial-gradient(circle at 35% 28%, #9a9187 0 18%, #6e665d 42%, #443f39 100%) !important;
+  filter: grayscale(0.9) saturate(0.35) brightness(0.82) !important;
+  transform: translateX(-50%) !important;
+}
+
+.auto-draw-button.is-unaffordable,
+.auto-draw-button:disabled:not(.is-running) {
+  cursor: default !important;
+  border-color: #4f463b !important;
+  background: linear-gradient(180deg, #7f7569 0%, #4d463f 100%) !important;
+  color: #d8d1c7 !important;
+  text-shadow: none !important;
+  filter: grayscale(0.85) saturate(0.45) brightness(0.86) !important;
+  opacity: 1 !important;
+  transform: translateX(-50%) !important;
+  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.auto-draw-button.is-unaffordable:hover,
+.auto-draw-button:disabled:not(.is-running):hover {
+  background: linear-gradient(180deg, #7f7569 0%, #4d463f 100%) !important;
+  filter: grayscale(0.85) saturate(0.45) brightness(0.86) !important;
+  transform: translateX(-50%) !important;
+}
+
+
+/* Cost-state fix v5: recruit growth reacts immediately and draw button never jumps. */
+.recruit-focus-action.is-unaffordable,
+.recruit-focus-action:disabled,
+.recruit-focus-action.shop-promote-button.is-unaffordable,
+.recruit-focus-action.shop-promote-button:disabled {
+  cursor: default !important;
+  border-color: #4f463b !important;
+  background: linear-gradient(180deg, #7f7569 0%, #4d463f 100%) !important;
+  color: #d8d1c7 !important;
+  text-shadow: none !important;
+  filter: grayscale(0.85) saturate(0.45) brightness(0.86) !important;
+  opacity: 1 !important;
+  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transform: none !important;
+}
+
+.battle-equipment-section .draw-machine-panel .equipment-draw-button,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:active:not(:disabled),
+.battle-equipment-section .draw-machine-panel .equipment-draw-button.has-pending,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button.is-unaffordable,
+.battle-equipment-section .draw-machine-panel .equipment-draw-button:disabled {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  translate: none !important;
+  animation: none !important;
+}
+
+.battle-equipment-section .draw-machine-panel .auto-draw-button,
+.battle-equipment-section .draw-machine-panel .auto-draw-button:hover:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button:active:not(:disabled),
+.battle-equipment-section .draw-machine-panel .auto-draw-button.is-unaffordable,
+.battle-equipment-section .draw-machine-panel .auto-draw-button:disabled {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  translate: none !important;
+}
