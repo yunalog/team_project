@@ -44,6 +44,7 @@
     saveStateText: document.querySelector("#saveStateText"),
     offlinePlanText: document.querySelector("#offlinePlanText"),
     offlineUnlockModal: document.querySelector("#offlineUnlockModal"),
+    lockedTabModal: document.querySelector("#lockedTabModal"),
     recruitCompanyUnlockModal: document.querySelector("#recruitCompanyUnlockModal"),
     offlineClaimModal: document.querySelector("#offlineClaimModal"),
     offlineClaimPlan: document.querySelector("#offlineClaimPlan"),
@@ -148,6 +149,7 @@ function bindEvents() {
     const offlinePlanButton = event.target.closest("[data-offline-plan]");
     const offlineUnlockPlanButton = event.target.closest("[data-offline-unlock-plan]");
     const recruitCompanyUnlockClose = event.target.closest("[data-close-recruit-company-unlock]");
+    const lockedTabClose = event.target.closest("[data-close-locked-tab]");
     const offlineClaimClose = event.target.closest("[data-close-offline-claim]");
     const guidedTutorialNext = event.target.closest("#guidedTutorialNextButton");
     const guidedTutorialSkip = event.target.closest("#guidedTutorialSkipButton");
@@ -165,6 +167,7 @@ function bindEvents() {
     if (offlinePlanButton) changeOfflineRewardPlan(Number(offlinePlanButton.dataset.offlinePlan));
     if (offlineUnlockPlanButton) chooseInitialOfflineRewardPlan(Number(offlineUnlockPlanButton.dataset.offlineUnlockPlan));
     if (recruitCompanyUnlockClose) closeRecruitCompanyUnlockPopup();
+    if (lockedTabClose) closeLockedTabPopup();
     if (offlineClaimClose) closeOfflineRewardClaimPopup();
     if (worldTutorialConfirm) startGuidedTutorial();
     if (guidedTutorialNext) nextGuidedTutorialStep();
@@ -763,6 +766,18 @@ function closeRecruitCompanyUnlockPopup() {
   renderAll();
   saveState("동료 영입 / 회사 시스템 안내 확인 완료");
   window.setTimeout(startRecruitCompanyTutorial, 100);
+}
+
+function openLockedTabPopup() {
+  if (!refs.lockedTabModal) return;
+  refs.lockedTabModal.classList.add("is-visible");
+  refs.lockedTabModal.setAttribute("aria-hidden", "false");
+}
+
+function closeLockedTabPopup() {
+  if (!refs.lockedTabModal) return;
+  refs.lockedTabModal.classList.remove("is-visible");
+  refs.lockedTabModal.setAttribute("aria-hidden", "true");
 }
 
 function checkOfflineRewardUnlockPopup() {

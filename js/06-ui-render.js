@@ -1,4 +1,10 @@
 ﻿function switchTab(tab) {
+  if (["recruit", "tools"].includes(tab.dataset.tab) && typeof isRecruitCompanyUnlocked === "function" && !isRecruitCompanyUnlocked()) {
+    openLockedTabPopup();
+    renderBattle();
+    return;
+  }
+
   if (tab.dataset.tab === "recruit" && !isRecruitUnlocked()) {
     log(`동료 영입은 ${RECRUIT_UNLOCK_CHAPTER}스테이지 진입 후 해금됩니다.`);
     renderBattle();
@@ -85,8 +91,8 @@ function renderBattle() {
   document.querySelectorAll('.tab-button[data-tab="recruit"]').forEach((button) => {
     const locked = !isRecruitUnlocked();
     button.classList.toggle("is-locked", locked);
-    button.disabled = locked;
-    button.textContent = locked ? `동료 영입 (${RECRUIT_UNLOCK_CHAPTER}스테이지)` : "동료 영입";
+    button.disabled = false;
+    button.textContent = "동료 영입";
   });
   renderEquipment();
 }

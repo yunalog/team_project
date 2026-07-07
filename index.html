@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>스튜디오 크루 RPG</title>
-    <link rel="stylesheet" href="style.css?v=logout-flow-v1" />
+    <link rel="stylesheet" href="style.css?v=locked-tab-v1" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
   <body>
@@ -328,6 +328,15 @@
       </div>
     </div>
 
+    <div class="offline-unlock-modal" id="lockedTabModal" aria-hidden="true">
+      <div class="offline-unlock-card" role="dialog" aria-modal="true" aria-labelledby="lockedTabTitle">
+        <strong class="offline-unlock-badge">LOCKED</strong>
+        <h2 id="lockedTabTitle">2스테이지 이후 해금됩니다.</h2>
+        <p class="offline-unlock-main">1스테이지 보스를 클리어하면 동료 영입과 회사 탭을 사용할 수 있습니다.</p>
+        <button class="offline-claim-confirm" type="button" data-close-locked-tab>확인</button>
+      </div>
+    </div>
+
     <div class="offline-unlock-modal" id="offlineUnlockModal" aria-hidden="true">
       <div class="offline-unlock-card" role="dialog" aria-modal="true" aria-labelledby="offlineUnlockTitle">
         <strong class="offline-unlock-badge">NEW SYSTEM</strong>
@@ -464,13 +473,13 @@
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
 
-<script src="js/firebase.js?v=logout-flow-v1"></script>
+<script src="js/firebase.js?v=locked-tab-v1"></script>
 
-<script src="js/01-data.js?v=logout-flow-v1"></script>
-<script src="js/02-core.js?v=logout-flow-v1"></script>
-<script src="js/03-battle.js?v=logout-flow-v1"></script>
-<script src="js/04-recruits-company.js?v=logout-flow-v1"></script>
-<script src="js/05-equipment-growth.js?v=logout-flow-v1"></script>
-<script src="js/06-ui-render.js?v=logout-flow-v1"></script>
+<script src="js/01-data.js?v=locked-tab-v1"></script>
+<script src="js/02-core.js?v=locked-tab-v1"></script>
+<script src="js/03-battle.js?v=locked-tab-v1"></script>
+<script src="js/04-recruits-company.js?v=locked-tab-v1"></script>
+<script src="js/05-equipment-growth.js?v=locked-tab-v1"></script>
+<script src="js/06-ui-render.js?v=locked-tab-v1"></script>
   </body>
 </html>
