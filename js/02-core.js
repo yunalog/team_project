@@ -164,7 +164,7 @@ function bindEvents() {
     if (offlineClaimClose) closeOfflineRewardClaimPopup();
     if (worldTutorialConfirm) startGuidedTutorial();
     if (guidedTutorialNext) nextGuidedTutorialStep();
-    if (guidedTutorialSkip) completeStartTutorial();
+    if (guidedTutorialSkip) completeActiveTutorial();
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -363,6 +363,73 @@ const START_TUTORIAL_STEPS = [
   },
 ];
 
+const RECRUIT_COMPANY_TUTORIAL_STEPS = [
+  {
+    tab: "recruit",
+    selector: ".recruit-board__left",
+    title: "동료 영입 목록",
+    text: "여기에서 개발, 아트, 기획, 사운드, 연출, 데이터 분석 등 다양한 직군 카드를 확인할 수 있습니다. 카드를 누르면 오른쪽에 성장 정보가 표시됩니다.",
+    placement: "right",
+  },
+  {
+    tab: "recruit",
+    selector: ".recruit-class-card",
+    title: "직군 카드",
+    text: "각 카드는 직군 이름, 현재 승급명, 캐릭터 이미지, 핵심 능력치를 보여줍니다. 원하는 직군을 선택해 성장시킬 수 있습니다.",
+    placement: "right",
+  },
+  {
+    tab: "recruit",
+    selector: ".recruit-board__right",
+    title: "직군 성장",
+    text: "선택한 동료의 설명, 스킬, 현재 레벨을 확인하고 동료 획득·레벨업·승급을 진행하는 영역입니다.",
+    placement: "left",
+  },
+  {
+    tab: "recruit",
+    selector: ".recruit-focus-action",
+    fallbackSelector: ".recruit-board__right",
+    title: "동료 획득 / 레벨업 / 승급",
+    text: "동료가 없을 때는 동료 획득, 보유 중일 때는 레벨업을 진행합니다. Lv.10, 20, 30, 40, 50에 도달하면 승급 버튼으로 더 높은 직급명을 열 수 있습니다.",
+    placement: "left",
+  },
+  {
+    tab: "tools",
+    selector: ".company-scene-heading",
+    title: "회사 성장 현황",
+    text: "회사 탭으로 이동하면 위쪽 화면이 회사 현황으로 바뀝니다. 회사 레벨과 현재 규모, 다음 성장까지 필요한 EXP를 확인할 수 있습니다.",
+    placement: "bottom",
+  },
+  {
+    tab: "tools",
+    selector: "#toolList",
+    title: "회사 시설 확장",
+    text: "아이디어를 사용해 시설에 투자하면 회사 EXP가 오르고 회사 가치가 성장합니다. 회사가 성장할수록 보너스와 분위기가 좋아집니다.",
+    placement: "top",
+  },
+  {
+    tab: "tools",
+    selector: ".squad-management",
+    title: "업무 스쿼드 구성",
+    text: "영입한 동료를 대표와 함께 업무 스쿼드에 배치하는 영역입니다. 동료 3명까지 추가해 총 4명 팀을 구성할 수 있습니다.",
+    placement: "top",
+  },
+  {
+    tab: "tools",
+    selector: "#squadFormation",
+    title: "배치 위치",
+    text: "각 자리의 선택 목록에서 보유 동료를 골라 배치합니다. 배치된 동료는 전투 화면에 등장하고 자동으로 업무를 처리합니다.",
+    placement: "left",
+  },
+  {
+    tab: "tools",
+    selector: "#squadRoster",
+    title: "보유 동료 / 시너지",
+    text: "보유한 동료와 배치 상태를 확인할 수 있습니다. 특정 직군 조합을 맞추면 스쿼드 시너지 보너스가 발동합니다.",
+    placement: "left",
+  },
+];
+
 function openWorldTutorial() {
   if (!refs.worldTutorialModal) {
     startGuidedTutorial();
@@ -378,23 +445,60 @@ function closeWorldTutorial() {
   refs.worldTutorialModal.setAttribute("aria-hidden", "true");
 }
 
-function startGuidedTutorial() {
-  closeWorldTutorial();
-  const battleTab = document.querySelector('[data-tab="battle"]');
-  if (battleTab && activeTab !== "battle") switchTab(battleTab);
+function openGuidedTutorial(steps, mode = "start") {
+  activeTutorialMode = mode;
+  activeTutorialSteps = Array.isArray(steps) ? steps : [];
   activeTutorialStepIndex = 0;
+
   if (refs.guidedTutorial) {
     refs.guidedTutorial.classList.remove("is-hidden");
     refs.guidedTutorial.setAttribute("aria-hidden", "false");
   }
-  window.setTimeout(() => showGuidedTutorialStep(0), 80);
+
+  window.setTimeout(() => showGuidedTutorialStep(0), 90);
+}
+
+function startGuidedTutorial() {
+  closeWorldTutorial();
+  const battleTab = document.querySelector('[data-tab="battle"]');
+  if (battleTab && activeTab !== "battle") switchTab(battleTab);
+  openGuidedTutorial(START_TUTORIAL_STEPS, "start");
+}
+
+function startRecruitCompanyTutorial() {
+  if (!isRecruitCompanyUnlocked() || state.recruitCompanyTutorialCompleted) {
+    checkOfflineRewardUnlockPopup();
+    return;
+  }
+
+  const recruitTab = document.querySelector('[data-tab="recruit"]');
+  if (recruitTab && activeTab !== "recruit") switchTab(recruitTab);
+  renderAll();
+  openGuidedTutorial(RECRUIT_COMPANY_TUTORIAL_STEPS, "recruitCompany");
+}
+
+function getActiveTutorialSteps() {
+  return activeTutorialSteps?.length ? activeTutorialSteps : START_TUTORIAL_STEPS;
+}
+
+function prepareTutorialStep(step) {
+  if (!step?.tab || activeTab === step.tab) return;
+  const tab = document.querySelector(`[data-tab="${step.tab}"]`);
+  if (tab) {
+    switchTab(tab);
+    renderAll();
+  }
 }
 
 function getTutorialTarget(step) {
   if (!step?.selector) return null;
-  const found = document.querySelector(step.selector);
+  const found = document.querySelector(step.selector) || (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
   if (!found) return null;
-  return found.closest(".stat-grid > div, .resource-chip, .equipped-item-panel, .draw-machine-panel, button") || found;
+  return (
+    found.closest(
+      ".stat-grid > div, .resource-chip, .equipped-item-panel, .draw-machine-panel, .recruit-board__left, .recruit-board__right, .recruit-class-card, .recruit-focus-card, .recruit-focus-action, .company-scene-heading, .company-status-strip, .facility-list, .facility-card, .squad-management, .squad-layout, .squad-formation, .squad-roster, button"
+    ) || found
+  );
 }
 
 function clearTutorialHighlight() {
@@ -404,12 +508,14 @@ function clearTutorialHighlight() {
 
 function showGuidedTutorialStep(index) {
   if (!refs.guidedTutorial) return;
-  const step = START_TUTORIAL_STEPS[index];
+  const steps = getActiveTutorialSteps();
+  const step = steps[index];
   if (!step) {
-    completeStartTutorial();
+    completeActiveTutorial();
     return;
   }
 
+  prepareTutorialStep(step);
   clearTutorialHighlight();
   activeTutorialStepIndex = index;
   activeTutorialTarget = getTutorialTarget(step);
@@ -421,17 +527,18 @@ function showGuidedTutorialStep(index) {
     }
   }
 
-  if (refs.guidedTutorialCounter) refs.guidedTutorialCounter.textContent = `${index + 1} / ${START_TUTORIAL_STEPS.length}`;
+  if (refs.guidedTutorialCounter) refs.guidedTutorialCounter.textContent = `${index + 1} / ${steps.length}`;
   if (refs.guidedTutorialTitle) refs.guidedTutorialTitle.textContent = step.title;
   if (refs.guidedTutorialText) refs.guidedTutorialText.textContent = step.text;
-  if (refs.guidedTutorialNextButton) refs.guidedTutorialNextButton.textContent = index >= START_TUTORIAL_STEPS.length - 1 ? "튜토리얼 완료" : "다음";
+  if (refs.guidedTutorialNextButton) refs.guidedTutorialNextButton.textContent = index >= steps.length - 1 ? "튜토리얼 완료" : "다음";
 
-  window.setTimeout(positionGuidedTutorial, 120);
+  window.setTimeout(positionGuidedTutorial, 140);
 }
 
 function positionGuidedTutorial() {
   if (!refs.guidedTutorial || refs.guidedTutorial.classList.contains("is-hidden")) return;
-  const step = START_TUTORIAL_STEPS[activeTutorialStepIndex];
+  const steps = getActiveTutorialSteps();
+  const step = steps[activeTutorialStepIndex];
   if (!step || !activeTutorialTarget || !refs.guidedTutorialBubble) return;
 
   const rect = activeTutorialTarget.getBoundingClientRect();
@@ -469,23 +576,41 @@ function positionGuidedTutorial() {
   bubble.style.top = `${top}px`;
 }
 
-function nextGuidedTutorialStep() {
-  showGuidedTutorialStep(activeTutorialStepIndex + 1);
-}
-
-function completeStartTutorial() {
+function hideGuidedTutorial() {
   closeWorldTutorial();
   clearTutorialHighlight();
   if (refs.guidedTutorial) {
     refs.guidedTutorial.classList.add("is-hidden");
     refs.guidedTutorial.setAttribute("aria-hidden", "true");
   }
+}
+
+function nextGuidedTutorialStep() {
+  showGuidedTutorialStep(activeTutorialStepIndex + 1);
+}
+
+function completeActiveTutorial() {
+  if (activeTutorialMode === "recruitCompany") {
+    completeRecruitCompanyTutorial();
+    return;
+  }
+  completeStartTutorial();
+}
+
+function completeStartTutorial() {
+  hideGuidedTutorial();
   state.startTutorialCompleted = true;
   saveState("초반 튜토리얼 완료");
   checkRecruitCompanyUnlockPopup();
   checkOfflineRewardUnlockPopup();
 }
 
+function completeRecruitCompanyTutorial() {
+  hideGuidedTutorial();
+  state.recruitCompanyTutorialCompleted = true;
+  saveState("동료 영입 / 회사 튜토리얼 완료");
+  checkOfflineRewardUnlockPopup();
+}
 
 function isRecruitCompanyUnlocked() {
   const currentChapter = Math.max(1, Number(state?.chapter) || Number(state?.stage) || 1);
@@ -516,6 +641,7 @@ function closeRecruitCompanyUnlockPopup() {
   refs.recruitCompanyUnlockModal.setAttribute("aria-hidden", "true");
   renderAll();
   saveState("동료 영입 / 회사 시스템 안내 확인 완료");
+  window.setTimeout(startRecruitCompanyTutorial, 100);
 }
 
 function checkOfflineRewardUnlockPopup() {
@@ -817,6 +943,7 @@ function normalizeState(nextState) {
       : 8,
     offlineRewardUnlocked: Boolean(nextState.offlineRewardUnlocked),
     recruitCompanyUnlockShown: Boolean(nextState.recruitCompanyUnlockShown),
+    recruitCompanyTutorialCompleted: Boolean(nextState.recruitCompanyTutorialCompleted),
     startTutorialCompleted: Boolean(nextState.startTutorialCompleted),
     lastActiveAtMs: Number(nextState.lastActiveAtMs) || Date.now(),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},

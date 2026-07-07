@@ -38,8 +38,8 @@ button {
 }
 
 button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
+  cursor: default;
+  opacity: 0.62;
 }
 
 .is-hidden {
@@ -3335,9 +3335,9 @@ h1 {
 }
 
 .growth-upgrade-button:disabled {
-  cursor: not-allowed;
-  filter: grayscale(0.7);
-  opacity: 0.55;
+  cursor: default;
+  filter: grayscale(0.68) saturate(0.72);
+  opacity: 0.68;
 }
 
 .growth-note {
@@ -3517,9 +3517,10 @@ button:active:not(:disabled),
 }
 
 button:disabled {
-  filter: grayscale(0.45);
-  opacity: 0.58;
-  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.28);
+  cursor: default !important;
+  filter: grayscale(0.42) saturate(0.7);
+  opacity: 0.68;
+  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.22);
 }
 
 .shop-item button,
@@ -7041,4 +7042,45 @@ button.is-active:not(:disabled),
   .guided-tutorial__bubble p {
     font-size: 12px;
   }
+}
+
+
+/* Disabled buttons: keep the normal cursor shape and show only visual deactivation. */
+button:disabled,
+.shop-item button:disabled,
+.facility-card button:disabled,
+.growth-upgrade-button:disabled,
+.recruit-focus-action:disabled,
+.shop-promote-button:disabled,
+.battle-column-action:disabled,
+.equipment-upgrade-actions button:disabled,
+.equipment-actions button:disabled,
+.equipment-draw-button:disabled,
+.auto-draw-button:disabled,
+.tab-button:disabled {
+  cursor: default !important;
+}
+
+.shop-item button:disabled,
+.facility-card button:disabled,
+.growth-upgrade-button:disabled,
+.recruit-focus-action:disabled,
+.shop-promote-button:disabled,
+.battle-column-action:disabled,
+.equipment-upgrade-actions button:disabled,
+.equipment-actions button:disabled {
+  border-color: rgba(74, 43, 23, 0.45);
+  background: linear-gradient(180deg, #c7b9a2 0%, #857665 100%) !important;
+  color: rgba(255, 255, 255, 0.78);
+  text-shadow: none;
+  filter: saturate(0.65);
+  opacity: 0.76;
+  box-shadow: 0 2px 0 rgba(45, 33, 25, 0.2);
+}
+
+.equipment-draw-button:disabled,
+.auto-draw-button:disabled {
+  cursor: default !important;
+  filter: grayscale(0.5) saturate(0.65);
+  opacity: 0.7;
 }
