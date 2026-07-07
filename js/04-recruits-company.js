@@ -93,7 +93,13 @@ function getRecruitBoostLevel(id) {
 }
 
 function getRecruitBuyCost(recruit, count = getRecruitCount(recruit.id)) {
-  return 1;
+  const currentLevel = Math.max(0, Number(count) || 0);
+
+  // 최초 동료 획득 비용
+  if (currentLevel <= 0) return 50;
+
+  // 레벨업 비용: Lv.1 -> Lv.2는 10 자금, 이후 5 자금씩 증가
+  return 10 + (currentLevel - 1) * 5;
 }
 
 function getRecruitEnhancementCost(id) {
@@ -105,7 +111,10 @@ function getRecruitPromotionCount(id) {
 }
 
 function getRecruitPromotionCost(recruit) {
-  return 1;
+  const currentPromotionCount = Math.max(0, getRecruitPromotionCount(recruit.id));
+
+  // 승급 비용: 1차 승급 100 자금, 이후 100 자금씩 증가
+  return 100 * (currentPromotionCount + 1);
 }
 
 function shouldShowRecruitPromotionButton(recruit, count = getRecruitCount(recruit.id)) {
