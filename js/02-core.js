@@ -105,6 +105,16 @@
     audioVolumeSliders: [...document.querySelectorAll("[data-audio-volume]")],
     audioVolumeValues: [...document.querySelectorAll("[data-audio-value]")],
     bgmAudio: document.querySelector("#bgmAudio"),
+    worldTutorialModal: document.querySelector("#worldTutorialModal"),
+    worldTutorialConfirmButton: document.querySelector("#worldTutorialConfirmButton"),
+    guidedTutorial: document.querySelector("#guidedTutorial"),
+    guidedTutorialSpotlight: document.querySelector("#guidedTutorialSpotlight"),
+    guidedTutorialBubble: document.querySelector("#guidedTutorialBubble"),
+    guidedTutorialCounter: document.querySelector("#guidedTutorialCounter"),
+    guidedTutorialTitle: document.querySelector("#guidedTutorialTitle"),
+    guidedTutorialText: document.querySelector("#guidedTutorialText"),
+    guidedTutorialNextButton: document.querySelector("#guidedTutorialNextButton"),
+    guidedTutorialSkipButton: document.querySelector("#guidedTutorialSkipButton"),
   };
 
   state = loadState();
@@ -135,6 +145,9 @@ function bindEvents() {
     const offlineUnlockPlanButton = event.target.closest("[data-offline-unlock-plan]");
     const recruitCompanyUnlockClose = event.target.closest("[data-close-recruit-company-unlock]");
     const offlineClaimClose = event.target.closest("[data-close-offline-claim]");
+    const guidedTutorialNext = event.target.closest("#guidedTutorialNextButton");
+    const guidedTutorialSkip = event.target.closest("#guidedTutorialSkipButton");
+    const worldTutorialConfirm = event.target.closest("#worldTutorialConfirmButton");
 
     if (tab) switchTab(tab);
     if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
@@ -149,6 +162,9 @@ function bindEvents() {
     if (offlineUnlockPlanButton) chooseInitialOfflineRewardPlan(Number(offlineUnlockPlanButton.dataset.offlineUnlockPlan));
     if (recruitCompanyUnlockClose) closeRecruitCompanyUnlockPopup();
     if (offlineClaimClose) closeOfflineRewardClaimPopup();
+    if (worldTutorialConfirm) startGuidedTutorial();
+    if (guidedTutorialNext) nextGuidedTutorialStep();
+    if (guidedTutorialSkip) completeStartTutorial();
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -179,7 +195,10 @@ function bindEvents() {
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
   document.addEventListener("change", handleSquadChange);
+  window.addEventListener("resize", positionGuidedTutorial);
+  window.addEventListener("scroll", positionGuidedTutorial, true);
 }
+
 
 async function startGame() {
   hasStartedGame = true;
@@ -226,8 +245,12 @@ async function startGame() {
   refs.gameShell.classList.remove("is-hidden");
   playBgm(getActiveBgmKey());
   renderAll();
-  checkRecruitCompanyUnlockPopup();
-  checkOfflineRewardUnlockPopup();
+  if (!state.startTutorialCompleted) {
+    openWorldTutorial();
+  } else {
+    checkRecruitCompanyUnlockPopup();
+    checkOfflineRewardUnlockPopup();
+  }
   startLoop();
 }
 
@@ -286,6 +309,181 @@ async function changeOfflineRewardPlan(hours) {
   }
 
   renderAll();
+}
+
+
+const START_TUTORIAL_STEPS = [
+  {
+    selector: ".resource-chip--gold",
+    title: "자금",
+    text: "업무를 처리하면 획득하는 기본 재화입니다. 동료 획득, 레벨업, 승급, 대표 역량 강화 등에 사용됩니다.",
+    placement: "bottom",
+  },
+  {
+    selector: ".resource-chip--idea",
+    title: "아이디어",
+    text: "직접 처리나 업무 완료 보상으로 얻는 성장 재화입니다. 장비 연구나 일부 성장 요소에 활용됩니다.",
+    placement: "bottom",
+  },
+  {
+    selector: "#teamCountText",
+    title: "팀 규모",
+    text: "현재 전투에 참여하는 대표와 동료 수를 보여줍니다. 동료를 영입하고 스쿼드에 배치하면 팀 규모가 커집니다.",
+    placement: "top",
+  },
+  {
+    selector: "#clickPowerText",
+    title: "클릭 기여도",
+    text: "직접 처리 버튼을 눌렀을 때 들어가는 수동 기여도입니다. 대표 역량과 성장 강화로 올릴 수 있습니다.",
+    placement: "top",
+  },
+  {
+    selector: "#clearCountText",
+    title: "처리한 업무",
+    text: "지금까지 완료한 업무 수입니다. 업무를 많이 처리할수록 회사가 성장할 기반이 쌓입니다.",
+    placement: "top",
+  },
+  {
+    selector: "#upgradePlayerButton",
+    title: "대표 역량 강화",
+    text: "자금을 사용해 대표의 기본 능력을 강화합니다. 초반에는 대표 역량을 올리면 업무 처리 속도가 안정적으로 빨라집니다.",
+    placement: "right",
+  },
+  {
+    selector: "#equippedItemPanel",
+    title: "장착 장비",
+    text: "뽑기로 얻은 장비를 장착하면 대표의 공격력과 스킬 공격력이 증가합니다. 목록 보기 버튼으로 장착 현황을 확인할 수 있습니다.",
+    placement: "right",
+  },
+  {
+    selector: ".draw-machine-panel",
+    title: "뽑기 / 자동 뽑기",
+    text: "자금을 사용해 장비를 뽑습니다. 자동 뽑기는 더 좋은 장비가 나올 때까지 반복 시도하는 기능입니다.",
+    placement: "left",
+  },
+];
+
+function openWorldTutorial() {
+  if (!refs.worldTutorialModal) {
+    startGuidedTutorial();
+    return;
+  }
+  refs.worldTutorialModal.classList.remove("is-hidden");
+  refs.worldTutorialModal.setAttribute("aria-hidden", "false");
+}
+
+function closeWorldTutorial() {
+  if (!refs.worldTutorialModal) return;
+  refs.worldTutorialModal.classList.add("is-hidden");
+  refs.worldTutorialModal.setAttribute("aria-hidden", "true");
+}
+
+function startGuidedTutorial() {
+  closeWorldTutorial();
+  const battleTab = document.querySelector('[data-tab="battle"]');
+  if (battleTab && activeTab !== "battle") switchTab(battleTab);
+  activeTutorialStepIndex = 0;
+  if (refs.guidedTutorial) {
+    refs.guidedTutorial.classList.remove("is-hidden");
+    refs.guidedTutorial.setAttribute("aria-hidden", "false");
+  }
+  window.setTimeout(() => showGuidedTutorialStep(0), 80);
+}
+
+function getTutorialTarget(step) {
+  if (!step?.selector) return null;
+  const found = document.querySelector(step.selector);
+  if (!found) return null;
+  return found.closest(".stat-grid > div, .resource-chip, .equipped-item-panel, .draw-machine-panel, button") || found;
+}
+
+function clearTutorialHighlight() {
+  if (activeTutorialTarget) activeTutorialTarget.classList.remove("is-tutorial-highlight");
+  activeTutorialTarget = null;
+}
+
+function showGuidedTutorialStep(index) {
+  if (!refs.guidedTutorial) return;
+  const step = START_TUTORIAL_STEPS[index];
+  if (!step) {
+    completeStartTutorial();
+    return;
+  }
+
+  clearTutorialHighlight();
+  activeTutorialStepIndex = index;
+  activeTutorialTarget = getTutorialTarget(step);
+
+  if (activeTutorialTarget) {
+    activeTutorialTarget.classList.add("is-tutorial-highlight");
+    if (typeof activeTutorialTarget.scrollIntoView === "function") {
+      activeTutorialTarget.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+    }
+  }
+
+  if (refs.guidedTutorialCounter) refs.guidedTutorialCounter.textContent = `${index + 1} / ${START_TUTORIAL_STEPS.length}`;
+  if (refs.guidedTutorialTitle) refs.guidedTutorialTitle.textContent = step.title;
+  if (refs.guidedTutorialText) refs.guidedTutorialText.textContent = step.text;
+  if (refs.guidedTutorialNextButton) refs.guidedTutorialNextButton.textContent = index >= START_TUTORIAL_STEPS.length - 1 ? "튜토리얼 완료" : "다음";
+
+  window.setTimeout(positionGuidedTutorial, 120);
+}
+
+function positionGuidedTutorial() {
+  if (!refs.guidedTutorial || refs.guidedTutorial.classList.contains("is-hidden")) return;
+  const step = START_TUTORIAL_STEPS[activeTutorialStepIndex];
+  if (!step || !activeTutorialTarget || !refs.guidedTutorialBubble) return;
+
+  const rect = activeTutorialTarget.getBoundingClientRect();
+  const padding = 10;
+  const spotlightPadding = 8;
+  const bubble = refs.guidedTutorialBubble;
+  const bubbleWidth = Math.min(310, window.innerWidth - 28);
+  bubble.style.width = `${bubbleWidth}px`;
+  bubble.style.maxWidth = `${bubbleWidth}px`;
+
+  if (refs.guidedTutorialSpotlight) {
+    refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
+    refs.guidedTutorialSpotlight.style.top = `${Math.max(8, rect.top - spotlightPadding)}px`;
+    refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;
+    refs.guidedTutorialSpotlight.style.height = `${Math.min(window.innerHeight - 16, rect.height + spotlightPadding * 2)}px`;
+  }
+
+  const bubbleHeight = bubble.offsetHeight || 168;
+  let left = rect.left + rect.width / 2 - bubbleWidth / 2;
+  let top = rect.bottom + 16;
+
+  if (step.placement === "top") {
+    top = rect.top - bubbleHeight - 16;
+  } else if (step.placement === "left") {
+    left = rect.left - bubbleWidth - 16;
+    top = rect.top + rect.height / 2 - bubbleHeight / 2;
+  } else if (step.placement === "right") {
+    left = rect.right + 16;
+    top = rect.top + rect.height / 2 - bubbleHeight / 2;
+  }
+
+  left = Math.max(padding, Math.min(window.innerWidth - bubbleWidth - padding, left));
+  top = Math.max(padding, Math.min(window.innerHeight - bubbleHeight - padding, top));
+  bubble.style.left = `${left}px`;
+  bubble.style.top = `${top}px`;
+}
+
+function nextGuidedTutorialStep() {
+  showGuidedTutorialStep(activeTutorialStepIndex + 1);
+}
+
+function completeStartTutorial() {
+  closeWorldTutorial();
+  clearTutorialHighlight();
+  if (refs.guidedTutorial) {
+    refs.guidedTutorial.classList.add("is-hidden");
+    refs.guidedTutorial.setAttribute("aria-hidden", "true");
+  }
+  state.startTutorialCompleted = true;
+  saveState("초반 튜토리얼 완료");
+  checkRecruitCompanyUnlockPopup();
+  checkOfflineRewardUnlockPopup();
 }
 
 
@@ -619,6 +817,7 @@ function normalizeState(nextState) {
       : 8,
     offlineRewardUnlocked: Boolean(nextState.offlineRewardUnlocked),
     recruitCompanyUnlockShown: Boolean(nextState.recruitCompanyUnlockShown),
+    startTutorialCompleted: Boolean(nextState.startTutorialCompleted),
     lastActiveAtMs: Number(nextState.lastActiveAtMs) || Date.now(),
     recruits: nextState.recruits && typeof nextState.recruits === "object" ? nextState.recruits : {},
     squad:
