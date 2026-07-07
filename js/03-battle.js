@@ -206,6 +206,53 @@ function recoverUnitsForNewWave() {
   });
 }
 
+function syncManualWorkCharge() {
+  const currentChapter = Math.max(1, Number(state.chapter) || 1);
+  if (state.manualWorkChapter === currentChapter) return false;
+
+  state.manualWorkChapter = currentChapter;
+  state.manualWorkUses = 0;
+  return true;
+}
+
+function getManualWorkRemaining() {
+  syncManualWorkCharge();
+  return Math.max(0, MANUAL_WORK_MAX_COUNT - Math.min(MANUAL_WORK_MAX_COUNT, Math.max(0, Number(state.manualWorkUses) || 0)));
+}
+
+function useManualWork() {
+  syncManualWorkCharge();
+
+  if (isSpawningNext || !getTargetEnemy()) {
+    log("처리할 업무가 아직 도착하지 않았습니다.");
+    return;
+  }
+
+  if (getManualWorkRemaining() <= 0) {
+    log(`${state.chapter}스테이지 직접처리 횟수를 모두 사용했습니다.`);
+    renderBattle();
+    return;
+  }
+
+  const unit = getPlayerUnit(getManualPower());
+  if (!isUnitAlive(unit.id)) {
+    log("대표가 회복될 때까지 직접처리를 사용할 수 없습니다.");
+    return;
+  }
+
+  state.manualWorkUses = Math.min(MANUAL_WORK_MAX_COUNT, Math.max(0, Number(state.manualWorkUses) || 0) + 1);
+  attackUnit(unit, { manual: true });
+  renderBattle();
+}
+
+function triggerManualWorkRechargeEffect() {
+  if (!refs.manualWorkButton) return;
+
+  refs.manualWorkButton.classList.remove("is-recharged");
+  window.requestAnimationFrame(() => refs.manualWorkButton.classList.add("is-recharged"));
+  window.setTimeout(() => refs.manualWorkButton.classList.remove("is-recharged"), 1100);
+}
+
 function updateMonsterAttacks(delta) {
   if (isSpawningNext || !state.enemies.length) return;
 
@@ -824,7 +871,7 @@ function completeWave(manual) {
   state.idea += bonusIdea;
   if (clearedBoss) {
     state.equipment = state.equipment || {};
-    state.equipment.speedTickets = Math.max(0, Number(state.equipment.speedTickets) || 0) + 1;
+    state.equipment.speedTickets = Math.min(SPEED_TICKET_MAX_COUNT, Math.max(0, Number(state.equipment.speedTickets) || 0) + 1);
   }
   log(clearedBoss ? `${state.chapter}스테이지 보스 클리어! 아이디어 +${bonusIdea}, 가속티켓 +1` : `${getProgressLabel()} 클리어!`);
 
@@ -860,6 +907,9 @@ function advanceBattleLayer() {
     state.chapter += 1;
     state.subStage = 1;
     state.battleMode = "normal";
+    state.manualWorkChapter = state.chapter;
+    state.manualWorkUses = 0;
+    triggerManualWorkRechargeEffect();
   } else if (state.subStage >= NORMAL_STAGES_PER_CHAPTER) {
     state.battleMode = "boss";
   } else {

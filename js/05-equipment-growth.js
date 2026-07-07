@@ -271,19 +271,19 @@ function getPlayerUpgradeCost(level = state.playerLevel) {
 }
 
 function getPlayerPower() {
-  const levelBonus = Math.max(0, state.playerLevel - 1) * 0.22;
+  const levelBonus = Math.max(0, state.playerLevel - 1) * 0.22 * PLAYER_UPGRADE_STAT_RATE;
   const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
   return roundStat(1 + levelBonus + equipmentBonus);
 }
 
 function getPlayerSkillPower() {
-  const levelBonus = Math.max(0, state.playerLevel - 1) * 0.26;
+  const levelBonus = Math.max(0, state.playerLevel - 1) * 0.26 * PLAYER_UPGRADE_STAT_RATE;
   const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
   return roundStat(1 + levelBonus + equipmentBonus);
 }
 
 function getManualPower() {
-  const representativeBonus = Math.max(0, state.clickPower - 1) * 0.2;
+  const representativeBonus = Math.max(0, state.clickPower - 1) * 0.2 * PLAYER_UPGRADE_STAT_RATE;
   const processBonus = Math.max(0, (state.growthLevels?.process || 0)) * 0.5;
   return roundStat(1 + representativeBonus + processBonus);
 }

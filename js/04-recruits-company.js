@@ -167,7 +167,7 @@ function getRecruitBattleStats(recruit) {
   const toolBonus = tools
     .filter((tool) => tool.target === recruit.id)
     .reduce((bonus, tool) => bonus + getToolLevel(tool.id) * tool.dps, 0);
-  const boostBonus = getRecruitBoostLevel(recruit.id);
+  const boostBonus = getRecruitBoostLevel(recruit.id) * RECRUIT_LEVEL_UP_STAT_RATE;
   const attackPower = base.attackPower + levelBonus * 0.07 + promotionTier * 0.85 + toolBonus + boostBonus * 0.65;
   const skillPower = hasRecruitSkillPowerStat(recruit)
     ? (base.skillPower || base.attackPower || 1) + levelBonus * 0.09 + promotionTier * 1.05 + boostBonus * 0.45

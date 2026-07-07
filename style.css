@@ -2088,6 +2088,34 @@ h1 {
   }
 }
 
+@keyframes manual-work-recharged {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 rgba(34, 197, 94, 0), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    filter: brightness(1);
+  }
+  28% {
+    transform: translateY(-1px) scale(1.04);
+    box-shadow:
+      0 0 0 3px rgba(34, 197, 94, 0.22),
+      0 0 14px rgba(34, 197, 94, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    filter: brightness(1.18);
+  }
+  62% {
+    transform: translateY(0) scale(1.01);
+    box-shadow:
+      0 0 0 1px rgba(34, 197, 94, 0.12),
+      0 0 8px rgba(34, 197, 94, 0.32);
+    filter: brightness(1.08);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 rgba(34, 197, 94, 0);
+    filter: brightness(1);
+  }
+}
+
 .message-line {
   display: flex;
   align-items: center;
@@ -4529,6 +4557,27 @@ textarea {
   padding-inline: 15px;
   font-size: 15px !important;
   white-space: nowrap;
+}
+
+.manual-work-control {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  min-width: 142px;
+}
+
+.manual-work-limit {
+  color: #5b361e;
+  font-size: 11px !important;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 247, 229, 0.9);
+  font-variant-numeric: tabular-nums;
+}
+
+#manualWorkButton.is-recharged {
+  animation: manual-work-recharged 0.92s ease-out 1;
 }
 
 .company-status-strip {

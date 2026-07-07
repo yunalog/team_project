@@ -76,6 +76,7 @@
     growthHpValue: document.querySelector("#growthHpValue"),
     toolList: document.querySelector("#toolList"),
     manualWorkButton: document.querySelector("#manualWorkButton"),
+    manualWorkLimitText: document.querySelector("#manualWorkLimitText"),
     upgradePlayerButton: document.querySelector("#upgradePlayerButton"),
     nextStageButton: document.querySelector("#nextStageButton"),
     equipmentDrawButton: document.querySelector("#equipmentDrawButton"),
@@ -175,7 +176,7 @@ function bindEvents() {
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
-    attackUnit(getPlayerUnit(getManualPower()), { manual: true });
+    useManualWork();
   });
   refs.upgradePlayerButton.addEventListener("click", upgradePlayer);
   refs.nextStageButton.addEventListener("click", () => {
@@ -1069,6 +1070,8 @@ function normalizeState(nextState) {
     unitHp: nextState.unitHp && typeof nextState.unitHp === "object" ? nextState.unitHp : {},
     unitMaxHp: nextState.unitMaxHp && typeof nextState.unitMaxHp === "object" ? nextState.unitMaxHp : {},
     clickPower: Math.max(1, Number(nextState.clickPower) || 1),
+    manualWorkUses: Math.min(MANUAL_WORK_MAX_COUNT, Math.max(0, Number(nextState.manualWorkUses) || 0)),
+    manualWorkChapter: Math.max(1, Number(nextState.manualWorkChapter) || Number(nextState.chapter) || Number(nextState.stage) || 1),
     playerLevel: Math.max(1, Number(nextState.playerLevel) || 1),
     clearCount: Math.max(0, Number(nextState.clearCount) || 0),
     companyXp: Math.max(0, Number(nextState.companyXp) || deriveCompanyXp(nextState)),
@@ -1163,7 +1166,7 @@ function normalizeEquipment(equipment) {
     gradeLevel: Math.min(getMaxEquipmentUpgradeLevel(), Math.max(1, Number(safeEquipment.gradeLevel) || 1)),
     upgradeRemaining: Math.max(0, Number(safeEquipment.upgradeRemaining) || 0),
     upgradingTo: safeEquipment.upgradingTo ? Number(safeEquipment.upgradingTo) : null,
-    speedTickets: Math.max(0, Number(safeEquipment.speedTickets) || 0),
+    speedTickets: Math.min(SPEED_TICKET_MAX_COUNT, Math.max(0, Number(safeEquipment.speedTickets) || 0)),
   };
 }
 
