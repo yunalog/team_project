@@ -1,5 +1,14 @@
 function switchTab(tab) {
-  activeTab = tab.dataset.tab;
+  const nextTab = tab.dataset.tab;
+  const isLockedSystemTab = (nextTab === "recruit" || nextTab === "tools") && typeof isRecruitCompanyUnlocked === "function" && !isRecruitCompanyUnlocked();
+
+  if (isLockedSystemTab) {
+    log("동료 영입과 회사 시스템은 2스테이지부터 사용할 수 있습니다.");
+    checkRecruitCompanyUnlockPopup();
+    return;
+  }
+
+  activeTab = nextTab;
   document.querySelectorAll(".tab-button").forEach((button) => button.classList.toggle("is-active", button === tab));
   document
     .querySelectorAll(".tab-panel")
@@ -18,6 +27,7 @@ function renderAll() {
   renderEnemies();
   renderBattle();
   renderOfflineRewardSetting();
+  renderSystemUnlockState();
 }
 
 function renderOfflineRewardSetting() {
@@ -583,4 +593,50 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initGame);
 } else {
   initGame();
+}
+
+
+function renderSystemUnlockState() {
+  const unlocked = typeof isRecruitCompanyUnlocked !== "function" || isRecruitCompanyUnlocked();
+
+  document.querySelectorAll('[data-tab="recruit"], [data-tab="tools"]').forEach((button) => {
+    button.classList.toggle("is-locked", !unlocked);
+    button.setAttribute("aria-disabled", String(!unlocked));
+    button.title = unlocked ? "" : "2스테이지부터 해금됩니다";
+  });
+
+  if (!unlocked) {
+    if (refs.recruitList) {
+      refs.recruitList.innerHTML = `
+        <div class="recruit-placeholder system-locked-card">
+          <strong>2스테이지부터 해금</strong>
+          <p>1스테이지 보스를 클리어하면 동료 영입과 직군 성장을 사용할 수 있습니다.</p>
+        </div>
+      `;
+    }
+
+    if (refs.recruitGrowthPanel) {
+      refs.recruitGrowthPanel.innerHTML = `
+        <div class="recruit-focus-empty system-locked-card">
+          <strong>동료 성장 대기 중</strong>
+          <p>2스테이지에 진입하면 레벨업, 승급, 스쿼드 구성이 열립니다.</p>
+        </div>
+      `;
+    }
+
+    if (refs.toolList) {
+      refs.toolList.innerHTML = `
+        <div class="facility-card system-locked-card">
+          <span class="facility-icon">🔒</span>
+          <div class="facility-copy">
+            <strong>회사 성장 준비 중</strong>
+            <span>2스테이지부터 회사 성장과 업무 스쿼드 구성을 사용할 수 있습니다.</span>
+          </div>
+        </div>
+      `;
+    }
+
+    if (refs.squadFormation) refs.squadFormation.innerHTML = "";
+    if (refs.squadRoster) refs.squadRoster.innerHTML = "";
+  }
 }

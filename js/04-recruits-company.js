@@ -542,6 +542,11 @@ function costFor(baseCost, count) {
 }
 
 function buyRecruit(id) {
+  if (typeof isRecruitCompanyUnlocked === "function" && !isRecruitCompanyUnlocked()) {
+    log("동료 영입은 2스테이지부터 사용할 수 있습니다.");
+    return;
+  }
+
   const recruit = recruits.find((item) => item.id === id);
   const count = getRecruitCount(id);
   const cost = getRecruitBuyCost(recruit, count);
@@ -558,6 +563,11 @@ function buyRecruit(id) {
 }
 
 function buyTool(id) {
+  if (typeof isRecruitCompanyUnlocked === "function" && !isRecruitCompanyUnlocked()) {
+    log("회사 성장은 2스테이지부터 사용할 수 있습니다.");
+    return;
+  }
+
   const tool = tools.find((item) => item.id === id);
   const level = getToolLevel(id);
   const cost = costFor(tool.baseCost, level);
