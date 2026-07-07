@@ -132,6 +132,7 @@ function bindEvents() {
     const growthButton = event.target.closest("[data-upgrade-growth]");
     const offlinePlanButton = event.target.closest("[data-offline-plan]");
     const offlineUnlockPlanButton = event.target.closest("[data-offline-unlock-plan]");
+    const offlineClaimDismiss = event.target.closest("[data-close-offline-claim]");
 
     if (tab) switchTab(tab);
     if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
@@ -144,6 +145,7 @@ function bindEvents() {
     if (growthButton) upgradeGrowth(growthButton.dataset.upgradeGrowth);
     if (offlinePlanButton) changeOfflineRewardPlan(Number(offlinePlanButton.dataset.offlinePlan));
     if (offlineUnlockPlanButton) chooseInitialOfflineRewardPlan(Number(offlineUnlockPlanButton.dataset.offlineUnlockPlan));
+    if (offlineClaimDismiss) closeOfflineRewardClaimPopup();
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
