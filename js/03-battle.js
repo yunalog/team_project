@@ -199,7 +199,10 @@ function recoverUnitsForNewWave() {
     const currentHp = getUnitHp(unit.id);
     const recoveryFloor = Math.ceil(maxHp * 0.56);
     const recoveryGain = Math.ceil(maxHp * 0.18);
-    state.unitHp[unit.id] = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
+    const nextHp = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
+    const healedAmount = roundStat(nextHp - currentHp);
+    state.unitHp[unit.id] = nextHp;
+    if (healedAmount > 0) showUnitHeal(healedAmount, unit);
   });
 }
 
@@ -953,6 +956,32 @@ function showUnitDamage(amount, unit, enemy) {
   damage.style.setProperty("--damage-tilt-end", "-5deg");
   refs.effectLayer.appendChild(damage);
   window.setTimeout(() => damage.remove(), 920);
+}
+
+function showUnitHeal(amount, unit) {
+  if (!refs.effectLayer) return;
+
+  const position = getUnitPosition(unit.id);
+  const heal = document.createElement("span");
+  heal.className = "damage-number is-unit-heal";
+  heal.textContent = `+${formatStatValue(amount)}`;
+  heal.style.setProperty("--hit-x", `${position.x}%`);
+  heal.style.setProperty("--hit-y", `${position.y + 112}px`);
+  heal.style.setProperty("--damage-x-pop", "0px");
+  heal.style.setProperty("--damage-x-apex", "0px");
+  heal.style.setProperty("--damage-x-drop", "0px");
+  heal.style.setProperty("--damage-x-end", "0px");
+  heal.style.setProperty("--damage-y-pop", "-20px");
+  heal.style.setProperty("--damage-y-apex", "-44px");
+  heal.style.setProperty("--damage-y-drop", "-18px");
+  heal.style.setProperty("--damage-y-end", "-8px");
+  heal.style.setProperty("--damage-tilt-start", "0deg");
+  heal.style.setProperty("--damage-tilt-pop", "-3deg");
+  heal.style.setProperty("--damage-tilt-apex", "2deg");
+  heal.style.setProperty("--damage-tilt-drop", "0deg");
+  heal.style.setProperty("--damage-tilt-end", "0deg");
+  refs.effectLayer.appendChild(heal);
+  window.setTimeout(() => heal.remove(), 980);
 }
 
 function pulseUnit(unitId, className, duration) {
