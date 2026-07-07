@@ -805,6 +805,9 @@ function defeatEnemy(enemyId, manual) {
   state.idea += ideaGain;
   state.clearCount += 1;
 
+  // 자금 획득 직후 강화/뽑기 버튼의 활성화 상태가 바로 반영되도록 즉시 갱신합니다.
+  if (typeof renderBattle === "function") renderBattle();
+
   if (!state.enemies.length) completeWave(manual);
 }
 

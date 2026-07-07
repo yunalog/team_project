@@ -271,6 +271,7 @@ function renderRecruitGrowthPanel() {
   const actionDataset = promotionReady ? `data-recruit-promote="${recruit.id}"` : `data-buy-recruit="${recruit.id}"`;
   const actionClass = promotionReady ? "shop-promote-button recruit-focus-action" : "recruit-focus-action";
   const actionDisabled = promotionReady ? state.gold < promotionCost : state.gold < cost;
+  const actionCost = promotionReady ? promotionCost : cost;
   const buttonText = promotionReady ? `승급 💵 ${promotionCost}` : count <= 0 ? `동료 획득 💵 ${cost}` : `레벨업 💵 ${cost}`;
 
   refs.recruitGrowthPanel.innerHTML = `
@@ -287,9 +288,26 @@ function renderRecruitGrowthPanel() {
           <span>${getRecruitSkillText(recruit)}</span>
         </div>
       </div>
-      <button class="${actionClass}" type="button" ${actionDataset} ${actionDisabled ? "disabled" : ""}>${buttonText}</button>
+      <button class="${actionClass}${actionDisabled ? " is-unaffordable" : ""}" type="button" ${actionDataset} data-action-cost="${actionCost}" aria-disabled="${String(actionDisabled)}" ${actionDisabled ? "disabled" : ""}>${buttonText}</button>
     </div>
   `;
+}
+
+function refreshRecruitGrowthActionState() {
+  if (!refs.recruitGrowthPanel) return;
+  const recruit = getSelectedRecruitForGrowth();
+  const button = refs.recruitGrowthPanel.querySelector(".recruit-focus-action");
+  if (!recruit || !button) return;
+
+  const count = getRecruitCount(recruit.id);
+  const promotionReady = shouldShowRecruitPromotionButton(recruit, count);
+  const cost = promotionReady ? getRecruitPromotionCost(recruit) : getRecruitBuyCost(recruit, count);
+  const isUnaffordable = state.gold < cost;
+
+  button.disabled = isUnaffordable;
+  button.classList.toggle("is-unaffordable", isUnaffordable);
+  button.setAttribute("aria-disabled", String(isUnaffordable));
+  button.dataset.actionCost = String(cost);
 }
 
 function renderRecruitDetailModal() {

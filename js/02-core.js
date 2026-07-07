@@ -891,6 +891,7 @@ function tick(delta) {
     }
 
     renderBattle();
+    if (typeof refreshCostSensitiveButtonStates === "function") refreshCostSensitiveButtonStates();
   } catch (error) {
     log(`?꾪닾 猷⑦봽 ?ㅻ쪟: ${error.message}`);
   }

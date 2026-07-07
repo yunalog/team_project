@@ -69,11 +69,18 @@ function renderBattle() {
   document.querySelectorAll("[data-upgrade-growth]").forEach((button) => {
     const type = button.dataset.upgradeGrowth;
     const cost = getGrowthCost(type);
+    const isUnaffordable = state.gold < cost;
     button.textContent = `강화 (${cost} 자금)`;
-    button.disabled = state.gold < cost;
+    button.disabled = isUnaffordable;
+    button.classList.toggle("is-unaffordable", isUnaffordable);
+    button.setAttribute("aria-disabled", String(isUnaffordable));
   });
+
+  const isPlayerUpgradeUnaffordable = state.gold < playerCost;
   refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
-  refs.upgradePlayerButton.disabled = false;
+  refs.upgradePlayerButton.disabled = isPlayerUpgradeUnaffordable;
+  refs.upgradePlayerButton.classList.toggle("is-unaffordable", isPlayerUpgradeUnaffordable);
+  refs.upgradePlayerButton.setAttribute("aria-disabled", String(isPlayerUpgradeUnaffordable));
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
   document.querySelectorAll('.tab-button[data-tab="recruit"]').forEach((button) => {
     const locked = !isRecruitUnlocked();
@@ -89,13 +96,20 @@ function renderEquipment() {
   const equipped = pending ? getEquippedItem(pending.slot) : null;
   const cost = getEquipmentDrawCost();
 
+  const isDrawingLocked = Boolean(pending) || isAutoDrawing();
+  const isDrawUnaffordable = state.gold < cost && !isDrawingLocked;
+  const isAutoDrawUnaffordable = state.gold < cost && !pending && !isAutoDrawing();
+
   refs.equipmentDrawCost.textContent = `${cost} 자금`;
-  refs.equipmentDrawButton.disabled = Boolean(pending) || isAutoDrawing();
-  refs.equipmentDrawButton.classList.toggle("is-unaffordable", state.gold < cost && !pending);
+  refs.equipmentDrawButton.disabled = isDrawingLocked || isDrawUnaffordable;
+  refs.equipmentDrawButton.classList.toggle("is-unaffordable", isDrawUnaffordable);
   refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
+  refs.equipmentDrawButton.setAttribute("aria-disabled", String(isDrawingLocked || isDrawUnaffordable));
   refs.autoDrawButton.textContent = isAutoDrawing() ? "자동 중지" : "자동 뽑기";
-  refs.autoDrawButton.disabled = Boolean(pending);
+  refs.autoDrawButton.disabled = Boolean(pending) || isAutoDrawUnaffordable;
+  refs.autoDrawButton.classList.toggle("is-unaffordable", isAutoDrawUnaffordable);
   refs.autoDrawButton.classList.toggle("is-running", isAutoDrawing());
+  refs.autoDrawButton.setAttribute("aria-disabled", String(refs.autoDrawButton.disabled));
   renderEquippedItems();
   renderEquipmentUpgrade();
 
@@ -109,6 +123,64 @@ function renderEquipment() {
   refs.equipmentName.textContent = `${pending.grade} ${pending.name}`;
   refs.equipmentName.style.color = pending.gradeColor;
   refs.equipmentBonus.innerHTML = formatEquipmentBonus(pending, equipped);
+}
+
+function refreshCostSensitiveButtonStates() {
+  if (!state || !refs) return;
+
+  if (refs.goldText) refs.goldText.textContent = Math.floor(state.gold);
+  if (refs.ideaText) refs.ideaText.textContent = Math.floor(state.idea);
+
+  document.querySelectorAll("[data-upgrade-growth]").forEach((button) => {
+    const type = button.dataset.upgradeGrowth;
+    if (!type || typeof getGrowthCost !== "function") return;
+    const cost = getGrowthCost(type);
+    const isUnaffordable = state.gold < cost;
+    button.disabled = isUnaffordable;
+    button.classList.toggle("is-unaffordable", isUnaffordable);
+    button.setAttribute("aria-disabled", String(isUnaffordable));
+  });
+
+  if (refs.upgradePlayerButton) {
+    const playerCost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
+    const isUnaffordable = state.gold < playerCost;
+    refs.upgradePlayerButton.disabled = isUnaffordable;
+    refs.upgradePlayerButton.classList.toggle("is-unaffordable", isUnaffordable);
+    refs.upgradePlayerButton.setAttribute("aria-disabled", String(isUnaffordable));
+  }
+
+  if (typeof refreshRecruitGrowthActionState === "function") {
+    refreshRecruitGrowthActionState();
+  }
+
+  if (refs.recruitDetailEnhanceButton && activeRecruitDetailId) {
+    const cost = getRecruitEnhancementCost(activeRecruitDetailId);
+    const isUnaffordable = state.gold < cost;
+    refs.recruitDetailEnhanceButton.disabled = isUnaffordable;
+    refs.recruitDetailEnhanceButton.classList.toggle("is-unaffordable", isUnaffordable);
+    refs.recruitDetailEnhanceButton.setAttribute("aria-disabled", String(isUnaffordable));
+  }
+
+  if (refs.equipmentDrawButton && typeof getEquipmentDrawCost === "function") {
+    const cost = getEquipmentDrawCost();
+    const pending = getPendingEquipment();
+    const isDrawingLocked = Boolean(pending) || isAutoDrawing();
+    const isDrawUnaffordable = state.gold < cost && !isDrawingLocked;
+    refs.equipmentDrawButton.disabled = isDrawingLocked || isDrawUnaffordable;
+    refs.equipmentDrawButton.classList.toggle("is-unaffordable", isDrawUnaffordable);
+    refs.equipmentDrawButton.classList.toggle("has-pending", Boolean(pending));
+    refs.equipmentDrawButton.setAttribute("aria-disabled", String(isDrawingLocked || isDrawUnaffordable));
+  }
+
+  if (refs.autoDrawButton && typeof getEquipmentDrawCost === "function") {
+    const cost = getEquipmentDrawCost();
+    const pending = getPendingEquipment();
+    const isAutoDrawUnaffordable = state.gold < cost && !pending && !isAutoDrawing();
+    refs.autoDrawButton.disabled = Boolean(pending) || isAutoDrawUnaffordable;
+    refs.autoDrawButton.classList.toggle("is-unaffordable", isAutoDrawUnaffordable);
+    refs.autoDrawButton.classList.toggle("is-running", isAutoDrawing());
+    refs.autoDrawButton.setAttribute("aria-disabled", String(refs.autoDrawButton.disabled));
+  }
 }
 
 function renderEquippedItems() {
@@ -440,7 +512,7 @@ function renderShop() {
             <strong>${tool.name} Lv.${level}</strong>
             <span>${tool.desc}</span>
           </div>
-          <button type="button" data-buy-tool="${tool.id}" ${state.idea < cost ? "disabled" : ""}>
+          <button type="button" data-buy-tool="${tool.id}" class="${state.idea < cost ? "is-unaffordable" : ""}" aria-disabled="${String(state.idea < cost)}" ${state.idea < cost ? "disabled" : ""}>
             ${cost} 아이디어 · EXP +${growthXp}
           </button>
         </div>
