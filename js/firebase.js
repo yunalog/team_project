@@ -77,6 +77,12 @@
     return user;
   }
 
+  async function logout() {
+    if (!initFirebase()) return false;
+    await auth.signOut();
+    return true;
+  }
+
   async function ensureUserDocument(user) {
     if (!user || !db) return;
 
@@ -224,6 +230,7 @@
     DEFAULT_OFFLINE_PLAN,
     initFirebase,
     loginWithGoogle,
+    logout,
     loadUserGameState,
     saveUserGameState,
     setOfflineRewardPlan,

@@ -703,6 +703,7 @@ let titleBgmUnlockArmed = false;
 let titleAuthUser = null;
 let isTitleLoginInProgress = false;
 let isGameStartInProgress = false;
+let isLogoutInProgress = false;
 let audioSettings = { ...defaultAudioSettings };
 let activeTab = "battle";
 let lastCompanyVisualKey = "";

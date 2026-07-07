@@ -5,6 +5,7 @@
     gameShell: document.querySelector("#gameShell"),
     loginButton: document.querySelector("#loginButton"),
     startButton: document.querySelector("#startButton"),
+    titleLogoutButton: document.querySelector("#titleLogoutButton"),
     titleMuteButton: document.querySelector("#titleMuteButton"),
     titleVolumeSlider: document.querySelector("#titleVolumeSlider"),
     titleVolumeValue: document.querySelector("#titleVolumeValue"),
@@ -99,6 +100,7 @@
     saveButton: document.querySelector("#saveButton"),
     resetButton: document.querySelector("#resetButton"),
     returnTitleButton: document.querySelector("#returnTitleButton"),
+    settingLogoutButton: document.querySelector("#settingLogoutButton"),
     muteButton: document.querySelector("#muteButton"),
     volumeSlider: document.querySelector("#volumeSlider"),
     volumeValue: document.querySelector("#volumeValue"),
@@ -189,6 +191,8 @@ function bindEvents() {
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
   if (refs.loginButton) refs.loginButton.addEventListener("click", loginFromTitle);
+  if (refs.titleLogoutButton) refs.titleLogoutButton.addEventListener("click", logoutFromCurrentUser);
+  if (refs.settingLogoutButton) refs.settingLogoutButton.addEventListener("click", logoutFromCurrentUser);
   refs.startButton.addEventListener("click", startGame);
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-audio-mute]")) toggleMute();
@@ -228,6 +232,17 @@ function updateStartAuthGate(user = titleAuthUser) {
     refs.startButton.disabled = !isLoggedIn || isGameStartInProgress;
     refs.startButton.textContent = isGameStartInProgress ? "불러오는 중..." : "게임 시작";
   }
+
+  if (refs.titleLogoutButton) {
+    refs.titleLogoutButton.classList.toggle("is-hidden", !isLoggedIn);
+    refs.titleLogoutButton.disabled = !isLoggedIn || isLogoutInProgress || isGameStartInProgress;
+    refs.titleLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
+  }
+
+  if (refs.settingLogoutButton) {
+    refs.settingLogoutButton.disabled = !isLoggedIn || isLogoutInProgress;
+    refs.settingLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
+  }
 }
 
 async function loginFromTitle() {
@@ -249,6 +264,46 @@ async function loginFromTitle() {
     if (refs.loginButton) refs.loginButton.textContent = "다시 로그인";
   } finally {
     isTitleLoginInProgress = false;
+    updateStartAuthGate(titleAuthUser);
+  }
+}
+
+async function logoutFromCurrentUser() {
+  if (isLogoutInProgress) return;
+
+  isLogoutInProgress = true;
+  updateStartAuthGate(titleAuthUser);
+
+  try {
+    if (hasStartedGame) {
+      state.lastActiveAtMs = Date.now();
+      try {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        if (refs.saveStateText) refs.saveStateText.textContent = "로컬 저장소 접근 불가";
+      }
+
+      if (window.FirebaseGame?.getCurrentUser?.()) {
+        await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+      }
+    }
+
+    if (window.FirebaseGame?.logout) {
+      await FirebaseGame.logout();
+    }
+
+    titleAuthUser = null;
+    hasStartedGame = false;
+    stopLoop();
+    refs.gameShell.classList.add("is-hidden");
+    refs.startScreen.classList.remove("is-hidden");
+    playBgm("title");
+    armTitleBgmUnlock();
+  } catch (error) {
+    console.error("Firebase 로그아웃 실패:", error);
+    if (refs.saveStateText) refs.saveStateText.textContent = "로그아웃 실패";
+  } finally {
+    isLogoutInProgress = false;
     updateStartAuthGate(titleAuthUser);
   }
 }

@@ -135,6 +135,38 @@ button:disabled {
   box-shadow: 0 4px 0 rgba(0, 0, 0, 0.22);
 }
 
+.start-actions {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(34px, 8vh, 78px);
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  transform: translateX(-50%);
+}
+
+.start-actions .start-button {
+  position: static;
+  transform: none;
+}
+
+.start-actions .start-button:active {
+  transform: translateY(3px);
+}
+
+.title-logout-button {
+  min-width: 150px;
+  min-height: 42px;
+  padding: 9px 18px;
+  background: linear-gradient(180deg, #f7f0dc 0%, #9b7b56 100%);
+  box-shadow: 0 5px 0 rgba(74, 43, 23, 0.62), 0 0 14px rgba(255, 247, 229, 0.3);
+}
+
+.title-logout-button:hover {
+  background: linear-gradient(180deg, #fff7e5 0%, #8f6d48 100%);
+}
+
 .start-audio-control {
   position: absolute;
   top: 14px;
