@@ -8499,3 +8499,228 @@ button:disabled:hover,
     opacity: 1 !important;
   }
 }
+
+/* Mobile recruit tab: portrait grid + inline growth panel. */
+@media (max-width: 560px) {
+  .tab-panel[data-panel="recruit"].is-active {
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board {
+    display: grid !important;
+    grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    gap: 7px !important;
+    height: 100% !important;
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__left,
+  .tab-panel[data-panel="recruit"] .recruit-board__right {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden !important;
+    padding: 8px !important;
+    border: 2px solid rgba(169, 120, 58, 0.72) !important;
+    border-radius: 8px !important;
+    background:
+      linear-gradient(180deg, rgba(255, 248, 232, 0.94), rgba(239, 216, 176, 0.92)),
+      var(--ui-tilemap);
+    background-size: auto, 420px 420px;
+  }
+
+  .tab-panel[data-panel="recruit"] #recruitList.shop-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-content: start;
+    gap: 6px !important;
+    height: 100% !important;
+    min-height: 0;
+    overflow-y: auto !important;
+    padding-right: 3px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-card.shop-item {
+    aspect-ratio: 1 / 0.92;
+    padding: 4px !important;
+    border: 2px solid rgba(169, 120, 58, 0.72) !important;
+    border-radius: 8px !important;
+    background: #fff8e9 !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-card.shop-item.is-selected {
+    border-color: #f59e0b !important;
+    box-shadow: inset 0 0 0 2px rgba(245, 158, 11, 0.28), 0 0 0 2px rgba(245, 158, 11, 0.18) !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-card-avatar {
+    width: min(100%, 48px) !important;
+    height: min(100%, 48px) !important;
+    border-radius: 8px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-mobile-caption {
+    display: none !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-panel {
+    display: block !important;
+    height: 100% !important;
+    min-height: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding-right: 4px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-card,
+  .tab-panel[data-panel="recruit"] .recruit-focus-empty {
+    display: grid !important;
+    gap: 8px !important;
+    min-height: 100%;
+    padding: 8px !important;
+    border: 2px solid #f59e0b !important;
+    border-radius: 10px !important;
+    background: linear-gradient(180deg, #fff8e9 0%, #efd4a2 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72) !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-portrait {
+    min-height: 86px !important;
+    padding: 8px !important;
+    border-width: 2px !important;
+    border-radius: 10px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-avatar {
+    width: 72px !important;
+    height: 72px !important;
+    border-radius: 12px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-role {
+    width: max-content;
+    max-width: 100%;
+    padding: 3px 7px;
+    font-size: 10px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-copy strong {
+    font-size: 13px !important;
+    line-height: 1.25 !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-copy p,
+  .tab-panel[data-panel="recruit"] .recruit-focus-skill span {
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+    word-break: keep-all;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-skill {
+    padding: 7px !important;
+    border-radius: 8px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-stats {
+    display: grid;
+    gap: 4px;
+    padding: 7px !important;
+    border: 1px solid rgba(169, 120, 58, 0.5);
+    border-radius: 8px;
+    background: rgba(255, 247, 229, 0.82);
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-stats span {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-stats strong {
+    color: var(--ink);
+    font-size: 10px !important;
+    line-height: 1.25 !important;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-action {
+    min-height: 36px !important;
+    padding: 6px 8px 3px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .tab-panel[data-panel="recruit"] .recruit-board {
+    gap: 5px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__left,
+  .tab-panel[data-panel="recruit"] .recruit-board__right {
+    padding: 6px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] #recruitList.shop-list {
+    gap: 6px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-card-avatar {
+    width: min(100%, 42px) !important;
+    height: min(100%, 42px) !important;
+  }
+}
+
+/* Mobile recruit portrait grid final sizing: 3 columns without overlap. */
+@media (max-width: 560px) {
+  .tab-panel[data-panel="recruit"] #recruitList.shop-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-auto-rows: clamp(42px, 8.5dvh, 54px) !important;
+    gap: 5px !important;
+    align-content: start !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-card.shop-item {
+    aspect-ratio: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 3px !important;
+    overflow: hidden !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-body,
+  .tab-panel[data-panel="recruit"] .recruit-class-head {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-card-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 7px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .tab-panel[data-panel="recruit"] #recruitList.shop-list {
+    grid-auto-rows: clamp(38px, 7.8dvh, 48px) !important;
+    gap: 4px !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-card-avatar {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}

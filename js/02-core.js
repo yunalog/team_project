@@ -169,7 +169,6 @@ function bindEvents() {
     if (tab) switchTab(tab);
     if (recruitSelectCard && !event.target.closest("button, select, a")) {
       selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
-      if (isMobileLayout()) openRecruitDetail(recruitSelectCard.dataset.selectRecruit);
     }
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
     if (recruitPromotionButton) openRecruitPromotion(recruitPromotionButton.dataset.recruitPromote);
@@ -577,17 +576,15 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "recruit",
     selector: ".recruit-class-card",
     title: "직군 카드",
-    text: "초상화를 누르면 해당 직군의 상세 팝업이 열립니다. 팝업에서 이름, 스탯, 스킬 설명을 보고 획득이나 레벨업을 진행합니다.",
+    text: "초상화를 누르면 오른쪽 직군 성장 패널이 해당 직군 정보로 바뀝니다. 이미지 아래에는 현재 Lv과 이름이 표시됩니다.",
     placement: "right",
   },
   {
     tab: "recruit",
-    selector: ".recruit-modal__panel",
-    fallbackSelector: ".recruit-class-card",
-    openRecruitDetailFirst: true,
+    selector: ".recruit-board__right",
     title: "동료 획득 / 레벨업 / 승급",
-    text: "상세 팝업의 아래 버튼으로 동료를 획득하거나 레벨업합니다. 승급 레벨에 도달하면 버튼이 승급 진행으로 바뀌고, 승급 이펙트 팝업이 이어집니다.",
-    placement: "top",
+    text: "오른쪽 직군 성장 패널에서 레벨, 이름, 설명, 스탯, 스킬을 확인합니다. 아래 버튼으로 획득이나 레벨업을 진행하고, 승급 가능 상태에서는 승급 진행 버튼으로 바뀝니다.",
+    placement: "left",
   },
   {
     tab: "tools",

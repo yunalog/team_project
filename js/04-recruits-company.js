@@ -289,6 +289,9 @@ function renderRecruitGrowthPanel() {
         <span class="recruit-focus-role">${recruit.category}</span>
         <strong>${rankLabel} Lv.${count}</strong>
         <p>${recruit.desc}</p>
+        <div class="recruit-focus-stats">
+          ${formatRecruitStatRows(recruit)}
+        </div>
         <div class="recruit-focus-skill">
           <b>${recruit.skill?.name || "스킬"}</b>
           <span>${getRecruitSkillText(recruit)}</span>
