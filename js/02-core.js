@@ -511,6 +511,10 @@ function isMobileTutorialViewport() {
   return window.matchMedia("(max-width: 760px)").matches;
 }
 
+function shouldUseMobileRecruitTutorialLayout() {
+  return activeTutorialMode === "recruitCompany" && isMobileTutorialViewport();
+}
+
 function scrollMobileTutorialTargetIntoPanel(target) {
   if (!target) return;
 
@@ -546,7 +550,7 @@ function showGuidedTutorialStep(index) {
 
   if (activeTutorialTarget) {
     activeTutorialTarget.classList.add("is-tutorial-highlight");
-    if (isMobileTutorialViewport()) {
+    if (shouldUseMobileRecruitTutorialLayout()) {
       scrollMobileTutorialTargetIntoPanel(activeTutorialTarget);
     } else if (typeof activeTutorialTarget.scrollIntoView === "function") {
       activeTutorialTarget.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
@@ -575,13 +579,13 @@ function positionGuidedTutorial() {
   bubble.style.width = `${bubbleWidth}px`;
   bubble.style.maxWidth = `${bubbleWidth}px`;
   bubble.style.maxHeight = `${Math.max(140, window.innerHeight - 28)}px`;
-  const mobileTutorial = isMobileTutorialViewport();
+  const mobileRecruitTutorial = shouldUseMobileRecruitTutorialLayout();
 
   const bubbleHeight = bubble.offsetHeight || 168;
   let left = rect.left + rect.width / 2 - bubbleWidth / 2;
   let top = rect.bottom + 16;
 
-  if (mobileTutorial) {
+  if (mobileRecruitTutorial) {
     left = Math.max(14, Math.min(window.innerWidth - bubbleWidth - 14, window.innerWidth - bubbleWidth - 18));
     top = Math.max(12, window.innerHeight - bubbleHeight - 22);
   } else if (step.placement === "top") {
@@ -595,7 +599,7 @@ function positionGuidedTutorial() {
   }
 
   if (refs.guidedTutorialSpotlight) {
-    if (mobileTutorial) {
+    if (mobileRecruitTutorial) {
       const panelRect = document.querySelector(".tab-panel.is-active")?.getBoundingClientRect();
       const safeTop = Math.max(8, panelRect ? panelRect.top + 8 : 8);
       const safeBottom = Math.max(safeTop + 86, Math.min(top - 14, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
