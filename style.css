@@ -5360,9 +5360,44 @@ textarea {
 }
 
 @media (max-width: 760px) {
+  .panel-area:has(.tab-panel[data-panel="recruit"].is-active) {
+    overflow: visible;
+  }
+
   .tab-panel[data-panel="recruit"] .recruit-board {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  .tab-panel[data-panel="recruit"],
+  .tab-panel[data-panel="recruit"].is-active {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .tab-panel[data-panel="recruit"].is-active {
+    display: block;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__left,
+  .tab-panel[data-panel="recruit"] .recruit-board__right {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .tab-panel[data-panel="recruit"] .shop-list,
+  .tab-panel[data-panel="recruit"] .recruit-focus-panel {
+    height: auto;
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+    overscroll-behavior: auto;
+    padding-right: 0;
+    scrollbar-width: auto;
   }
 }
 
