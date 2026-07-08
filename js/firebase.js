@@ -77,7 +77,11 @@
 
     const result = await auth.signInWithPopup(provider);
     const user = result.user;
-    await ensureUserDocument(user);
+    try {
+      await ensureUserDocument(user);
+    } catch (error) {
+      console.error("Firebase 사용자 문서 확인 실패:", error);
+    }
     return user;
   }
 

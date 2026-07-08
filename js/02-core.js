@@ -203,7 +203,7 @@ function bindEvents() {
   refs.discardItemButton.addEventListener("click", discardPendingEquipment);
   refs.equipmentUpgradeButton.addEventListener("click", startEquipmentUpgrade);
   refs.speedTicketButton.addEventListener("click", useSpeedTicket);
-  refs.saveButton.addEventListener("click", () => saveState("?섎룞 ????꾨즺"));
+  refs.saveButton.addEventListener("click", () => saveState("수동 저장 완료"));
   refs.resetButton.addEventListener("click", resetGame);
   refs.returnTitleButton.addEventListener("click", returnToTitle);
   if (refs.loginButton) refs.loginButton.addEventListener("click", loginFromTitle);
@@ -337,7 +337,8 @@ async function loginFromTitle() {
     titleAuthUser = user || FirebaseGame.getCurrentUser?.() || null;
     if (!titleAuthUser) throw new Error("Google login did not return a user.");
   } catch (error) {
-    didLoginFail = true;
+    titleAuthUser = FirebaseGame.getCurrentUser?.() || titleAuthUser;
+    didLoginFail = !titleAuthUser;
     console.error("Firebase 로그인 실패:", error);
   } finally {
     isTitleLoginInProgress = false;
@@ -1087,7 +1088,7 @@ function playBgm(trackKey, options = {}) {
   const playPromise = refs.bgmAudio.play();
   if (playPromise && typeof playPromise.catch === "function") {
     playPromise.catch(() => {
-      if (!options.silentFail) log("BGM ?ъ깮??釉뚮씪?곗??먯꽌 李⑤떒?섏뿀?듬땲??");
+      if (!options.silentFail) log("BGM 재생이 브라우저에서 차단되었습니다.");
     });
   }
 }
@@ -1116,7 +1117,7 @@ function saveAudioSettings() {
   try {
     window.localStorage.setItem(AUDIO_SETTINGS_KEY, JSON.stringify(audioSettings));
   } catch {
-    log("?ㅻ뵒???ㅼ젙 ??μ뿉 ?ㅽ뙣?덉뒿?덈떎.");
+    log("오디오 설정 저장에 실패했습니다.");
   }
 }
 
@@ -1178,7 +1179,7 @@ function handleSquadChange(event) {
     const isRecruited = getRecruitCount(nextId) > 0;
     const isDeployedElsewhere = state.squad.some((id, index) => index !== slotIndex && id === nextId);
     if (!recruits.some((recruit) => recruit.id === nextId) || !isRecruited || isDeployedElsewhere) {
-      log("?곸엯?섏? ?딆? ?숇즺?닿굅???대? ?ㅻⅨ ?먮━??諛곗튂???숇즺?낅땲??");
+      log("영입하지 않은 동료이거나 이미 다른 자리에 배치된 동료입니다.");
       renderSquadManagement();
       return;
     }
@@ -1189,7 +1190,7 @@ function handleSquadChange(event) {
   lastRosterKey = "";
   const recruit = recruits.find((item) => item.id === nextId);
   const positionNumber = slotIndex + 2;
-  log(recruit ? `${positionNumber}踰??먮━??${recruit.name} 諛곗튂 ?꾨즺` : `${positionNumber}踰??먮━瑜?鍮꾩썱?듬땲??`);
+  log(recruit ? `${positionNumber}번 자리에 ${recruit.name} 배치 완료` : `${positionNumber}번 자리를 비웠습니다.`);
   renderAll();
 }
 
@@ -1252,13 +1253,13 @@ function tick(delta) {
 
     if (saveCooldown >= 10) {
       saveCooldown = 0;
-      saveState("?먮룞 ????꾨즺");
+      saveState("자동 저장 완료");
     }
 
     renderBattle();
     if (typeof refreshCostSensitiveButtonStates === "function") refreshCostSensitiveButtonStates();
   } catch (error) {
-    log(`?꾪닾 猷⑦봽 ?ㅻ쪟: ${error.message}`);
+    log(`전투 루프 오류: ${error.message}`);
   }
 }
 
@@ -1422,7 +1423,7 @@ function normalizeEquipmentItem(item) {
   return {
     id: String(item.id || "unknown"),
     slot,
-    name: String(item.name || "?대쫫 ?녿뒗 ?λ퉬"),
+    name: String(item.name || "이름 없는 장비"),
     icon: String(item.icon || "?"),
     image: String(item.image || (base ? getEquipmentImageSrc(base.id, grade) : "")),
     grade,
@@ -1447,7 +1448,7 @@ function saveState(message) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    message = "??μ냼 ?묎렐 遺덇?";
+    message = "저장소 접근 불가";
   }
 
   if (refs.saveStateText) refs.saveStateText.textContent = message;
@@ -1463,14 +1464,14 @@ function resetGame() {
   try {
     window.localStorage.removeItem(STORAGE_KEY);
   } catch {
-    refs.saveStateText.textContent = "??μ냼 ?묎렐 遺덇?";
+    refs.saveStateText.textContent = "저장소 접근 불가";
   }
   state = cloneDefaultState();
   lastRosterKey = "";
   lastCompanyVisualKey = "";
   spawnWave();
   renderAll();
-  saveState("珥덇린???꾨즺");
+  saveState("초기화 완료");
 }
 
 function normalizeEnemies(enemies) {
