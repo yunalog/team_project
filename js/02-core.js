@@ -367,21 +367,24 @@ const START_TUTORIAL_STEPS = [
 const RECRUIT_COMPANY_TUTORIAL_STEPS = [
   {
     tab: "recruit",
-    selector: ".recruit-board__left",
+    selector: ".recruit-board__left > .section-heading",
+    exactTarget: true,
     title: "동료 영입 목록",
     text: "여기에서 개발, 아트, 기획, 사운드, 연출, 데이터 분석 등 다양한 직군 카드를 확인할 수 있습니다. 카드를 누르면 오른쪽에 성장 정보가 표시됩니다.",
     placement: "right",
   },
   {
     tab: "recruit",
-    selector: ".recruit-class-card",
+    selector: ".recruit-class-card .recruit-class-title",
+    exactTarget: true,
     title: "직군 카드",
     text: "각 카드는 직군 이름, 현재 승급명, 캐릭터 이미지, 핵심 능력치를 보여줍니다. 원하는 직군을 선택해 성장시킬 수 있습니다.",
     placement: "right",
   },
   {
     tab: "recruit",
-    selector: ".recruit-board__right",
+    selector: ".recruit-board__right > .section-heading",
+    exactTarget: true,
     title: "직군 성장",
     text: "선택한 동료의 설명, 스킬, 현재 레벨을 확인하고 동료 획득·레벨업·승급을 진행하는 영역입니다.",
     placement: "left",
@@ -390,13 +393,15 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "recruit",
     selector: ".recruit-focus-action",
     fallbackSelector: ".recruit-board__right",
+    exactTarget: true,
     title: "동료 획득 / 레벨업 / 승급",
     text: "동료가 없을 때는 동료 획득, 보유 중일 때는 레벨업을 진행합니다. Lv.10, 20, 30, 40, 50에 도달하면 승급 버튼으로 더 높은 직급명을 열 수 있습니다.",
     placement: "left",
   },
   {
     tab: "tools",
-    selector: ".company-scene-heading",
+    selector: "#companyScene",
+    exactTarget: true,
     title: "회사 성장 현황",
     text: "회사 탭으로 이동하면 위쪽 화면이 회사 현황으로 바뀝니다. 회사 레벨과 현재 규모, 다음 성장까지 필요한 EXP를 확인할 수 있습니다.",
     placement: "bottom",
@@ -495,6 +500,7 @@ function getTutorialTarget(step) {
   if (!step?.selector) return null;
   const found = document.querySelector(step.selector) || (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
   if (!found) return null;
+  if (step.exactTarget) return found;
   return (
     found.closest(
       ".stat-grid > div, .resource-chip, .equipped-item-panel, .draw-machine-panel, .recruit-board__left, .recruit-board__right, .recruit-class-card, .recruit-focus-card, .recruit-focus-action, .company-scene-heading, .company-status-strip, .facility-list, .facility-card, .squad-management, .squad-layout, .squad-formation, .squad-roster, button"

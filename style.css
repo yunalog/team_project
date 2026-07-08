@@ -5545,6 +5545,58 @@ textarea {
 }
 
 @media (max-width: 560px) {
+  .tab-panel[data-panel="tools"].is-active {
+    padding-bottom: 96px;
+  }
+
+  .tab-panel[data-panel="tools"] .company-dashboard {
+    gap: 14px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-heading {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-heading small {
+    max-width: none;
+    text-align: left;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    min-height: min(52dvh, 420px);
+    align-content: start;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 11px;
+    min-height: 126px;
+    padding: 12px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-copy strong {
+    font-size: 14px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-copy span {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
   .top-bar {
     background-size: auto, 480px 480px;
   }
