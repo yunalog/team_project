@@ -369,6 +369,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "recruit",
     selector: ".recruit-board__left > .section-heading",
     exactTarget: true,
+    mobileSpotlight: { width: 144, height: 76 },
     title: "동료 영입 목록",
     text: "여기에서 개발, 아트, 기획, 사운드, 연출, 데이터 분석 등 다양한 직군 카드를 확인할 수 있습니다. 카드를 누르면 오른쪽에 성장 정보가 표시됩니다.",
     placement: "right",
@@ -377,6 +378,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "recruit",
     selector: ".recruit-class-card .recruit-class-title",
     exactTarget: true,
+    mobileSpotlight: { width: 132, height: 62 },
     title: "직군 카드",
     text: "각 카드는 직군 이름, 현재 승급명, 캐릭터 이미지, 핵심 능력치를 보여줍니다. 원하는 직군을 선택해 성장시킬 수 있습니다.",
     placement: "right",
@@ -385,6 +387,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "recruit",
     selector: ".recruit-board__right > .section-heading",
     exactTarget: true,
+    mobileSpotlight: { width: 112, height: 52 },
     title: "직군 성장",
     text: "선택한 동료의 설명, 스킬, 현재 레벨을 확인하고 동료 획득·레벨업·승급을 진행하는 영역입니다.",
     placement: "left",
@@ -394,6 +397,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     selector: ".recruit-focus-action",
     fallbackSelector: ".recruit-board__right",
     exactTarget: true,
+    mobileSpotlight: { maxWidth: 300, minWidth: 168, height: 54, align: "center" },
     title: "동료 획득 / 레벨업 / 승급",
     text: "동료가 없을 때는 동료 획득, 보유 중일 때는 레벨업을 진행합니다. Lv.10, 20, 30, 40, 50에 도달하면 승급 버튼으로 더 높은 직급명을 열 수 있습니다.",
     placement: "left",
@@ -527,14 +531,44 @@ function shouldUseMobileRecruitTutorialLayout() {
   return activeTutorialMode === "recruitCompany" && isMobileTutorialViewport();
 }
 
-function scrollMobileTutorialTargetIntoPanel(target) {
+function getMobileTutorialSpotlightRect(baseRect, step) {
+  if (!shouldUseMobileRecruitTutorialLayout() || !step?.mobileSpotlight) return baseRect;
+
+  const options = step.mobileSpotlight;
+  const viewportPadding = 24;
+  const maxViewportWidth = Math.max(1, window.innerWidth - viewportPadding);
+  const maxWidth = Math.min(options.maxWidth || maxViewportWidth, maxViewportWidth);
+  const requestedWidth = options.width || Math.min(baseRect.width, maxWidth);
+  const width = Math.max(options.minWidth || 0, Math.min(requestedWidth, maxWidth));
+  const height = Math.max(36, options.height || Math.min(baseRect.height, options.maxHeight || baseRect.height));
+
+  let left = baseRect.left + (options.offsetX || 0);
+  if (options.align === "center") {
+    left = baseRect.left + baseRect.width / 2 - width / 2 + (options.offsetX || 0);
+  } else if (options.align === "right") {
+    left = baseRect.right - width + (options.offsetX || 0);
+  }
+  left = Math.max(8, Math.min(window.innerWidth - width - 8, left));
+
+  const top = baseRect.top + (options.offsetY || 0);
+  return {
+    left,
+    right: left + width,
+    top,
+    bottom: top + height,
+    width,
+    height,
+  };
+}
+
+function scrollMobileTutorialTargetIntoPanel(target, step) {
   if (!target) return;
 
   const panel = document.querySelector(".tab-panel.is-active");
   if (!panel) return;
 
   const panelRect = panel.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
+  const targetRect = getMobileTutorialSpotlightRect(target.getBoundingClientRect(), step);
   const safeTop = panelRect.top + 18;
   const safeBottom = Math.min(panelRect.bottom - 132, window.innerHeight - 196);
 
@@ -563,7 +597,7 @@ function showGuidedTutorialStep(index) {
   if (activeTutorialTarget) {
     activeTutorialTarget.classList.add("is-tutorial-highlight");
     if (shouldUseMobileRecruitTutorialLayout()) {
-      scrollMobileTutorialTargetIntoPanel(activeTutorialTarget);
+      scrollMobileTutorialTargetIntoPanel(activeTutorialTarget, step);
     } else if (typeof activeTutorialTarget.scrollIntoView === "function") {
       activeTutorialTarget.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
     }
@@ -583,7 +617,8 @@ function positionGuidedTutorial() {
   const step = steps[activeTutorialStepIndex];
   if (!step || !activeTutorialTarget || !refs.guidedTutorialBubble) return;
 
-  const rect = activeTutorialTarget.getBoundingClientRect();
+  const baseRect = activeTutorialTarget.getBoundingClientRect();
+  const rect = getMobileTutorialSpotlightRect(baseRect, step);
   const padding = 10;
   const spotlightPadding = 8;
   const bubble = refs.guidedTutorialBubble;
@@ -614,7 +649,8 @@ function positionGuidedTutorial() {
     if (mobileRecruitTutorial) {
       const panelRect = document.querySelector(".tab-panel.is-active")?.getBoundingClientRect();
       const safeTop = Math.max(8, panelRect ? panelRect.top + 8 : 8);
-      const safeBottom = Math.max(safeTop + 86, Math.min(top - 14, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
+      const minSpotlightHeight = Math.max(36, Math.min(86, rect.height));
+      const safeBottom = Math.max(safeTop + minSpotlightHeight, Math.min(top - 14, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
       const targetVisible = rect.bottom > safeTop && rect.top < safeBottom;
       setTutorialHighlightVisible(targetVisible);
       if (!targetVisible) {
@@ -622,9 +658,9 @@ function positionGuidedTutorial() {
         bubble.style.top = `${top}px`;
         return;
       }
-      const spotlightTop = Math.min(safeBottom - 86, Math.max(safeTop, rect.top - spotlightPadding));
+      const spotlightTop = Math.min(safeBottom - minSpotlightHeight, Math.max(safeTop, rect.top - spotlightPadding));
       const spotlightBottom = Math.min(safeBottom, rect.bottom + spotlightPadding);
-      const spotlightHeight = Math.max(86, spotlightBottom - spotlightTop);
+      const spotlightHeight = Math.max(minSpotlightHeight, spotlightBottom - spotlightTop);
       refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
       refs.guidedTutorialSpotlight.style.top = `${spotlightTop}px`;
       refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;

@@ -7247,7 +7247,7 @@ button:disabled,
 }
 
 /* Mobile tutorial and company-tab final sizing fixes. */
-@media (max-width: 560px) {
+@media (max-width: 760px) {
   .tab-panel[data-panel="recruit"] .section-heading {
     display: inline-grid !important;
     width: max-content !important;
