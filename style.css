@@ -7269,6 +7269,28 @@ button:disabled,
     padding-bottom: 112px !important;
   }
 
+  .tab-panel[data-panel="tools"] .company-status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin: 0 0 10px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip > div {
+    min-height: 48px !important;
+    padding: 5px 8px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip span {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip strong {
+    margin-top: 2px !important;
+    font-size: 13px !important;
+    line-height: 1.15 !important;
+  }
+
   .company-scene:not(.is-hidden) {
     height: 250px !important;
     min-height: 250px !important;
