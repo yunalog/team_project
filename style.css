@@ -7025,6 +7025,10 @@ button.is-active:not(:disabled),
   position: absolute;
   inset: 0;
   z-index: 0;
+  background: transparent;
+}
+
+.guided-tutorial.is-spotlight-hidden .guided-tutorial__dim {
   background: rgba(0, 0, 0, 0.62);
 }
 

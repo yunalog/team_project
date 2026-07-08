@@ -510,6 +510,7 @@ function clearTutorialHighlight() {
 function setTutorialHighlightVisible(visible) {
   if (activeTutorialTarget) activeTutorialTarget.classList.toggle("is-tutorial-highlight", visible);
   if (refs.guidedTutorialSpotlight) refs.guidedTutorialSpotlight.style.visibility = visible ? "visible" : "hidden";
+  if (refs.guidedTutorial) refs.guidedTutorial.classList.toggle("is-spotlight-hidden", !visible);
 }
 
 function isMobileTutorialViewport() {
