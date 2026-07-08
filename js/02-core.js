@@ -507,6 +507,29 @@ function clearTutorialHighlight() {
   activeTutorialTarget = null;
 }
 
+function isMobileTutorialViewport() {
+  return window.matchMedia("(max-width: 760px)").matches;
+}
+
+function scrollMobileTutorialTargetIntoPanel(target) {
+  if (!target) return;
+
+  const panel = document.querySelector(".tab-panel.is-active");
+  if (!panel) return;
+
+  const panelRect = panel.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const safeTop = panelRect.top + 18;
+  const safeBottom = Math.min(panelRect.bottom - 132, window.innerHeight - 196);
+
+  if (targetRect.top >= safeTop && targetRect.bottom <= safeBottom) return;
+
+  const currentScroll = panel.scrollTop;
+  const targetOffset = targetRect.top - panelRect.top + currentScroll;
+  const nextScroll = Math.max(0, targetOffset - 18);
+  panel.scrollTo({ top: nextScroll, behavior: "smooth" });
+}
+
 function showGuidedTutorialStep(index) {
   if (!refs.guidedTutorial) return;
   const steps = getActiveTutorialSteps();
@@ -523,7 +546,9 @@ function showGuidedTutorialStep(index) {
 
   if (activeTutorialTarget) {
     activeTutorialTarget.classList.add("is-tutorial-highlight");
-    if (typeof activeTutorialTarget.scrollIntoView === "function") {
+    if (isMobileTutorialViewport()) {
+      scrollMobileTutorialTargetIntoPanel(activeTutorialTarget);
+    } else if (typeof activeTutorialTarget.scrollIntoView === "function") {
       activeTutorialTarget.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
     }
   }
@@ -550,19 +575,16 @@ function positionGuidedTutorial() {
   bubble.style.width = `${bubbleWidth}px`;
   bubble.style.maxWidth = `${bubbleWidth}px`;
   bubble.style.maxHeight = `${Math.max(140, window.innerHeight - 28)}px`;
-
-  if (refs.guidedTutorialSpotlight) {
-    refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
-    refs.guidedTutorialSpotlight.style.top = `${Math.max(8, rect.top - spotlightPadding)}px`;
-    refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;
-    refs.guidedTutorialSpotlight.style.height = `${Math.min(window.innerHeight - 16, rect.height + spotlightPadding * 2)}px`;
-  }
+  const mobileTutorial = isMobileTutorialViewport();
 
   const bubbleHeight = bubble.offsetHeight || 168;
   let left = rect.left + rect.width / 2 - bubbleWidth / 2;
   let top = rect.bottom + 16;
 
-  if (step.placement === "top") {
+  if (mobileTutorial) {
+    left = Math.max(14, Math.min(window.innerWidth - bubbleWidth - 14, window.innerWidth - bubbleWidth - 18));
+    top = Math.max(12, window.innerHeight - bubbleHeight - 22);
+  } else if (step.placement === "top") {
     top = rect.top - bubbleHeight - 16;
   } else if (step.placement === "left") {
     left = rect.left - bubbleWidth - 16;
@@ -570,6 +592,26 @@ function positionGuidedTutorial() {
   } else if (step.placement === "right") {
     left = rect.right + 16;
     top = rect.top + rect.height / 2 - bubbleHeight / 2;
+  }
+
+  if (refs.guidedTutorialSpotlight) {
+    if (mobileTutorial) {
+      const panelRect = document.querySelector(".tab-panel.is-active")?.getBoundingClientRect();
+      const safeTop = Math.max(8, panelRect ? panelRect.top + 8 : 8);
+      const safeBottom = Math.max(safeTop + 86, Math.min(top - 14, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
+      const spotlightTop = Math.min(safeBottom - 86, Math.max(safeTop, rect.top - spotlightPadding));
+      const spotlightBottom = Math.min(safeBottom, rect.bottom + spotlightPadding);
+      const spotlightHeight = Math.max(86, spotlightBottom - spotlightTop);
+      refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
+      refs.guidedTutorialSpotlight.style.top = `${spotlightTop}px`;
+      refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;
+      refs.guidedTutorialSpotlight.style.height = `${spotlightHeight}px`;
+    } else {
+      refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
+      refs.guidedTutorialSpotlight.style.top = `${Math.max(8, rect.top - spotlightPadding)}px`;
+      refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;
+      refs.guidedTutorialSpotlight.style.height = `${Math.min(window.innerHeight - 16, rect.height + spotlightPadding * 2)}px`;
+    }
   }
 
   left = Math.max(padding, Math.min(window.innerWidth - bubbleWidth - padding, left));
