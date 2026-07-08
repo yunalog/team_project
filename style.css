@@ -2127,6 +2127,22 @@ h1 {
   background: #fff2d3;
 }
 
+body.is-company-tab .message-line {
+  min-height: 0;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+  border-bottom: 0;
+}
+
+body.is-company-tab .panel-area {
+  border-top: 2px solid var(--ink);
+}
+
+body.is-company-tab .tab-panel[data-panel="tools"].is-active {
+  padding-top: 10px;
+}
+
 #battleLog {
   min-width: 0;
   font-size: 14px;
@@ -5199,16 +5215,19 @@ textarea {
 
 @media (max-width: 760px) {
   .recruit-board {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 8px;
   }
 
   .recruit-focus-portrait {
-    min-height: 170px;
+    min-height: 110px;
+    padding: 8px;
   }
 
   .recruit-focus-avatar {
-    width: 130px;
-    height: 130px;
+    width: 88px;
+    height: 88px;
   }
 }
 
@@ -5392,9 +5411,130 @@ textarea {
 }
 
 @media (max-width: 760px) {
+  .panel-area:has(.tab-panel[data-panel="recruit"].is-active) {
+    overflow: hidden;
+  }
+
   .tab-panel[data-panel="recruit"] .recruit-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    overflow: hidden;
+    gap: 9px;
+  }
+
+  .tab-panel[data-panel="recruit"],
+  .tab-panel[data-panel="recruit"].is-active {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    padding: 8px;
+  }
+
+  .tab-panel[data-panel="recruit"].is-active {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__left,
+  .tab-panel[data-panel="recruit"] .recruit-board__right {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .tab-panel[data-panel="recruit"] .shop-list,
+  .tab-panel[data-panel="recruit"] .recruit-focus-panel {
+    height: 100%;
+    max-height: none;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 0;
+    scrollbar-width: thin;
+  }
+
+  .tab-panel[data-panel="recruit"] .shop-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: 6px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-card.shop-item {
+    display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    place-items: center;
+    min-height: 52px;
+    padding: 4px;
+    border-width: 2px;
+    border-radius: 9px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-title,
+  .tab-panel[data-panel="recruit"] .recruit-class-stats {
+    display: none !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    place-items: center;
+    gap: 0;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-card-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-card,
+  .tab-panel[data-panel="recruit"] .recruit-focus-empty {
+    padding: 8px;
+    border-radius: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72), 0 4px 0 rgba(74, 43, 23, 0.16);
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-portrait {
+    min-height: 92px;
+    padding: 6px;
+    border-width: 2px;
+    border-radius: 12px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-avatar {
+    width: 74px;
+    height: 74px;
+    border-radius: 15px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-copy {
+    gap: 4px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-copy strong {
+    font-size: 15px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-copy p,
+  .tab-panel[data-panel="recruit"] .recruit-focus-skill span {
+    font-size: 10px;
+    line-height: 1.3;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-skill {
+    padding: 6px;
+    border-radius: 8px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-focus-action {
+    min-height: 36px;
+    border-radius: 9px;
+    font-size: 12px;
   }
 }
 
@@ -5540,6 +5680,58 @@ textarea {
 }
 
 @media (max-width: 560px) {
+  .tab-panel[data-panel="tools"].is-active {
+    padding-bottom: 96px;
+  }
+
+  .tab-panel[data-panel="tools"] .company-dashboard {
+    gap: 14px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-heading {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-heading small {
+    max-width: none;
+    text-align: left;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-list {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    min-height: min(52dvh, 420px);
+    align-content: start;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 11px;
+    min-height: 126px;
+    padding: 12px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-copy strong {
+    font-size: 14px;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-copy span {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card button {
+    min-height: 42px;
+    font-size: 13px;
+  }
+
   .top-bar {
     background-size: auto, 480px 480px;
   }
@@ -7012,19 +7204,24 @@ button.is-active:not(:disabled),
 .guided-tutorial {
   position: fixed;
   inset: 0;
-  z-index: 3900;
+  z-index: 9000;
   pointer-events: none;
 }
 
 .guided-tutorial__dim {
   position: absolute;
   inset: 0;
+  z-index: 0;
+  background: transparent;
+}
+
+.guided-tutorial.is-spotlight-hidden .guided-tutorial__dim {
   background: rgba(0, 0, 0, 0.62);
 }
 
 .guided-tutorial__spotlight {
   position: fixed;
-  z-index: 3901;
+  z-index: 1;
   border: 3px solid rgba(255, 244, 188, 0.96);
   border-radius: 14px;
   box-shadow:
@@ -7036,16 +7233,19 @@ button.is-active:not(:disabled),
 
 .is-tutorial-highlight {
   position: relative !important;
-  z-index: 4002 !important;
+  z-index: auto !important;
   border-radius: 12px;
-  filter: brightness(1.08) saturate(1.05);
-  box-shadow: 0 0 0 4px rgba(255, 244, 188, 0.95), 0 0 24px rgba(255, 217, 121, 0.9) !important;
+  filter: none !important;
+  box-shadow: none !important;
 }
 
 .guided-tutorial__bubble {
   position: fixed;
-  z-index: 4100;
+  z-index: 2;
   width: min(310px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 14px;
   border: 3px solid #4a2b17;
   border-radius: 14px;
@@ -7180,7 +7380,6 @@ button:disabled,
   filter: grayscale(0.5) saturate(0.65);
   opacity: 0.7;
 }
-
 
 /* Cost-state disabled buttons: always dark/gray while resources are insufficient.
    This state is controlled by JS, not by hover. */
@@ -7442,4 +7641,76 @@ button:disabled:hover,
   place-items: center !important;
   transform: none !important;
   translate: none !important;
+}
+
+/* Mobile tutorial and company-tab final sizing fixes. */
+@media (max-width: 760px) {
+  .tab-panel[data-panel="recruit"] .section-heading {
+    display: inline-grid !important;
+    width: max-content !important;
+    max-width: calc(100vw - 48px) !important;
+    padding: 2px 7px 3px !important;
+    border-radius: 6px;
+  }
+
+  .tab-panel[data-panel="tools"].is-active {
+    padding-bottom: 112px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin: 0 0 10px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip > div {
+    min-height: 48px !important;
+    padding: 5px 8px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip span {
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  .tab-panel[data-panel="tools"] .company-status-strip strong {
+    margin-top: 2px !important;
+    font-size: 13px !important;
+    line-height: 1.15 !important;
+  }
+
+  .company-scene:not(.is-hidden) {
+    height: 250px !important;
+    min-height: 250px !important;
+  }
+
+  .company-scene:not(.is-hidden) .company-campus {
+    top: 64px !important;
+  }
+
+  .company-scene:not(.is-hidden) .company-scene-progress {
+    bottom: 12px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-list {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    min-height: 56dvh !important;
+    padding-bottom: 24px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    min-height: 140px !important;
+    padding: 14px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-icon {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card button {
+    min-height: 46px !important;
+  }
 }

@@ -19,11 +19,11 @@ const SPEED_TICKET_MAX_COUNT = 10;
 const MANUAL_WORK_MAX_COUNT = 10;
 const RECRUIT_UNLOCK_CHAPTER = 2;
 const RECRUIT_HIRE_COST_RATE = 0.6;
-const RECRUIT_LEVEL_UP_COST_RATE = 0.6;
+const RECRUIT_LEVEL_UP_COST_RATE = 0.42;
 const PLAYER_UPGRADE_COST_RATE = 0.6;
 const IDEA_GAIN_BONUS_RATE = 0.15;
 const PLAYER_UPGRADE_STAT_RATE = 0.8;
-const RECRUIT_LEVEL_UP_STAT_RATE = 1.3;
+const RECRUIT_LEVEL_UP_STAT_RATE = 3.9;
 
 function roundStat(value, precision = 10) {
   return Math.round(Math.max(0, Number(value) || 0) * precision) / precision;
