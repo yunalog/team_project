@@ -377,8 +377,9 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
   {
     tab: "recruit",
     selector: ".recruit-class-card .recruit-class-title",
+    mobileSelector: ".recruit-class-card.is-selected",
     exactTarget: true,
-    mobileSpotlight: { width: 132, height: 62 },
+    mobileSpotlight: { width: 64, height: 64, align: "center" },
     title: "직군 카드",
     text: "각 카드는 직군 이름, 현재 승급명, 캐릭터 이미지, 핵심 능력치를 보여줍니다. 원하는 직군을 선택해 성장시킬 수 있습니다.",
     placement: "right",
@@ -503,7 +504,8 @@ function prepareTutorialStep(step) {
 
 function getTutorialTarget(step) {
   if (!step?.selector) return null;
-  const found = document.querySelector(step.selector) || (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
+  const selector = shouldUseMobileRecruitTutorialLayout() && step.mobileSelector ? step.mobileSelector : step.selector;
+  const found = document.querySelector(selector) || (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
   if (!found) return null;
   if (step.exactTarget) return found;
   return (
