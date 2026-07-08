@@ -507,6 +507,11 @@ function clearTutorialHighlight() {
   activeTutorialTarget = null;
 }
 
+function setTutorialHighlightVisible(visible) {
+  if (activeTutorialTarget) activeTutorialTarget.classList.toggle("is-tutorial-highlight", visible);
+  if (refs.guidedTutorialSpotlight) refs.guidedTutorialSpotlight.style.visibility = visible ? "visible" : "hidden";
+}
+
 function isMobileTutorialViewport() {
   return window.matchMedia("(max-width: 760px)").matches;
 }
@@ -603,6 +608,13 @@ function positionGuidedTutorial() {
       const panelRect = document.querySelector(".tab-panel.is-active")?.getBoundingClientRect();
       const safeTop = Math.max(8, panelRect ? panelRect.top + 8 : 8);
       const safeBottom = Math.max(safeTop + 86, Math.min(top - 14, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
+      const targetVisible = rect.bottom > safeTop && rect.top < safeBottom;
+      setTutorialHighlightVisible(targetVisible);
+      if (!targetVisible) {
+        bubble.style.left = `${left}px`;
+        bubble.style.top = `${top}px`;
+        return;
+      }
       const spotlightTop = Math.min(safeBottom - 86, Math.max(safeTop, rect.top - spotlightPadding));
       const spotlightBottom = Math.min(safeBottom, rect.bottom + spotlightPadding);
       const spotlightHeight = Math.max(86, spotlightBottom - spotlightTop);
@@ -611,6 +623,7 @@ function positionGuidedTutorial() {
       refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;
       refs.guidedTutorialSpotlight.style.height = `${spotlightHeight}px`;
     } else {
+      setTutorialHighlightVisible(true);
       refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
       refs.guidedTutorialSpotlight.style.top = `${Math.max(8, rect.top - spotlightPadding)}px`;
       refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;

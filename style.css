@@ -7017,13 +7017,14 @@ button.is-active:not(:disabled),
 .guided-tutorial {
   position: fixed;
   inset: 0;
-  z-index: 3900;
+  z-index: auto;
   pointer-events: none;
 }
 
 .guided-tutorial__dim {
-  position: absolute;
+  position: fixed;
   inset: 0;
+  z-index: 3900;
   background: rgba(0, 0, 0, 0.62);
 }
 
@@ -7049,7 +7050,7 @@ button.is-active:not(:disabled),
 
 .guided-tutorial__bubble {
   position: fixed;
-  z-index: 4100;
+  z-index: 9999;
   width: min(310px, calc(100vw - 28px));
   max-height: calc(100dvh - 28px);
   overflow-y: auto;
