@@ -331,14 +331,25 @@ function renderRecruitDetailModal() {
   }
 
   const boostLevel = getRecruitBoostLevel(recruit.id);
-  const enhancementCost = getRecruitEnhancementCost(recruit.id);
   const currentCount = getRecruitCount(recruit.id);
+  const rankLabel = getRecruitRankLabel(recruit, currentCount);
   const skillText = getRecruitSkillText(recruit);
+  const promotionReady = shouldShowRecruitPromotionButton(recruit, currentCount);
+  const actionCost = promotionReady ? getRecruitPromotionCost(recruit) : getRecruitBuyCost(recruit, currentCount);
+  const actionDisabled = state.gold < actionCost;
+  const actionText = promotionReady
+    ? `승급 진행 (${actionCost} 자금)`
+    : currentCount <= 0
+      ? `획득 (${actionCost} 자금)`
+      : `레벨업 (${actionCost} 자금)`;
 
   refs.recruitDetailModal.classList.remove("is-hidden");
-  refs.recruitDetailBadge.textContent = recruit.mark;
+  const sprite = getRecruitSpriteSrc(recruit);
+  refs.recruitDetailBadge.textContent = sprite ? "" : recruit.mark;
+  refs.recruitDetailBadge.classList.toggle("has-character", Boolean(sprite));
   refs.recruitDetailBadge.style.setProperty("--recruit-badge-color", recruit.color);
-  refs.recruitDetailTitle.textContent = recruit.name;
+  refs.recruitDetailBadge.style.setProperty("--recruit-image", sprite ? `url("${sprite}")` : "none");
+  refs.recruitDetailTitle.textContent = rankLabel;
   refs.recruitDetailCategory.textContent = `${recruit.category} · 보유 ${currentCount}명`;
   refs.recruitDetailDesc.textContent = recruit.desc;
   refs.recruitDetailLevel.textContent = `Lv.${currentCount}`;
@@ -346,8 +357,12 @@ function renderRecruitDetailModal() {
   refs.recruitDetailBoost.textContent = `${boostLevel}단계`;
   refs.recruitDetailSkillName.textContent = recruit.skill?.name || "스킬 정보";
   refs.recruitDetailSkillText.textContent = skillText;
-  refs.recruitDetailEnhanceButton.textContent = `추가 강화 (${enhancementCost} 자금)`;
-  refs.recruitDetailEnhanceButton.disabled = state.gold < enhancementCost;
+  refs.recruitDetailEnhanceButton.textContent = actionText;
+  refs.recruitDetailEnhanceButton.dataset.recruitDetailAction = promotionReady ? "promote" : "buy";
+  refs.recruitDetailEnhanceButton.dataset.actionCost = String(actionCost);
+  refs.recruitDetailEnhanceButton.disabled = actionDisabled;
+  refs.recruitDetailEnhanceButton.classList.toggle("is-unaffordable", actionDisabled);
+  refs.recruitDetailEnhanceButton.setAttribute("aria-disabled", String(actionDisabled));
 }
 
 function openRecruitDetail(id) {
@@ -479,6 +494,24 @@ function enhanceRecruitDetail() {
   state.recruitBoosts[recruit.id] = (state.recruitBoosts[recruit.id] || 0) + 1;
   log(`${recruit.name} 전문성이 강화되었습니다.`);
   renderAll();
+}
+
+function handleRecruitDetailAction() {
+  if (!activeRecruitDetailId) return;
+
+  const recruit = recruits.find((item) => item.id === activeRecruitDetailId);
+  if (!recruit) return;
+
+  const count = getRecruitCount(recruit.id);
+  if (shouldShowRecruitPromotionButton(recruit, count)) {
+    closeRecruitDetail();
+    openRecruitPromotion(recruit.id);
+    return;
+  }
+
+  buyRecruit(recruit.id);
+  activeRecruitDetailId = recruit.id;
+  renderRecruitDetailModal();
 }
 
 function getGlobalMultiplier() {

@@ -163,8 +163,11 @@ function refreshCostSensitiveButtonStates() {
   }
 
   if (refs.recruitDetailEnhanceButton && activeRecruitDetailId) {
-    const cost = getRecruitEnhancementCost(activeRecruitDetailId);
-    const isUnaffordable = state.gold < cost;
+    const recruit = recruits.find((item) => item.id === activeRecruitDetailId);
+    const count = recruit ? getRecruitCount(recruit.id) : 0;
+    const promotionReady = recruit ? shouldShowRecruitPromotionButton(recruit, count) : false;
+    const cost = recruit ? (promotionReady ? getRecruitPromotionCost(recruit) : getRecruitBuyCost(recruit, count)) : 0;
+    const isUnaffordable = recruit ? state.gold < cost : true;
     refs.recruitDetailEnhanceButton.disabled = isUnaffordable;
     refs.recruitDetailEnhanceButton.classList.toggle("is-unaffordable", isUnaffordable);
     refs.recruitDetailEnhanceButton.setAttribute("aria-disabled", String(isUnaffordable));
@@ -496,6 +499,7 @@ function renderShop() {
             <div class="recruit-class-body">
               <div class="recruit-class-head">
                 ${getRecruitAvatarMarkup(recruit, "recruit-card-avatar")}
+                <span class="recruit-mobile-caption">Lv.${getRecruitCount(recruit.id)} ${getRecruitRankLabel(recruit, getRecruitCount(recruit.id))}</span>
               </div>
               <div class="recruit-class-stats">
                 ${formatRecruitStatRows(recruit)}
@@ -591,7 +595,8 @@ function renderSquadManagement() {
     })
     .join("");
 
-  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup + renderSquadSynergyPanel();
+  refs.squadFormation.innerHTML = leaderMarkup + slotMarkup;
+  if (refs.squadSynergyPanel) refs.squadSynergyPanel.innerHTML = renderSquadSynergyPanel();
   refs.squadRoster.innerHTML = recruits
     .map((recruit) => {
       const level = getRecruitCount(recruit.id);
@@ -739,6 +744,7 @@ function renderSystemUnlockState() {
     }
 
     if (refs.squadFormation) refs.squadFormation.innerHTML = "";
+    if (refs.squadSynergyPanel) refs.squadSynergyPanel.innerHTML = "";
     if (refs.squadRoster) refs.squadRoster.innerHTML = "";
   }
 }

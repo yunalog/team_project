@@ -156,7 +156,9 @@
           <div class="battle-equipment-section">
             <div class="battle-equipment-column">
               <button id="upgradePlayerButton" class="battle-column-action" type="button">대표 역량 강화</button>
+              <button class="mobile-battle-popup-button" type="button" data-open-mobile-panel="equipped">장착장비</button>
               <div id="equippedItemPanel" class="equipped-item-panel is-collapsed" aria-expanded="false">
+                <button class="mobile-panel-close" type="button" data-close-mobile-panel aria-label="장착장비 닫기">×</button>
                 <div class="equipped-item-header">
                   <div class="equipped-item-summary">
                     <span class="equipped-item-label">장착 장비</span>
@@ -171,40 +173,44 @@
             </div>
             <div class="battle-equipment-column">
               <button id="nextStageButton" class="battle-column-action" type="button">다음 의뢰</button>
-              <div class="equipment-layer" aria-live="polite">
-                <div class="draw-machine-panel" aria-label="장비 뽑기">
-                  <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
-                  <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
-                    <span>뽑기</span>
-                    <strong id="equipmentDrawCost">10</strong>
-                  </button>
-                  <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
-                </div>
-                <div id="equipmentChoice" class="equipment-choice is-hidden">
-                  <div class="equipment-card">
-                    <span id="equipmentIcon" class="equipment-icon">?</span>
-                    <div>
-                      <strong id="equipmentName">장비</strong>
-                      <p id="equipmentBonus">대표 능력치 상승</p>
+              <button class="mobile-battle-popup-button" type="button" data-open-mobile-panel="equipment-tools">장비 뽑기 · 연구</button>
+              <div id="equipmentToolsPanel" class="equipment-tools-panel">
+                <button class="mobile-panel-close" type="button" data-close-mobile-panel aria-label="장비 뽑기와 연구 닫기">×</button>
+                <div class="equipment-layer" aria-live="polite">
+                  <div class="draw-machine-panel" aria-label="장비 뽑기">
+                    <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
+                    <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
+                      <span>뽑기</span>
+                      <strong id="equipmentDrawCost">10</strong>
+                    </button>
+                    <button id="autoDrawButton" class="auto-draw-button" type="button">자동 뽑기</button>
+                  </div>
+                  <div id="equipmentChoice" class="equipment-choice is-hidden">
+                    <div class="equipment-card">
+                      <span id="equipmentIcon" class="equipment-icon">?</span>
+                      <div>
+                        <strong id="equipmentName">장비</strong>
+                        <p id="equipmentBonus">대표 능력치 상승</p>
+                      </div>
+                    </div>
+                    <div class="equipment-actions">
+                      <button id="equipItemButton" type="button">장착</button>
+                      <button id="discardItemButton" type="button">버리기</button>
                     </div>
                   </div>
-                  <div class="equipment-actions">
-                    <button id="equipItemButton" type="button">장착</button>
-                    <button id="discardItemButton" type="button">버리기</button>
+                </div>
+                <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
+                  <div class="equipped-item-summary">
+                    <span class="equipment-upgrade-label">장비 연구</span>
+                    <strong id="equipmentGradeText">1단계</strong>
+                    <p id="equipmentUpgradeTimer">업그레이드 대기 중</p>
                   </div>
+                  <div class="equipment-upgrade-actions">
+                    <button id="equipmentUpgradeButton" type="button">등급 업그레이드</button>
+                    <button id="speedTicketButton" type="button">가속티켓</button>
+                  </div>
+                  <small id="speedTicketText">보유 0장 · 1장당 10분</small>
                 </div>
-              </div>
-              <div id="equipmentUpgradePanel" class="equipment-upgrade-panel">
-                <div class="equipped-item-summary">
-                  <span class="equipment-upgrade-label">장비 연구</span>
-                  <strong id="equipmentGradeText">1단계</strong>
-                  <p id="equipmentUpgradeTimer">업그레이드 대기 중</p>
-                </div>
-                <div class="equipment-upgrade-actions">
-                  <button id="equipmentUpgradeButton" type="button">등급 업그레이드</button>
-                  <button id="speedTicketButton" type="button">가속티켓</button>
-                </div>
-                <small id="speedTicketText">보유 0장 · 1장당 10분</small>
               </div>
             </div>
           </div>
@@ -230,33 +236,59 @@
 
         <article class="tab-panel" data-panel="tools">
           <div class="company-dashboard">
-            <div class="facility-heading">
-              <div>
-                <span class="section-kicker">OFFICE INVESTMENT</span>
-                <h2>회사 시설 확장</h2>
-              </div>
-              <small>시설 투자는 회사 EXP를 올리고 업무 효율을 높입니다.</small>
-            </div>
-            <div class="facility-list" id="toolList"></div>
-
-            <div class="squad-management">
+            <button class="company-popup-button" type="button" data-open-company-panel="facilities">회사 시설 확장</button>
+            <div class="company-popup-panel company-facilities-panel" data-company-panel="facilities">
+              <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="회사 시설 확장 닫기">×</button>
               <div class="facility-heading">
                 <div>
-                  <span class="section-kicker">ACTIVE SQUAD</span>
-                  <h2>업무 스쿼드 구성</h2>
+                  <span class="section-kicker">OFFICE INVESTMENT</span>
+                  <h2>회사 시설 확장</h2>
                 </div>
-                <small>대표 1명 + 동료 3명까지,총 4명으로 구성할 수 있습니다.</small>
+                <small>시설 투자는 회사 EXP를 올리고 업무 효율을 높입니다.</small>
               </div>
-              <div class="squad-layout">
-                <div>
-                  <span class="squad-subtitle">배치 위치</span>
-                  <div class="squad-formation" id="squadFormation"></div>
+              <div class="facility-list" id="toolList"></div>
+            </div>
+
+            <div class="squad-management">
+              <button class="company-popup-button" type="button" data-open-company-panel="formation">업무 스쿼드 구성</button>
+              <div class="company-popup-panel company-formation-panel" data-company-panel="formation">
+                <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="업무 스쿼드 구성 닫기">×</button>
+                <div class="facility-heading">
+                  <div>
+                    <span class="section-kicker">ACTIVE SQUAD</span>
+                    <h2>업무 스쿼드 구성</h2>
+                  </div>
+                  <small>대표 1명 + 동료 3명까지,총 4명으로 구성할 수 있습니다.</small>
                 </div>
-                <div>
-                  <span class="squad-subtitle">보유 동료</span>
-                  <div class="squad-roster" id="squadRoster"></div>
-                </div>
+                <span class="squad-subtitle">배치 위치</span>
+                <div class="squad-formation" id="squadFormation"></div>
               </div>
+
+              <button class="company-popup-button" type="button" data-open-company-panel="synergy">조합 시너지</button>
+              <div class="company-popup-panel company-synergy-panel" data-company-panel="synergy">
+                <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="조합 시너지 닫기">×</button>
+                <div class="facility-heading">
+                  <div>
+                    <span class="section-kicker">SQUAD SYNERGY</span>
+                    <h2>조합 시너지</h2>
+                  </div>
+                </div>
+                <div id="squadSynergyPanel"></div>
+              </div>
+
+              <button class="company-popup-button" type="button" data-open-company-panel="roster">보유 동료</button>
+              <div class="company-popup-panel company-roster-panel" data-company-panel="roster">
+                <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="보유 동료 닫기">×</button>
+                <div class="facility-heading">
+                  <div>
+                    <span class="section-kicker">CREW ROSTER</span>
+                    <h2>보유 동료</h2>
+                  </div>
+                </div>
+                <span class="squad-subtitle">보유 동료</span>
+                <div class="squad-roster" id="squadRoster"></div>
+              </div>
+
               <p class="squad-help">각 위치의 목록에서 동료를 선택하면 업무 화면 배치와 자동 기여도에 바로 반영됩니다.</p>
             </div>
 
@@ -439,10 +471,10 @@
             <strong id="recruitDetailLevel">Lv.0</strong>
           </div>
           <div>
-            <span>기본 DPS</span>
+            <span>스탯 설명</span>
             <strong id="recruitDetailDps">0</strong>
           </div>
-          <div>
+          <div class="recruit-detail-boost-stat">
             <span>전문 강화</span>
             <strong id="recruitDetailBoost">0단계</strong>
           </div>

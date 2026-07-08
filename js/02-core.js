@@ -29,6 +29,7 @@
     battleStatusItems: [...document.querySelectorAll(".battle-status-item")],
     squadFormation: document.querySelector("#squadFormation"),
     squadRoster: document.querySelector("#squadRoster"),
+    squadSynergyPanel: document.querySelector("#squadSynergyPanel"),
     effectLayer: document.querySelector("#effectLayer"),
     goldText: document.querySelector("#goldText"),
     ideaText: document.querySelector("#ideaText"),
@@ -139,6 +140,11 @@
 function bindEvents() {
   document.addEventListener("click", (event) => {
     const tab = event.target.closest("[data-tab]");
+    const mobilePanelOpenButton = event.target.closest("[data-open-mobile-panel]");
+    const mobilePanelCloseButton = event.target.closest("[data-close-mobile-panel]");
+    const mobilePanelBackdrop = event.target.classList?.contains("is-mobile-popup-open") ? event.target : null;
+    const companyPanelOpenButton = event.target.closest("[data-open-company-panel]");
+    const companyPanelCloseButton = event.target.closest("[data-close-company-panel]");
     const recruitButton = event.target.closest("[data-buy-recruit]");
     const recruitSelectCard = event.target.closest("[data-select-recruit]");
     const recruitPromotionButton = event.target.closest("[data-recruit-promote]");
@@ -156,8 +162,15 @@ function bindEvents() {
     const guidedTutorialSkip = event.target.closest("#guidedTutorialSkipButton");
     const worldTutorialConfirm = event.target.closest("#worldTutorialConfirmButton");
 
+    if (mobilePanelOpenButton) openMobileBattlePanel(mobilePanelOpenButton.dataset.openMobilePanel);
+    if (mobilePanelCloseButton || mobilePanelBackdrop) closeMobileBattlePanels();
+    if (companyPanelOpenButton) openMobileCompanyPanel(companyPanelOpenButton.dataset.openCompanyPanel);
+    if (companyPanelCloseButton) closeMobileCompanyPanels();
     if (tab) switchTab(tab);
-    if (recruitSelectCard && !event.target.closest("button, select, a")) selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
+    if (recruitSelectCard && !event.target.closest("button, select, a")) {
+      selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
+      if (isMobileLayout()) openRecruitDetail(recruitSelectCard.dataset.selectRecruit);
+    }
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
     if (recruitPromotionButton) openRecruitPromotion(recruitPromotionButton.dataset.recruitPromote);
     if (recruitDetailButton) openRecruitDetail(recruitDetailButton.dataset.recruitDetail);
@@ -201,13 +214,65 @@ function bindEvents() {
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-audio-mute]")) toggleMute();
   });
-  if (refs.recruitDetailEnhanceButton) refs.recruitDetailEnhanceButton.addEventListener("click", enhanceRecruitDetail);
+  if (refs.recruitDetailEnhanceButton) refs.recruitDetailEnhanceButton.addEventListener("click", handleRecruitDetailAction);
   if (refs.recruitPromotionConfirmButton) refs.recruitPromotionConfirmButton.addEventListener("click", confirmRecruitPromotion);
   document.addEventListener("input", handleAudioInput);
   document.addEventListener("change", handleAudioInput);
   document.addEventListener("change", handleSquadChange);
   window.addEventListener("resize", positionGuidedTutorial);
+  window.addEventListener("resize", () => {
+    if (!isMobileLayout()) closeMobileBattlePanels();
+    if (!isMobileLayout()) closeMobileCompanyPanels();
+  });
   window.addEventListener("scroll", positionGuidedTutorial, true);
+}
+
+function isMobileLayout() {
+  return window.matchMedia("(max-width: 560px)").matches;
+}
+
+function openMobileBattlePanel(panelName) {
+  if (!isMobileLayout()) return;
+  closeMobileBattlePanels();
+  const target =
+    panelName === "equipped"
+      ? refs.equippedItemPanel
+      : panelName === "equipment-tools"
+        ? document.querySelector("#equipmentToolsPanel")
+        : null;
+  if (!target) return;
+
+  if (panelName === "equipped" && !equipmentPanelExpanded) {
+    equipmentPanelExpanded = true;
+    renderEquippedItems();
+  }
+
+  target.classList.add("is-mobile-popup-open");
+  document.body.classList.add("has-mobile-panel-open");
+}
+
+function closeMobileBattlePanels() {
+  document.querySelectorAll(".is-mobile-popup-open").forEach((panel) => {
+    panel.classList.remove("is-mobile-popup-open");
+  });
+  document.body.classList.remove("has-mobile-panel-open");
+}
+
+function openMobileCompanyPanel(panelName) {
+  if (!isMobileLayout()) return;
+  closeMobileCompanyPanels();
+  const target = document.querySelector(`[data-company-panel="${panelName}"]`);
+  if (!target) return;
+
+  target.classList.add("is-company-popup-open");
+  document.body.classList.add("has-mobile-panel-open");
+}
+
+function closeMobileCompanyPanels() {
+  document.querySelectorAll(".is-company-popup-open").forEach((panel) => {
+    panel.classList.remove("is-company-popup-open");
+  });
+  document.body.classList.remove("has-mobile-panel-open");
 }
 
 function setupStartAuthGate() {
@@ -486,14 +551,16 @@ const START_TUTORIAL_STEPS = [
   },
   {
     selector: "#equippedItemPanel",
+    mobileSelector: '[data-open-mobile-panel="equipped"]',
     title: "장착 장비",
-    text: "뽑기로 얻은 장비를 장착하면 대표의 공격력과 스킬 공격력이 증가합니다. 목록 보기 버튼으로 장착 현황을 확인할 수 있습니다.",
+    text: "모바일에서는 장착장비 버튼으로 장비 현황을 팝업에서 확인합니다. 뽑기로 얻은 장비를 장착하면 대표 공격력과 스킬 공격력이 증가합니다.",
     placement: "right",
   },
   {
     selector: ".draw-machine-panel",
-    title: "뽑기 / 자동 뽑기",
-    text: "자금을 사용해 장비를 뽑습니다. 자동 뽑기는 더 좋은 장비가 나올 때까지 반복 시도하는 기능입니다. 보스를 처치하면 장비 연구 시간을 줄이는 가속티켓을 얻을 수 있습니다.",
+    mobileSelector: '[data-open-mobile-panel="equipment-tools"]',
+    title: "장비 뽑기 / 연구",
+    text: "모바일에서는 장비 뽑기·연구 버튼으로 팝업을 엽니다. 자금으로 장비를 뽑고, 아이디어와 가속티켓으로 장비 연구를 진행합니다.",
     placement: "left",
   },
 ];
@@ -503,30 +570,24 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "recruit",
     selector: ".recruit-board__left",
     title: "동료 영입 목록",
-    text: "여기에서 개발, 아트, 기획, 사운드, 연출, 데이터 분석 등 다양한 직군 카드를 확인할 수 있습니다. 카드를 누르면 오른쪽에 성장 정보가 표시됩니다.",
+    text: "여기에서 개발, 아트, 기획, 사운드, 연출, 데이터 분석 등 다양한 직군 초상화를 확인합니다. 모바일에서는 초상화 아래에 현재 Lv과 이름이 표시됩니다.",
     placement: "right",
   },
   {
     tab: "recruit",
     selector: ".recruit-class-card",
     title: "직군 카드",
-    text: "각 카드는 직군 이름, 현재 승급명, 캐릭터 이미지, 핵심 능력치를 보여줍니다. 원하는 직군을 선택해 성장시킬 수 있습니다.",
+    text: "초상화를 누르면 해당 직군의 상세 팝업이 열립니다. 팝업에서 이름, 스탯, 스킬 설명을 보고 획득이나 레벨업을 진행합니다.",
     placement: "right",
   },
   {
     tab: "recruit",
-    selector: ".recruit-board__right",
-    title: "직군 성장",
-    text: "선택한 동료의 설명, 스킬, 현재 레벨을 확인하고 동료 획득·레벨업·승급을 진행하는 영역입니다.",
-    placement: "left",
-  },
-  {
-    tab: "recruit",
-    selector: ".recruit-focus-action",
-    fallbackSelector: ".recruit-board__right",
+    selector: ".recruit-modal__panel",
+    fallbackSelector: ".recruit-class-card",
+    openRecruitDetailFirst: true,
     title: "동료 획득 / 레벨업 / 승급",
-    text: "동료가 없을 때는 동료 획득, 보유 중일 때는 레벨업을 진행합니다. Lv.10, 20, 30, 40, 50에 도달하면 승급 버튼으로 더 높은 직급명을 열 수 있습니다.",
-    placement: "left",
+    text: "상세 팝업의 아래 버튼으로 동료를 획득하거나 레벨업합니다. 승급 레벨에 도달하면 버튼이 승급 진행으로 바뀌고, 승급 이펙트 팝업이 이어집니다.",
+    placement: "top",
   },
   {
     tab: "tools",
@@ -538,29 +599,41 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
   {
     tab: "tools",
     selector: "#toolList",
+    mobileSelector: '[data-open-company-panel="facilities"]',
     title: "회사 시설 확장",
-    text: "아이디어를 사용해 시설에 투자하면 회사 EXP가 오르고 회사 가치가 성장합니다. 회사가 성장할수록 보너스와 분위기가 좋아집니다.",
-    placement: "top",
-  },
-  {
-    tab: "tools",
-    selector: ".squad-management",
-    title: "업무 스쿼드 구성",
-    text: "영입한 동료를 대표와 함께 업무 스쿼드에 배치하는 영역입니다. 동료 3명까지 추가해 총 4명 팀을 구성할 수 있습니다.",
+    text: "모바일에서는 회사 시설 확장 버튼으로 시설 투자 팝업을 엽니다. 아이디어를 사용해 시설에 투자하면 회사 EXP와 회사 가치가 성장합니다.",
     placement: "top",
   },
   {
     tab: "tools",
     selector: "#squadFormation",
-    title: "배치 위치",
-    text: "각 자리의 선택 목록에서 보유 동료를 골라 배치합니다. 배치된 동료는 전투 화면에 등장하고 자동으로 업무를 처리합니다.",
-    placement: "left",
+    mobileSelector: '[data-open-company-panel="formation"]',
+    title: "업무 스쿼드 구성",
+    text: "모바일에서는 업무 스쿼드 구성 버튼으로 배치 팝업을 엽니다. 대표 1명과 동료 3명까지 더해 총 4명 팀을 구성할 수 있습니다.",
+    placement: "top",
+  },
+  {
+    tab: "tools",
+    selector: "#squadSynergyPanel",
+    mobileSelector: '[data-open-company-panel="synergy"]',
+    title: "조합 시너지",
+    text: "조합 시너지 버튼에서 현재 활성 시너지와 가능한 조합을 확인합니다. 특정 직군 조합을 맞추면 스쿼드 보너스가 발동합니다.",
+    placement: "top",
   },
   {
     tab: "tools",
     selector: "#squadRoster",
-    title: "보유 동료 / 시너지",
-    text: "보유한 동료와 배치 상태를 확인할 수 있습니다. 특정 직군 조합을 맞추면 스쿼드 시너지 보너스가 발동합니다.",
+    mobileSelector: '[data-open-company-panel="roster"]',
+    title: "보유 동료",
+    text: "보유 동료 버튼에서 합류한 동료와 배치 상태를 확인합니다. 배치된 동료는 전투 화면에 등장하고 자동으로 업무를 처리합니다.",
+    placement: "top",
+  },
+  {
+    tab: "tools",
+    selector: "#squadFormation",
+    openCompanyPanel: "formation",
+    title: "배치 위치",
+    text: "팝업 안의 각 자리 선택 목록에서 보유 동료를 골라 배치합니다. 이미 배치된 동료는 다른 자리에서 중복 선택되지 않습니다.",
     placement: "left",
   },
 ];
@@ -617,27 +690,47 @@ function getActiveTutorialSteps() {
 }
 
 function prepareTutorialStep(step) {
-  if (!step?.tab || activeTab === step.tab) return;
-  const tab = document.querySelector(`[data-tab="${step.tab}"]`);
-  if (tab) {
-    switchTab(tab);
-    renderAll();
+  closeMobileBattlePanels();
+  closeMobileCompanyPanels();
+  if (!step?.openRecruitDetailFirst && activeRecruitDetailId) closeRecruitDetail();
+
+  if (step?.tab && activeTab !== step.tab) {
+    const tab = document.querySelector(`[data-tab="${step.tab}"]`);
+    if (tab) {
+      switchTab(tab);
+      renderAll();
+    }
+  }
+
+  if (isMobileLayout()) {
+    if (step.openMobilePanel) openMobileBattlePanel(step.openMobilePanel);
+    if (step.openCompanyPanel) openMobileCompanyPanel(step.openCompanyPanel);
+  }
+
+  if (step.openRecruitDetailFirst) {
+    const recruit = recruits.find((item) => getRecruitCount(item.id) > 0) || recruits[0];
+    if (recruit) {
+      openRecruitDetail(recruit.id);
+      refs.recruitDetailModal?.classList.add("is-tutorial-surface");
+    }
   }
 }
 
 function getTutorialTarget(step) {
-  if (!step?.selector) return null;
-  const found = document.querySelector(step.selector) || (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
+  const selector = isMobileLayout() && step?.mobileSelector ? step.mobileSelector : step?.selector;
+  if (!selector) return null;
+  const found = document.querySelector(selector) || (step.fallbackSelector ? document.querySelector(step.fallbackSelector) : null);
   if (!found) return null;
   return (
     found.closest(
-      ".stat-grid > div, .resource-chip, .equipped-item-panel, .draw-machine-panel, .recruit-board__left, .recruit-board__right, .recruit-class-card, .recruit-focus-card, .recruit-focus-action, .company-scene-heading, .company-status-strip, .facility-list, .facility-card, .squad-management, .squad-layout, .squad-formation, .squad-roster, button"
+      ".stat-grid > div, .resource-chip, .equipped-item-panel, .equipment-tools-panel, .draw-machine-panel, .recruit-modal__panel, .recruit-board__left, .recruit-board__right, .recruit-class-card, .recruit-focus-card, .recruit-focus-action, .company-scene-heading, .company-status-strip, .company-popup-panel, .facility-list, .facility-card, .squad-management, .squad-layout, .squad-formation, .squad-roster, .squad-synergy-panel, button"
     ) || found
   );
 }
 
 function clearTutorialHighlight() {
   if (activeTutorialTarget) activeTutorialTarget.classList.remove("is-tutorial-highlight");
+  refs.recruitDetailModal?.classList.remove("is-tutorial-surface");
   activeTutorialTarget = null;
 }
 
@@ -650,8 +743,8 @@ function showGuidedTutorialStep(index) {
     return;
   }
 
-  prepareTutorialStep(step);
   clearTutorialHighlight();
+  prepareTutorialStep(step);
   activeTutorialStepIndex = index;
   activeTutorialTarget = getTutorialTarget(step);
 
@@ -680,9 +773,10 @@ function positionGuidedTutorial() {
   const padding = 10;
   const spotlightPadding = 8;
   const bubble = refs.guidedTutorialBubble;
-  const bubbleWidth = Math.min(310, window.innerWidth - 28);
+  const bubbleWidth = Math.min(isMobileLayout() ? 336 : 310, window.innerWidth - 20);
   bubble.style.width = `${bubbleWidth}px`;
   bubble.style.maxWidth = `${bubbleWidth}px`;
+  bubble.style.maxHeight = `${Math.max(160, window.innerHeight - padding * 2)}px`;
 
   if (refs.guidedTutorialSpotlight) {
     refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
@@ -694,13 +788,20 @@ function positionGuidedTutorial() {
   const bubbleHeight = bubble.offsetHeight || 168;
   let left = rect.left + rect.width / 2 - bubbleWidth / 2;
   let top = rect.bottom + 16;
+  let placement = step.placement;
 
-  if (step.placement === "top") {
+  if (isMobileLayout() && (placement === "left" || placement === "right")) {
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    placement = spaceBelow >= bubbleHeight + 24 || spaceBelow >= spaceAbove ? "bottom" : "top";
+  }
+
+  if (placement === "top") {
     top = rect.top - bubbleHeight - 16;
-  } else if (step.placement === "left") {
+  } else if (placement === "left") {
     left = rect.left - bubbleWidth - 16;
     top = rect.top + rect.height / 2 - bubbleHeight / 2;
-  } else if (step.placement === "right") {
+  } else if (placement === "right") {
     left = rect.right + 16;
     top = rect.top + rect.height / 2 - bubbleHeight / 2;
   }
@@ -713,6 +814,9 @@ function positionGuidedTutorial() {
 
 function hideGuidedTutorial() {
   closeWorldTutorial();
+  closeMobileBattlePanels();
+  closeMobileCompanyPanels();
+  if (activeRecruitDetailId) closeRecruitDetail();
   clearTutorialHighlight();
   if (refs.guidedTutorial) {
     refs.guidedTutorial.classList.add("is-hidden");
