@@ -2095,6 +2095,18 @@ h1 {
   background: #fff2d3;
 }
 
+body.is-company-tab .message-line {
+  display: none;
+}
+
+body.is-company-tab .panel-area {
+  border-top: 2px solid var(--ink);
+}
+
+body.is-company-tab .tab-panel[data-panel="tools"].is-active {
+  padding-top: 10px;
+}
+
 #battleLog {
   min-width: 0;
   font-size: 14px;

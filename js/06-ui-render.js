@@ -207,6 +207,7 @@ function updatePrimaryScene() {
   const isCompanyTab = activeTab === "tools";
   const companyDashboard = document.querySelector('.tab-panel[data-panel="tools"] .company-dashboard');
   const messageLine = document.querySelector(".message-line");
+  document.body.classList.toggle("is-company-tab", isCompanyTab);
   refs.battlefield.classList.toggle("is-hidden", isCompanyTab);
   refs.companyScene.classList.toggle("is-hidden", !isCompanyTab);
   refs.battleStatusItems.forEach((element) => element.classList.toggle("is-hidden", isCompanyTab));
