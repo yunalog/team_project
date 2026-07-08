@@ -7245,3 +7245,62 @@ button:disabled,
   filter: grayscale(0.5) saturate(0.65);
   opacity: 0.7;
 }
+
+/* Mobile tutorial and company-tab final sizing fixes. */
+@media (max-width: 560px) {
+  .tab-panel[data-panel="recruit"] .section-heading {
+    display: inline-grid !important;
+    width: max-content !important;
+    max-width: calc(100vw - 48px) !important;
+    padding: 2px 7px 3px !important;
+    border-radius: 6px;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-class-title {
+    justify-self: start !important;
+    width: max-content !important;
+    max-width: calc(100vw - 72px) !important;
+    padding: 3px 8px 5px !important;
+    border-bottom: 0 !important;
+    border-radius: 6px;
+  }
+
+  .tab-panel[data-panel="tools"].is-active {
+    padding-bottom: 112px !important;
+  }
+
+  .company-scene:not(.is-hidden) {
+    height: 250px !important;
+    min-height: 250px !important;
+  }
+
+  .company-scene:not(.is-hidden) .company-campus {
+    top: 64px !important;
+  }
+
+  .company-scene:not(.is-hidden) .company-scene-progress {
+    bottom: 12px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-list {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    min-height: 56dvh !important;
+    padding-bottom: 24px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card {
+    grid-template-columns: 54px minmax(0, 1fr) !important;
+    min-height: 140px !important;
+    padding: 14px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-icon {
+    width: 54px !important;
+    height: 54px !important;
+  }
+
+  .tab-panel[data-panel="tools"] .facility-card button {
+    min-height: 46px !important;
+  }
+}
