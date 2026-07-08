@@ -549,6 +549,7 @@ function positionGuidedTutorial() {
   const bubbleWidth = Math.min(310, window.innerWidth - 28);
   bubble.style.width = `${bubbleWidth}px`;
   bubble.style.maxWidth = `${bubbleWidth}px`;
+  bubble.style.maxHeight = `${Math.max(140, window.innerHeight - 28)}px`;
 
   if (refs.guidedTutorialSpotlight) {
     refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;

@@ -5361,7 +5361,7 @@ textarea {
 
 @media (max-width: 760px) {
   .panel-area:has(.tab-panel[data-panel="recruit"].is-active) {
-    overflow: visible;
+    overflow: hidden;
   }
 
   .tab-panel[data-panel="recruit"] .recruit-board {
@@ -5373,9 +5373,11 @@ textarea {
 
   .tab-panel[data-panel="recruit"],
   .tab-panel[data-panel="recruit"].is-active {
-    height: auto;
+    height: 100%;
     min-height: 0;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .tab-panel[data-panel="recruit"].is-active {
@@ -7049,6 +7051,9 @@ button.is-active:not(:disabled),
   position: fixed;
   z-index: 4100;
   width: min(310px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 14px;
   border: 3px solid #4a2b17;
   border-radius: 14px;
