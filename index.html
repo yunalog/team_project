@@ -2,8 +2,17 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>스튜디오 크루 RPG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#7f3518" />
+    <meta name="application-name" content="게임 회사 키우기" />
+    <meta name="apple-mobile-web-app-title" content="게임 회사 키우기" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>게임 회사 키우기</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="Resource/Icon/icon-192.png" />
+    <link rel="apple-touch-icon" href="Resource/Icon/icon-192.png" />
     <link rel="stylesheet" href="style.css?v=auth-gate-v2" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
@@ -516,5 +525,14 @@
 <script src="js/04-recruits-company.js?v=auth-gate-v1"></script>
 <script src="js/05-equipment-growth.js?v=auth-gate-v1"></script>
 <script src="js/06-ui-render.js?v=auth-gate-v1"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+        console.warn("Service worker registration failed:", error);
+      });
+    });
+  }
+</script>
   </body>
 </html>
