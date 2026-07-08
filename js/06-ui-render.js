@@ -286,15 +286,24 @@ function formatDiff(value) {
 
 function updatePrimaryScene() {
   const isCompanyTab = activeTab === "tools";
+  const companyDashboard = document.querySelector('.tab-panel[data-panel="tools"] .company-dashboard');
+  const messageLine = document.querySelector(".message-line");
+  document.body.classList.toggle("is-company-tab", isCompanyTab);
   refs.battlefield.classList.toggle("is-hidden", isCompanyTab);
   refs.companyScene.classList.toggle("is-hidden", !isCompanyTab);
   refs.battleStatusItems.forEach((element) => element.classList.toggle("is-hidden", isCompanyTab));
   refs.companyStatusStrip.classList.toggle("is-hidden", !isCompanyTab);
 
   if (isCompanyTab) {
+    if (companyDashboard && refs.companyStatusStrip.parentElement !== companyDashboard) {
+      companyDashboard.insertBefore(refs.companyStatusStrip, companyDashboard.firstChild);
+    }
     const companyLevel = companyLevels[getCompanyLevelIndex()];
     setText(refs.companyLocationText, `회사 규모: ${companyLevel.name}`);
   } else {
+    if (messageLine && refs.companyStatusStrip.parentElement !== messageLine) {
+      messageLine.appendChild(refs.companyStatusStrip);
+    }
     setText(refs.companyLocationText, "위치: 사무실 1층");
   }
 }
