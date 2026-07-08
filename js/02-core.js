@@ -397,7 +397,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     selector: ".recruit-focus-action",
     fallbackSelector: ".recruit-board__right",
     exactTarget: true,
-    mobileSpotlight: { maxWidth: 300, minWidth: 168, height: 54, align: "center" },
+    mobileSpotlight: { maxWidth: 300, minWidth: 168, height: 54, align: "center", allowUnderBubble: true },
     title: "동료 획득 / 레벨업 / 승급",
     text: "동료가 없을 때는 동료 획득, 보유 중일 때는 레벨업을 진행합니다. Lv.10, 20, 30, 40, 50에 도달하면 승급 버튼으로 더 높은 직급명을 열 수 있습니다.",
     placement: "left",
@@ -406,6 +406,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#companyScene",
     exactTarget: true,
+    mobileSpotlight: { fullWidth: true, height: 332, offsetY: -4, allowUnderBubble: false },
     title: "회사 성장 현황",
     text: "회사 탭으로 이동하면 위쪽 화면이 회사 현황으로 바뀝니다. 회사 레벨과 현재 규모, 다음 성장까지 필요한 EXP를 확인할 수 있습니다.",
     placement: "bottom",
@@ -538,12 +539,14 @@ function getMobileTutorialSpotlightRect(baseRect, step) {
   const viewportPadding = 24;
   const maxViewportWidth = Math.max(1, window.innerWidth - viewportPadding);
   const maxWidth = Math.min(options.maxWidth || maxViewportWidth, maxViewportWidth);
-  const requestedWidth = options.width || Math.min(baseRect.width, maxWidth);
+  const requestedWidth = options.fullWidth ? maxViewportWidth : options.width || Math.min(baseRect.width, maxWidth);
   const width = Math.max(options.minWidth || 0, Math.min(requestedWidth, maxWidth));
   const height = Math.max(36, options.height || Math.min(baseRect.height, options.maxHeight || baseRect.height));
 
-  let left = baseRect.left + (options.offsetX || 0);
-  if (options.align === "center") {
+  let left = options.fullWidth ? 12 : baseRect.left + (options.offsetX || 0);
+  if (options.fullWidth) {
+    left += options.offsetX || 0;
+  } else if (options.align === "center") {
     left = baseRect.left + baseRect.width / 2 - width / 2 + (options.offsetX || 0);
   } else if (options.align === "right") {
     left = baseRect.right - width + (options.offsetX || 0);
@@ -650,7 +653,8 @@ function positionGuidedTutorial() {
       const panelRect = document.querySelector(".tab-panel.is-active")?.getBoundingClientRect();
       const safeTop = Math.max(8, panelRect ? panelRect.top + 8 : 8);
       const minSpotlightHeight = Math.max(36, Math.min(86, rect.height));
-      const safeBottom = Math.max(safeTop + minSpotlightHeight, Math.min(top - 14, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
+      const safeBottomLimit = step.mobileSpotlight?.allowUnderBubble ? panelRect ? panelRect.bottom - 8 : window.innerHeight - 8 : top - 14;
+      const safeBottom = Math.max(safeTop + minSpotlightHeight, Math.min(safeBottomLimit, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
       const targetVisible = rect.bottom > safeTop && rect.top < safeBottom;
       setTutorialHighlightVisible(targetVisible);
       if (!targetVisible) {
