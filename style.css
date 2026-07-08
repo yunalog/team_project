@@ -2096,7 +2096,11 @@ h1 {
 }
 
 body.is-company-tab .message-line {
-  display: none;
+  min-height: 0;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+  border-bottom: 0;
 }
 
 body.is-company-tab .panel-area {
