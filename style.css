@@ -8992,3 +8992,15 @@ button:disabled:hover,
     min-height: 46px !important;
   }
 }
+
+/* Mobile-only close buttons must never appear in the desktop inline layout. */
+.mobile-panel-close {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .is-mobile-popup-open > .mobile-panel-close,
+  .company-popup-panel.is-company-popup-open > .mobile-panel-close {
+    display: inline-grid !important;
+  }
+}
