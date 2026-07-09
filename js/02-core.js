@@ -405,21 +405,26 @@ async function startGame() {
     try {
       const user = FirebaseGame.getCurrentUser();
       if (user) {
-        const savedState = await FirebaseGame.loadUserGameState();
+        const localState = normalizeState({ ...cloneDefaultState(), ...state });
+        let cloudState = null;
 
-        if (savedState) {
-          state = normalizeState({
-            ...cloneDefaultState(),
-            ...savedState,
-          });
+        try {
+          const savedState = await FirebaseGame.loadUserGameState();
+          cloudState = savedState ? normalizeState({ ...cloneDefaultState(), ...savedState }) : null;
+        } catch (error) {
+          console.error("Firebase 불러오기 실패:", error);
+          if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 불러오기 실패 · 로컬 저장으로 진행";
         }
+
+        const saveChoice = chooseBestSaveState(localState, cloudState);
+        state = saveChoice.state;
 
         const currentChapter = Math.max(1, Number(state.chapter) || Number(state.stage) || 1);
         const canReceiveOfflineReward = currentChapter >= 3 && Boolean(state.offlineRewardUnlocked);
 
         if (canReceiveOfflineReward) {
           const rewardResult = FirebaseGame.applyOfflineReward(state, getTotalDps());
-          await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+          saveStateLocally(state);
 
           if (rewardResult.applied) {
             window.setTimeout(() => {
@@ -430,7 +435,18 @@ async function startGame() {
           // 3-1 이전이거나 아직 해금 보상 시간을 선택하지 않은 상태에서는
           // 비접속 보상을 지급하지 않고 기준 시간만 현재로 맞춥니다.
           state.lastActiveAtMs = Date.now();
+          saveStateLocally(state);
+        }
+
+        try {
           await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+          if (refs.saveStateText) {
+            refs.saveStateText.textContent =
+              saveChoice.source === "cloud" ? "클라우드 저장 동기화 완료" : "로컬 저장 동기화 완료";
+          }
+        } catch (error) {
+          console.error("Firebase 저장 동기화 실패:", error);
+          if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 저장 실패 · 로컬 저장 유지";
         }
       }
     } catch (error) {
@@ -1267,6 +1283,93 @@ function cloneDefaultState() {
   return JSON.parse(JSON.stringify(defaultState));
 }
 
+function saveStateLocally(nextState = state) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function chooseBestSaveState(localState, cloudState) {
+  if (!localState && !cloudState) return { state: cloneDefaultState(), source: "local" };
+  if (!localState) return { state: normalizeState({ ...cloneDefaultState(), ...cloudState }), source: "cloud" };
+  if (!cloudState) return { state: normalizeState({ ...cloneDefaultState(), ...localState }), source: "local" };
+
+  const normalizedLocal = normalizeState({ ...cloneDefaultState(), ...localState });
+  const normalizedCloud = normalizeState({ ...cloneDefaultState(), ...cloudState });
+  return compareSaveStates(normalizedLocal, normalizedCloud) >= 0
+    ? { state: normalizedLocal, source: "local" }
+    : { state: normalizedCloud, source: "cloud" };
+}
+
+function compareSaveStates(leftState, rightState) {
+  const leftRank = getSaveProgressRank(leftState);
+  const rightRank = getSaveProgressRank(rightState);
+  const length = Math.max(leftRank.length, rightRank.length);
+
+  for (let index = 0; index < length; index += 1) {
+    const leftValue = Number(leftRank[index]) || 0;
+    const rightValue = Number(rightRank[index]) || 0;
+    if (leftValue !== rightValue) return leftValue - rightValue;
+  }
+
+  return 0;
+}
+
+function getSaveProgressRank(nextState) {
+  const chapter = Math.max(1, Number(nextState?.chapter) || Number(nextState?.stage) || 1);
+  const subStage = Math.min(
+    NORMAL_STAGES_PER_CHAPTER,
+    Math.max(1, Number(nextState?.subStage) || deriveSubStageFromLegacy(nextState?.stage))
+  );
+  const stageStep = nextState?.battleMode === "boss" ? NORMAL_STAGES_PER_CHAPTER + 1 : subStage;
+
+  return [
+    chapter,
+    stageStep,
+    Math.max(0, Number(nextState?.clearCount) || 0),
+    Math.max(1, Number(nextState?.playerLevel) || 1),
+    Math.max(1, Number(nextState?.clickPower) || 1),
+    Math.max(0, Number(nextState?.companyXp) || 0),
+    sumSaveRecordValues(nextState?.recruits),
+    sumSaveRecordValues(nextState?.tools),
+    sumSaveRecordValues(nextState?.growthLevels),
+    sumSaveRecordValues(nextState?.recruitBoosts),
+    sumSaveRecordValues(nextState?.recruitPromotions),
+    getEquipmentSaveScore(nextState?.equipment),
+    nextState?.startTutorialCompleted ? 1 : 0,
+    nextState?.recruitCompanyUnlockShown ? 1 : 0,
+    nextState?.recruitCompanyTutorialCompleted ? 1 : 0,
+    nextState?.offlineRewardUnlocked ? 1 : 0,
+    getSaveResourceScore(nextState),
+    Math.max(0, Number(nextState?.lastActiveAtMs) || 0),
+  ];
+}
+
+function sumSaveRecordValues(record) {
+  if (!record || typeof record !== "object") return 0;
+  return Object.values(record).reduce((total, value) => total + Math.max(0, Number(value) || 0), 0);
+}
+
+function getEquipmentSaveScore(equipment) {
+  if (!equipment || typeof equipment !== "object") return 0;
+
+  const equippedCount =
+    equipment.equipped && typeof equipment.equipped === "object" ? Object.keys(equipment.equipped).length : 0;
+  return (
+    Math.max(0, Number(equipment.gradeLevel) || 0) * 1000 +
+    Math.max(0, Number(equipment.drawCount) || 0) +
+    Math.max(0, Number(equipment.speedTickets) || 0) * 10 +
+    equippedCount * 100
+  );
+}
+
+function getSaveResourceScore(nextState) {
+  return Math.max(0, Number(nextState?.gold) || 0) + Math.max(0, Number(nextState?.idea) || 0) * 5;
+}
+
 function loadState() {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -1445,9 +1548,7 @@ function getEquipmentSlotId(slotId) {
 function saveState(message) {
   state.lastActiveAtMs = Date.now();
 
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
+  if (!saveStateLocally(state)) {
     message = "저장소 접근 불가";
   }
 
