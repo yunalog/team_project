@@ -224,6 +224,14 @@ function bindEvents() {
     if (!isMobileLayout()) closeMobileCompanyPanels();
   });
   window.addEventListener("scroll", positionGuidedTutorial, true);
+  window.addEventListener("pagehide", persistStateBeforePageExit);
+  window.addEventListener("beforeunload", persistStateBeforePageExit);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      persistStateBeforePageExit();
+      flushQueuedCloudSave();
+    }
+  });
 }
 
 function isMobileLayout() {
@@ -1079,6 +1087,7 @@ async function chooseInitialOfflineRewardPlan(hours) {
 }
 
 function returnToTitle() {
+  queueStateSave({ delayMs: 0 });
   hasStartedGame = false;
   stopLoop();
   refs.gameShell.classList.add("is-hidden");
@@ -1267,7 +1276,7 @@ function tick(delta) {
     updateAutoCombat(delta);
     updateEquipmentUpgrade(delta);
 
-    if (saveCooldown >= 10) {
+    if (saveCooldown >= AUTO_SAVE_INTERVAL_SECONDS) {
       saveCooldown = 0;
       saveState("자동 저장 완료");
     }
@@ -1290,6 +1299,55 @@ function saveStateLocally(nextState = state) {
   } catch {
     return false;
   }
+}
+
+function queueStateSave(options = {}) {
+  if (!state || !hasStartedGame) return;
+
+  if (options.updateLastActive !== false) state.lastActiveAtMs = Date.now();
+  saveStateLocally(state);
+  scheduleCloudSave(options.delayMs);
+}
+
+function scheduleCloudSave(delayMs = CLOUD_SAVE_DEBOUNCE_MS) {
+  if (!window.FirebaseGame?.getCurrentUser?.()) return;
+  if (cloudSaveTimer) window.clearTimeout(cloudSaveTimer);
+
+  cloudSaveTimer = window.setTimeout(() => {
+    cloudSaveTimer = null;
+    flushQueuedCloudSave();
+  }, Math.max(0, Number(delayMs) || 0));
+}
+
+async function flushQueuedCloudSave() {
+  if (!state || !window.FirebaseGame?.getCurrentUser?.()) return false;
+
+  if (isCloudSaveInFlight) {
+    hasPendingCloudSave = true;
+    return false;
+  }
+
+  isCloudSaveInFlight = true;
+
+  try {
+    await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+    return true;
+  } catch (error) {
+    console.error("Firebase 저장 실패:", error);
+    return false;
+  } finally {
+    isCloudSaveInFlight = false;
+    if (hasPendingCloudSave) {
+      hasPendingCloudSave = false;
+      scheduleCloudSave(0);
+    }
+  }
+}
+
+function persistStateBeforePageExit() {
+  if (!state || !hasStartedGame) return;
+  state.lastActiveAtMs = Date.now();
+  saveStateLocally(state);
 }
 
 function chooseBestSaveState(localState, cloudState) {
@@ -1554,11 +1612,7 @@ function saveState(message) {
 
   if (refs.saveStateText) refs.saveStateText.textContent = message;
 
-  if (window.FirebaseGame && FirebaseGame.getCurrentUser()) {
-    FirebaseGame.saveUserGameState(state, { updateLastActive: false }).catch((error) => {
-      console.error("Firebase 저장 실패:", error);
-    });
-  }
+  scheduleCloudSave(0);
 }
 
 function resetGame() {

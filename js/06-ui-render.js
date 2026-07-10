@@ -31,6 +31,7 @@ function renderAll() {
   renderBattle();
   renderOfflineRewardSetting();
   renderSystemUnlockState();
+  queueStateSave();
 }
 
 function renderOfflineRewardSetting() {
