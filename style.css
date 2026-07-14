@@ -2816,13 +2816,13 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   justify-content: center;
   width: 100%;
   min-height: 42px;
-  padding: 9px 18px 3px !important;
+  padding: 7px 10px 4px !important;
   border: 2px solid var(--ui-ink) !important;
   border-radius: 6px !important;
   background-color: #9b5521 !important;
   background-image: linear-gradient(180deg, #c27a2e 0%, #934918 100%) !important;
   color: #fff !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 900;
   line-height: 1.05 !important;
   text-shadow: 1px 1px 0 rgba(45, 33, 25, 0.72) !important;
@@ -2831,7 +2831,7 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 
 .squad-management {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   grid-template-areas:
     "formation roster"
     "synergy roster"
@@ -5781,7 +5781,7 @@ textarea {
 
 @media (max-width: 560px) {
   .squad-management {
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     grid-template-areas:
       "formation roster"
       "synergy roster"
@@ -8365,7 +8365,7 @@ button:disabled:hover,
   }
 
   .squad-management {
-    grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     align-items: stretch;
     width: 100%;
   }
@@ -9078,9 +9078,16 @@ button:disabled:hover,
 }
 
 /* Final squad-management placement lock: left formation/synergy, right roster spanning both rows. */
+.tab-panel[data-panel="tools"] .squad-management__section-button,
+.tab-panel[data-panel="tools"] .squad-management__section-button:hover:not(:disabled) {
+  min-height: 42px !important;
+  padding: 7px 10px 4px !important;
+  font-size: 13px !important;
+}
+
 .tab-panel[data-panel="tools"] .squad-management {
   display: grid !important;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr) !important;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) !important;
   grid-template-areas:
     "formation roster"
     "synergy roster"
