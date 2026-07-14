@@ -629,8 +629,37 @@ function renderSquadManagement() {
 function syncSquadRosterHeight() {
   if (!refs?.squadFormation || !refs?.squadRoster) return;
 
+  const rosterPanel = refs.squadRoster.closest(".squad-management__roster");
+  const leftColumn = document.querySelector(".squad-management__left");
+  const isStackedLayout = window.matchMedia("(max-width: 560px)").matches;
+
   refs.squadRoster.style.height = "";
   refs.squadRoster.style.maxHeight = "";
+  if (rosterPanel) rosterPanel.style.height = "";
+
+  if (!rosterPanel || !leftColumn || isStackedLayout) return;
+
+  const leftHeight = leftColumn.getBoundingClientRect().height;
+  if (leftHeight <= 0) return;
+
+  const rosterPanelStyle = window.getComputedStyle(rosterPanel);
+  const rosterPanelGap = Number.parseFloat(rosterPanelStyle.rowGap || rosterPanelStyle.gap) || 0;
+  const rosterPanelPadding =
+    (Number.parseFloat(rosterPanelStyle.paddingTop) || 0) +
+    (Number.parseFloat(rosterPanelStyle.paddingBottom) || 0);
+  const rosterPanelBorder =
+    (Number.parseFloat(rosterPanelStyle.borderTopWidth) || 0) +
+    (Number.parseFloat(rosterPanelStyle.borderBottomWidth) || 0);
+  const rosterHeading = rosterPanel.querySelector(".facility-heading");
+  const rosterHeadingHeight = rosterHeading ? rosterHeading.getBoundingClientRect().height : 0;
+  const rosterHeight = Math.max(
+    120,
+    Math.floor(leftHeight - rosterPanelPadding - rosterPanelBorder - rosterPanelGap - rosterHeadingHeight)
+  );
+
+  rosterPanel.style.height = `${Math.round(leftHeight)}px`;
+  refs.squadRoster.style.height = `${rosterHeight}px`;
+  refs.squadRoster.style.maxHeight = `${rosterHeight}px`;
 }
 
 function renderSquadSynergyPanel() {

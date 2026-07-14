@@ -2863,6 +2863,15 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   background: rgba(255, 248, 232, 0.7);
 }
 
+.squad-management__roster {
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+}
+
+.squad-management__roster .squad-roster {
+  min-height: 0;
+}
+
 .squad-management .squad-help {
   grid-column: 1 / -1;
 }
