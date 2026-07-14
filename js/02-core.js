@@ -370,7 +370,7 @@ async function logoutFromCurrentUser() {
         if (refs.saveStateText) refs.saveStateText.textContent = "로컬 저장소 접근 불가";
       }
 
-      if (window.FirebaseGame?.getCurrentUser?.()) {
+      if (canSyncCloudSave()) {
         await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
       }
     }
@@ -382,6 +382,7 @@ async function logoutFromCurrentUser() {
     titleAuthUser = null;
     hasStartedGame = false;
     stopLoop();
+    state = normalizeState({ ...cloneDefaultState(), ...state });
     refs.gameShell.classList.add("is-hidden");
     refs.startScreen.classList.remove("is-hidden");
     playBgm("title");
@@ -408,6 +409,7 @@ async function startGame() {
   isGameStartInProgress = true;
   updateStartAuthGate(titleAuthUser);
   hasStartedGame = true;
+  unblockCloudSave();
 
   if (window.FirebaseGame) {
     try {
@@ -419,9 +421,11 @@ async function startGame() {
         try {
           const savedState = await FirebaseGame.loadUserGameState();
           cloudState = savedState ? normalizeState({ ...cloneDefaultState(), ...savedState }) : null;
+          unblockCloudSave();
         } catch (error) {
+          blockCloudSave("cloud-load-failed");
           console.error("Firebase 불러오기 실패:", error);
-          if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 불러오기 실패 · 로컬 저장으로 진행";
+          if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 불러오기 실패 · 클라우드 덮어쓰기 차단";
         }
 
         const saveChoice = chooseBestSaveState(localState, cloudState);
@@ -446,18 +450,26 @@ async function startGame() {
           saveStateLocally(state);
         }
 
-        try {
-          await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
-          if (refs.saveStateText) {
-            refs.saveStateText.textContent =
-              saveChoice.source === "cloud" ? "클라우드 저장 동기화 완료" : "로컬 저장 동기화 완료";
+        if (canSyncCloudSave()) {
+          try {
+            const didSave = await FirebaseGame.saveUserGameState(state, { updateLastActive: false });
+            if (refs.saveStateText) {
+              refs.saveStateText.textContent = didSave
+                ? saveChoice.source === "cloud"
+                  ? "클라우드 저장 동기화 완료"
+                  : "로컬 저장 동기화 완료"
+                : "클라우드 저장 보류 · 기존 진행도 보호";
+            }
+          } catch (error) {
+            console.error("Firebase 저장 동기화 실패:", error);
+            if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 저장 실패 · 로컬 저장 유지";
           }
-        } catch (error) {
-          console.error("Firebase 저장 동기화 실패:", error);
-          if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 저장 실패 · 로컬 저장 유지";
+        } else if (refs.saveStateText) {
+          refs.saveStateText.textContent = "로컬 저장 유지 · 클라우드 덮어쓰기 차단";
         }
       }
     } catch (error) {
+      blockCloudSave("firebase-start-failed");
       console.error("Firebase 로그인/불러오기 실패:", error);
       if (refs.saveStateText) refs.saveStateText.textContent = "Firebase 연결 실패 · 로컬 저장으로 진행";
     }
@@ -468,6 +480,8 @@ async function startGame() {
   playBgm(getActiveBgmKey());
   renderAll();
   if (!state.startTutorialCompleted) {
+    state.startTutorialCompleted = false;
+    saveStateLocally(state);
     openWorldTutorial();
   } else {
     checkRecruitCompanyUnlockPopup();
@@ -519,9 +533,8 @@ async function changeOfflineRewardPlan(hours) {
     // 로컬 저장 실패는 Firebase 저장을 계속 시도합니다.
   }
 
-  if (window.FirebaseGame && FirebaseGame.getCurrentUser()) {
+  if (canSyncCloudSave()) {
     try {
-      await FirebaseGame.setOfflineRewardPlan(state, hours);
       await FirebaseGame.saveUserGameState(state, { updateLastActive: true });
       if (refs.saveStateText) refs.saveStateText.textContent = `비접속 보상 ${plan.label} 저장 완료`;
     } catch (error) {
@@ -673,7 +686,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#squadFormation",
     openCompanyPanel: "formation",
-    title: "배치 위치",
+    title: "자리 선택",
     text: "팝업 안의 각 자리 선택 목록에서 보유 동료를 골라 배치합니다. 이미 배치된 동료는 다른 자리에서 중복 선택되지 않습니다.",
     placement: "left",
   },
@@ -1070,9 +1083,8 @@ async function chooseInitialOfflineRewardPlan(hours) {
     // 로컬 저장 실패는 Firebase 저장을 계속 시도합니다.
   }
 
-  if (window.FirebaseGame && FirebaseGame.getCurrentUser()) {
+  if (canSyncCloudSave()) {
     try {
-      await FirebaseGame.setOfflineRewardPlan(state, hours);
       await FirebaseGame.saveUserGameState(state, { updateLastActive: true });
       if (refs.saveStateText) refs.saveStateText.textContent = `비접속 보상 ${plan.label} 선택 완료`;
     } catch (error) {
@@ -1292,6 +1304,25 @@ function cloneDefaultState() {
   return JSON.parse(JSON.stringify(defaultState));
 }
 
+function canSyncCloudSave() {
+  return !isCloudSaveBlocked && Boolean(window.FirebaseGame?.getCurrentUser?.());
+}
+
+function blockCloudSave(reason = "") {
+  isCloudSaveBlocked = true;
+  cloudSaveBlockedReason = reason;
+  hasPendingCloudSave = false;
+  if (cloudSaveTimer) {
+    window.clearTimeout(cloudSaveTimer);
+    cloudSaveTimer = null;
+  }
+}
+
+function unblockCloudSave() {
+  isCloudSaveBlocked = false;
+  cloudSaveBlockedReason = "";
+}
+
 function saveStateLocally(nextState = state) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
@@ -1310,7 +1341,7 @@ function queueStateSave(options = {}) {
 }
 
 function scheduleCloudSave(delayMs = CLOUD_SAVE_DEBOUNCE_MS) {
-  if (!window.FirebaseGame?.getCurrentUser?.()) return;
+  if (!canSyncCloudSave()) return;
   if (cloudSaveTimer) window.clearTimeout(cloudSaveTimer);
 
   cloudSaveTimer = window.setTimeout(() => {
@@ -1320,7 +1351,7 @@ function scheduleCloudSave(delayMs = CLOUD_SAVE_DEBOUNCE_MS) {
 }
 
 async function flushQueuedCloudSave() {
-  if (!state || !window.FirebaseGame?.getCurrentUser?.()) return false;
+  if (!state || !canSyncCloudSave()) return false;
 
   if (isCloudSaveInFlight) {
     hasPendingCloudSave = true;
@@ -1432,7 +1463,9 @@ function loadState() {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (!saved) return cloneDefaultState();
-    return normalizeState({ ...cloneDefaultState(), ...JSON.parse(saved) });
+    const parsed = JSON.parse(saved);
+    if (!parsed || typeof parsed !== "object") return cloneDefaultState();
+    return normalizeState({ ...cloneDefaultState(), ...parsed });
   } catch {
     return cloneDefaultState();
   }

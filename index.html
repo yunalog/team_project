@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" sizes="192x192" href="Resource/Icon/icon-192.png" />
     <link rel="apple-touch-icon" href="Resource/Icon/icon-192.png" />
-    <link rel="stylesheet" href="style.css?v=auth-gate-claim-modal-v2" />
+    <link rel="stylesheet" href="style.css?v=squad-management-layout-v11" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
   <body>
@@ -167,7 +167,6 @@
               <button id="upgradePlayerButton" class="battle-column-action" type="button">대표 역량 강화</button>
               <button class="mobile-battle-popup-button" type="button" data-open-mobile-panel="equipped">장착장비</button>
               <div id="equippedItemPanel" class="equipped-item-panel is-collapsed" aria-expanded="false">
-                <button class="mobile-panel-close" type="button" data-close-mobile-panel aria-label="장착장비 닫기">×</button>
                 <div class="equipped-item-header">
                   <div class="equipped-item-summary">
                     <span class="equipped-item-label">장착 장비</span>
@@ -184,7 +183,6 @@
               <button id="nextStageButton" class="battle-column-action" type="button">다음 의뢰</button>
               <button class="mobile-battle-popup-button" type="button" data-open-mobile-panel="equipment-tools">장비 뽑기 · 연구</button>
               <div id="equipmentToolsPanel" class="equipment-tools-panel">
-                <button class="mobile-panel-close" type="button" data-close-mobile-panel aria-label="장비 뽑기와 연구 닫기">×</button>
                 <div class="equipment-layer" aria-live="polite">
                   <div class="draw-machine-panel" aria-label="장비 뽑기">
                     <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
@@ -247,7 +245,6 @@
           <div class="company-dashboard">
             <button class="company-popup-button" type="button" data-open-company-panel="facilities">회사 시설 확장</button>
             <div class="company-popup-panel company-facilities-panel" data-company-panel="facilities">
-              <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="회사 시설 확장 닫기">×</button>
               <div class="facility-heading">
                 <div>
                   <span class="section-kicker">OFFICE INVESTMENT</span>
@@ -258,24 +255,20 @@
               <div class="facility-list" id="toolList"></div>
             </div>
 
+            <button class="company-popup-button squad-management__section-button" type="button">스쿼드 관리</button>
             <div class="squad-management">
-              <button class="company-popup-button" type="button" data-open-company-panel="formation">업무 스쿼드 구성</button>
-              <div class="company-popup-panel company-formation-panel" data-company-panel="formation">
-                <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="업무 스쿼드 구성 닫기">×</button>
+              <div class="squad-management__formation">
                 <div class="facility-heading">
                   <div>
                     <span class="section-kicker">ACTIVE SQUAD</span>
-                    <h2>업무 스쿼드 구성</h2>
+                    <h2>스쿼드 구성</h2>
                   </div>
-                  <small>대표 1명 + 동료 3명까지,총 4명으로 구성할 수 있습니다.</small>
+                  <small>대표 1명 + 동료 3명까지, 총 4명으로 구성할 수 있습니다.</small>
                 </div>
-                <span class="squad-subtitle">배치 위치</span>
                 <div class="squad-formation" id="squadFormation"></div>
               </div>
 
-              <button class="company-popup-button" type="button" data-open-company-panel="synergy">조합 시너지</button>
-              <div class="company-popup-panel company-synergy-panel" data-company-panel="synergy">
-                <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="조합 시너지 닫기">×</button>
+              <div class="squad-management__synergy">
                 <div class="facility-heading">
                   <div>
                     <span class="section-kicker">SQUAD SYNERGY</span>
@@ -285,16 +278,13 @@
                 <div id="squadSynergyPanel"></div>
               </div>
 
-              <button class="company-popup-button" type="button" data-open-company-panel="roster">보유 동료</button>
-              <div class="company-popup-panel company-roster-panel" data-company-panel="roster">
-                <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="보유 동료 닫기">×</button>
+              <div class="squad-management__roster">
                 <div class="facility-heading">
                   <div>
                     <span class="section-kicker">CREW ROSTER</span>
                     <h2>보유 동료</h2>
                   </div>
                 </div>
-                <span class="squad-subtitle">보유 동료</span>
                 <div class="squad-roster" id="squadRoster"></div>
               </div>
 
@@ -465,7 +455,7 @@
     <div class="recruit-modal is-hidden" id="recruitDetailModal" role="dialog" aria-modal="true" aria-labelledby="recruitDetailTitle">
       <div class="recruit-modal__overlay" data-close-recruit-modal></div>
       <div class="recruit-modal__panel">
-        <button class="recruit-modal__close" type="button" data-close-recruit-modal aria-label="상세보기 닫기">×</button>
+        <button class="recruit-modal__close" type="button" data-close-recruit-modal aria-label="상세보기 닫기"></button>
         <div class="recruit-modal__header">
           <span class="recruit-modal__badge" id="recruitDetailBadge">P</span>
           <div>
@@ -502,7 +492,7 @@
     <div class="recruit-evolution-modal is-hidden" id="recruitPromotionModal" role="dialog" aria-modal="true" aria-labelledby="recruitPromotionTitle">
       <div class="recruit-evolution-modal__overlay" data-close-recruit-promotion></div>
       <div class="recruit-evolution-modal__panel">
-        <button class="recruit-evolution-modal__close" type="button" data-close-recruit-promotion aria-label="승급 닫기">×</button>
+        <button class="recruit-evolution-modal__close" type="button" data-close-recruit-promotion aria-label="승급 닫기"></button>
         <div class="recruit-evolution-modal__portrait" id="recruitPromotionAvatar"></div>
         <h3 id="recruitPromotionTitle">직군 승급</h3>
         <p id="recruitPromotionDesc">이 직군은 승급 준비가 완료되었습니다.</p>
@@ -517,20 +507,23 @@
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore-compat.js"></script>
 
-<script src="js/firebase.js?v=login-fix-v1"></script>
+<script src="js/firebase.js?v=save-guard-v1"></script>
 
-<script src="js/01-data.js?v=save-merge-v2"></script>
-<script src="js/02-core.js?v=save-merge-v2"></script>
+<script src="js/01-data.js?v=save-guard-v1"></script>
+<script src="js/02-core.js?v=save-guard-v1"></script>
 <script src="js/03-battle.js?v=auth-gate-v1"></script>
 <script src="js/04-recruits-company.js?v=auth-gate-v1"></script>
 <script src="js/05-equipment-growth.js?v=auth-gate-v1"></script>
-<script src="js/06-ui-render.js?v=player-upgrade-affordability-fix-v1"></script>
+<script src="js/06-ui-render.js?v=squad-layout-v11"></script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-        console.warn("Service worker registration failed:", error);
-      });
+      navigator.serviceWorker
+        .register("./service-worker.js", { updateViaCache: "none" })
+        .then((registration) => registration.update())
+        .catch((error) => {
+          console.warn("Service worker registration failed:", error);
+        });
     });
   }
 </script>
