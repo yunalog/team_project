@@ -2567,7 +2567,13 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   border-radius: 50%;
   background: #8f4c22;
   color: #fff;
+  font-size: 0;
+}
+
+.recruit-modal__close::before {
+  content: "✕";
   font-size: 18px;
+  line-height: 1;
 }
 
 .recruit-modal__header {
@@ -2692,7 +2698,13 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   border-radius: 50%;
   background: #8f4c22;
   color: #fff;
+  font-size: 0;
+}
+
+.recruit-evolution-modal__close::before {
+  content: "✕";
   font-size: 18px;
+  line-height: 1;
 }
 
 .recruit-evolution-modal__portrait {
