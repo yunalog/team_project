@@ -2838,16 +2838,46 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 }
 
 .squad-management__right {
-  display: grid;
-  gap: 8px;
-  align-content: start;
+  display: none;
 }
 
 .squad-management__bottom {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   padding-top: 10px;
   border-top: 1px solid rgba(84, 61, 34, 0.16);
+}
+
+.squad-management__section-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #8e4d22 0%, #6b3318 100%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  box-shadow: 0 3px 0 rgba(67, 34, 16, 0.26);
+}
+
+.squad-management__bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.squad-management__synergy,
+.squad-management__roster {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(84, 61, 34, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 248, 232, 0.7);
 }
 
 .squad-layout {
