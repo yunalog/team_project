@@ -2832,8 +2832,12 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 .squad-management {
   display: grid;
   grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  grid-template-areas:
+    "formation roster"
+    "synergy roster"
+    "help help";
   gap: 12px;
-  align-items: start;
+  align-items: stretch;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2841,20 +2845,21 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 
-.squad-management__left,
-.squad-management__right,
+.squad-management__formation,
+.squad-management__synergy,
+.squad-management__roster,
 .squad-management .squad-help {
   min-width: 0;
 }
 
-.squad-management__left,
-.squad-management__right,
+.squad-management__formation,
 .squad-management__roster,
 .squad-management__synergy {
   display: grid;
   gap: 10px;
 }
 
+.squad-management__formation,
 .squad-management__synergy,
 .squad-management__roster {
   padding: 10px;
@@ -2863,17 +2868,29 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   background: rgba(255, 248, 232, 0.7);
 }
 
-.squad-management__roster {
-  grid-template-rows: auto minmax(0, 1fr);
-  align-content: stretch;
+.squad-management__formation {
+  grid-area: formation;
 }
 
-.squad-management__roster .squad-roster {
+.squad-management__synergy {
+  grid-area: synergy;
+}
+
+.squad-management__roster {
+  grid-area: roster;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
   min-height: 0;
 }
 
+.squad-management__roster .squad-roster {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+
 .squad-management .squad-help {
-  grid-column: 1 / -1;
+  grid-area: help;
 }
 
 .squad-layout {
@@ -5757,6 +5774,11 @@ textarea {
 @media (max-width: 560px) {
   .squad-management {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "formation"
+      "synergy"
+      "roster"
+      "help";
   }
 
   .squad-management__section-button {
@@ -8337,17 +8359,7 @@ button:disabled:hover,
 
   .squad-management {
     grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-    align-items: start;
-    width: 100%;
-  }
-
-  .squad-management .squad-help {
-    grid-column: 1 / -1;
-  }
-
-  .squad-management__left,
-  .squad-management__right {
-    min-width: 0;
+    align-items: stretch;
     width: 100%;
   }
 }
