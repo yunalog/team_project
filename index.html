@@ -256,21 +256,31 @@
             </div>
 
             <div class="squad-management">
-              <button class="company-popup-button" type="button" data-open-company-panel="formation">업무 스쿼드 구성</button>
-              <div class="company-popup-panel company-formation-panel" data-company-panel="formation">
-                <div class="facility-heading">
-                  <div>
-                    <span class="section-kicker">ACTIVE SQUAD</span>
-                    <h2>업무 스쿼드 구성</h2>
+              <div class="squad-management__top">
+                <div class="squad-management__left">
+                  <div class="facility-heading">
+                    <div>
+                      <span class="section-kicker">ACTIVE SQUAD</span>
+                      <h2>스쿼드 구성</h2>
+                    </div>
+                    <small>대표 1명 + 동료 3명까지, 총 4명으로 구성할 수 있습니다.</small>
                   </div>
-                  <small>대표 1명 + 동료 3명까지,총 4명으로 구성할 수 있습니다.</small>
+                  <span class="squad-subtitle">배치 위치</span>
+                  <div class="squad-formation" id="squadFormation"></div>
                 </div>
-                <span class="squad-subtitle">배치 위치</span>
-                <div class="squad-formation" id="squadFormation"></div>
+
+                <div class="squad-management__right">
+                  <div class="facility-heading">
+                    <div>
+                      <span class="section-kicker">CREW ROSTER</span>
+                      <h2>보유 동료</h2>
+                    </div>
+                  </div>
+                  <div class="squad-roster" id="squadRoster"></div>
+                </div>
               </div>
 
-              <button class="company-popup-button" type="button" data-open-company-panel="synergy">조합 시너지</button>
-              <div class="company-popup-panel company-synergy-panel" data-company-panel="synergy">
+              <div class="squad-management__bottom">
                 <div class="facility-heading">
                   <div>
                     <span class="section-kicker">SQUAD SYNERGY</span>
@@ -278,18 +288,6 @@
                   </div>
                 </div>
                 <div id="squadSynergyPanel"></div>
-              </div>
-
-              <button class="company-popup-button" type="button" data-open-company-panel="roster">보유 동료</button>
-              <div class="company-popup-panel company-roster-panel" data-company-panel="roster">
-                <div class="facility-heading">
-                  <div>
-                    <span class="section-kicker">CREW ROSTER</span>
-                    <h2>보유 동료</h2>
-                  </div>
-                </div>
-                <span class="squad-subtitle">보유 동료</span>
-                <div class="squad-roster" id="squadRoster"></div>
               </div>
 
               <p class="squad-help">각 위치의 목록에서 동료를 선택하면 업무 화면 배치와 자동 기여도에 바로 반영됩니다.</p>
