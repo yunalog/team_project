@@ -469,6 +469,8 @@ async function startGame() {
   playBgm(getActiveBgmKey());
   renderAll();
   if (!state.startTutorialCompleted) {
+    state.startTutorialCompleted = false;
+    saveStateLocally(state);
     openWorldTutorial();
   } else {
     checkRecruitCompanyUnlockPopup();
