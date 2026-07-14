@@ -2821,7 +2821,7 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 
 .squad-management__top {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  grid-template-columns: minmax(0, 5.5fr) minmax(0, 4.5fr);
   gap: 12px;
   align-items: start;
 }
@@ -2982,6 +2982,7 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   max-height: 256px;
   padding-right: 4px;
   overflow-y: auto;
+  align-content: start;
 }
 
 .squad-roster-item {
@@ -5728,6 +5729,14 @@ textarea {
 }
 
 @media (max-width: 560px) {
+  .squad-management__top {
+    grid-template-columns: 1fr;
+  }
+
+  .squad-roster {
+    max-height: 220px;
+  }
+
   .tab-panel[data-panel="tools"].is-active {
     padding-bottom: 96px;
   }
