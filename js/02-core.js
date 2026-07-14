@@ -382,6 +382,7 @@ async function logoutFromCurrentUser() {
     titleAuthUser = null;
     hasStartedGame = false;
     stopLoop();
+    state = normalizeState({ ...cloneDefaultState(), ...state });
     refs.gameShell.classList.add("is-hidden");
     refs.startScreen.classList.remove("is-hidden");
     playBgm("title");
@@ -1432,7 +1433,9 @@ function loadState() {
   try {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (!saved) return cloneDefaultState();
-    return normalizeState({ ...cloneDefaultState(), ...JSON.parse(saved) });
+    const parsed = JSON.parse(saved);
+    if (!parsed || typeof parsed !== "object") return cloneDefaultState();
+    return normalizeState({ ...cloneDefaultState(), ...parsed });
   } catch {
     return cloneDefaultState();
   }
