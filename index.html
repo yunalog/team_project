@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" sizes="192x192" href="Resource/Icon/icon-192.png" />
     <link rel="apple-touch-icon" href="Resource/Icon/icon-192.png" />
-    <link rel="stylesheet" href="style.css?v=squad-management-layout-v9" />
+    <link rel="stylesheet" href="style.css?v=squad-management-layout-v10" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
   <body>
@@ -510,17 +510,20 @@
 <script src="js/firebase.js?v=login-fix-v1"></script>
 
 <script src="js/01-data.js?v=save-merge-v2"></script>
-<script src="js/02-core.js?v=save-merge-v2"></script>
+<script src="js/02-core.js?v=squad-layout-v10"></script>
 <script src="js/03-battle.js?v=auth-gate-v1"></script>
 <script src="js/04-recruits-company.js?v=auth-gate-v1"></script>
 <script src="js/05-equipment-growth.js?v=auth-gate-v1"></script>
-<script src="js/06-ui-render.js?v=save-merge-v2"></script>
+<script src="js/06-ui-render.js?v=squad-layout-v10"></script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch((error) => {
-        console.warn("Service worker registration failed:", error);
-      });
+      navigator.serviceWorker
+        .register("./service-worker.js", { updateViaCache: "none" })
+        .then((registration) => registration.update())
+        .catch((error) => {
+          console.warn("Service worker registration failed:", error);
+        });
     });
   }
 </script>

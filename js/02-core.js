@@ -676,7 +676,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#squadFormation",
     openCompanyPanel: "formation",
-    title: "배치 위치",
+    title: "자리 선택",
     text: "팝업 안의 각 자리 선택 목록에서 보유 동료를 골라 배치합니다. 이미 배치된 동료는 다른 자리에서 중복 선택되지 않습니다.",
     placement: "left",
   },
