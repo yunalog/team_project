@@ -255,45 +255,39 @@
               <div class="facility-list" id="toolList"></div>
             </div>
 
+            <button class="squad-management__section-button" type="button">스쿼드 관리</button>
             <div class="squad-management">
-              <div class="squad-management__top">
-                <div class="squad-management__left">
+              <div class="squad-management__left">
+                <div class="facility-heading">
+                  <div>
+                    <span class="section-kicker">ACTIVE SQUAD</span>
+                    <h2>스쿼드 구성</h2>
+                  </div>
+                  <small>대표 1명 + 동료 3명까지, 총 4명으로 구성할 수 있습니다.</small>
+                </div>
+                <span class="squad-subtitle">배치 위치</span>
+                <div class="squad-formation" id="squadFormation"></div>
+
+                <div class="squad-management__synergy">
                   <div class="facility-heading">
                     <div>
-                      <span class="section-kicker">ACTIVE SQUAD</span>
-                      <h2>스쿼드 구성</h2>
+                      <span class="section-kicker">SQUAD SYNERGY</span>
+                      <h2>조합 시너지</h2>
                     </div>
-                    <small>대표 1명 + 동료 3명까지, 총 4명으로 구성할 수 있습니다.</small>
                   </div>
-                  <span class="squad-subtitle">배치 위치</span>
-                  <div class="squad-formation" id="squadFormation"></div>
+                  <div id="squadSynergyPanel"></div>
                 </div>
-
               </div>
 
-              <div class="squad-management__bottom">
-                <div class="squad-management__titlebar">
-                  <span class="squad-management__title-button" role="heading" aria-level="2">스쿼드 관리</span>
-                </div>
-                <div class="squad-management__bottom-grid">
-                  <div class="squad-management__synergy">
-                    <div class="facility-heading">
-                      <div>
-                        <span class="section-kicker">SQUAD SYNERGY</span>
-                        <h2>조합 시너지</h2>
-                      </div>
+              <div class="squad-management__right">
+                <div class="squad-management__roster">
+                  <div class="facility-heading">
+                    <div>
+                      <span class="section-kicker">CREW ROSTER</span>
+                      <h2>보유 동료</h2>
                     </div>
-                    <div id="squadSynergyPanel"></div>
                   </div>
-                  <div class="squad-management__roster">
-                    <div class="facility-heading">
-                      <div>
-                        <span class="section-kicker">CREW ROSTER</span>
-                        <h2>보유 동료</h2>
-                      </div>
-                    </div>
-                    <div class="squad-roster" id="squadRoster"></div>
-                  </div>
+                  <div class="squad-roster" id="squadRoster"></div>
                 </div>
               </div>
 

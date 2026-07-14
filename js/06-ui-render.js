@@ -629,18 +629,8 @@ function renderSquadManagement() {
 function syncSquadRosterHeight() {
   if (!refs?.squadFormation || !refs?.squadRoster) return;
 
-  if (!refs.squadRoster.closest(".squad-management__top")) {
-    refs.squadRoster.style.height = "";
-    refs.squadRoster.style.maxHeight = "";
-    return;
-  }
-
-  const formationHeight = refs.squadFormation.getBoundingClientRect().height;
-  if (formationHeight <= 0) return;
-
-  const height = `${formationHeight}px`;
-  refs.squadRoster.style.height = height;
-  refs.squadRoster.style.maxHeight = height;
+  refs.squadRoster.style.height = "";
+  refs.squadRoster.style.maxHeight = "";
 }
 
 function renderSquadSynergyPanel() {
