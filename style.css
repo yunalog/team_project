@@ -2831,7 +2831,7 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 
 .squad-management {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   grid-template-areas:
     "formation roster"
     "synergy roster"
@@ -5781,7 +5781,7 @@ textarea {
 
 @media (max-width: 560px) {
   .squad-management {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     grid-template-areas:
       "formation roster"
       "synergy roster"
@@ -8365,7 +8365,7 @@ button:disabled:hover,
   }
 
   .squad-management {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     align-items: stretch;
     width: 100%;
   }
@@ -9080,14 +9080,24 @@ button:disabled:hover,
 /* Final squad-management placement lock: left formation/synergy, right roster spanning both rows. */
 .tab-panel[data-panel="tools"] .squad-management__section-button,
 .tab-panel[data-panel="tools"] .squad-management__section-button:hover:not(:disabled) {
+  height: 42px !important;
   min-height: 42px !important;
+  max-height: 42px !important;
+  padding: 7px 10px 4px !important;
+  font-size: 13px !important;
+}
+
+.tab-panel[data-panel="tools"] .company-dashboard > .company-popup-button {
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
   padding: 7px 10px 4px !important;
   font-size: 13px !important;
 }
 
 .tab-panel[data-panel="tools"] .squad-management {
   display: grid !important;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) !important;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) !important;
   grid-template-areas:
     "formation roster"
     "synergy roster"
