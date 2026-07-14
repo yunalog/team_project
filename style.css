@@ -2843,19 +2843,24 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   border-top: 1px solid rgba(84, 61, 34, 0.16);
 }
 
-.squad-management__section-title {
+.squad-management__titlebar {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+}
+
+.squad-management__title-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 36px;
   width: fit-content;
-  margin: 0;
   padding: 8px 16px 3px;
   border: 2px solid var(--ui-ink);
   border-radius: 6px;
   background-color: #9b5521;
   background-image: linear-gradient(180deg, #c27a2e 0%, #934918 100%);
-  color: #fff7e5;
+  color: #fff;
   font-size: 13px;
   font-weight: 900;
   line-height: 1.05;
@@ -2865,7 +2870,7 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 
 .squad-management__bottom-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 10px;
   align-items: start;
 }
