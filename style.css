@@ -2821,13 +2821,12 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 
 .squad-management__top {
   display: grid;
-  grid-template-columns: minmax(0, 5.5fr) minmax(0, 4.5fr);
+  grid-template-columns: 1fr;
   gap: 12px;
   align-items: start;
 }
 
 .squad-management__left,
-.squad-management__right,
 .squad-management__bottom {
   min-width: 0;
 }
@@ -2835,10 +2834,6 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 .squad-management__left {
   display: grid;
   gap: 8px;
-}
-
-.squad-management__right {
-  display: none;
 }
 
 .squad-management__bottom {
@@ -2852,20 +2847,25 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-height: 36px;
   width: fit-content;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #8e4d22 0%, #6b3318 100%);
-  color: #fff;
+  margin: 0;
+  padding: 8px 16px 3px;
+  border: 2px solid var(--ui-ink);
+  border-radius: 6px;
+  background-color: #9b5521;
+  background-image: linear-gradient(180deg, #c27a2e 0%, #934918 100%);
+  color: #fff7e5;
   font-size: 13px;
   font-weight: 900;
-  letter-spacing: 0.04em;
-  box-shadow: 0 3px 0 rgba(67, 34, 16, 0.26);
+  line-height: 1.05;
+  text-shadow: 1px 1px 0 rgba(45, 33, 25, 0.72);
+  box-shadow: 0 3px 0 #5b2d13, 2px 2px 0 rgba(255, 255, 255, 0.16) inset;
 }
 
 .squad-management__bottom-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
   gap: 10px;
   align-items: start;
 }
@@ -5763,6 +5763,10 @@ textarea {
     grid-template-columns: 1fr;
   }
 
+  .squad-management__bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
   .squad-roster {
     max-height: 220px;
   }
@@ -8336,37 +8340,21 @@ button:disabled:hover,
   }
 
   .squad-management {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-    align-items: start;
+    grid-template-columns: 1fr;
+    align-items: stretch;
     width: 100%;
   }
 
-  .squad-management > .company-formation-panel,
-  .squad-management > .company-roster-panel,
-  .squad-management > .company-synergy-panel {
-    min-width: 0;
-    width: 100%;
-  }
-
-  .company-formation-panel,
-  .company-roster-panel,
-  .company-synergy-panel {
-    display: grid;
-    gap: 10px;
-    min-width: 0;
-  }
-
-  .company-formation-panel {
-    grid-column: 1;
-  }
-
-  .company-roster-panel {
-    grid-column: 2;
-  }
-
-  .company-synergy-panel,
+  .squad-management__top,
+  .squad-management__bottom,
   .squad-management .squad-help {
     grid-column: 1 / -1;
+  }
+
+  .squad-management__top,
+  .squad-management__bottom-grid {
+    min-width: 0;
+    width: 100%;
   }
 }
 
