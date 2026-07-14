@@ -2798,6 +2798,8 @@ body.is-company-tab .tab-panel[data-panel="tools"].is-active {
 }
 
 .squad-management {
+  display: grid;
+  gap: 10px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -8249,10 +8251,16 @@ button:disabled:hover,
   }
 
   .squad-management {
-    display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     align-items: start;
-    gap: 10px;
+    width: 100%;
+  }
+
+  .squad-management > .company-formation-panel,
+  .squad-management > .company-roster-panel,
+  .squad-management > .company-synergy-panel {
+    min-width: 0;
+    width: 100%;
   }
 
   .company-formation-panel,
@@ -8397,32 +8405,9 @@ button:disabled:hover,
   }
 
   .mobile-panel-close,
-.recruit-modal__close,
-.recruit-evolution-modal__close {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 2;
-    display: inline-grid;
-    place-items: center;
-    width: 30px !important;
-    height: 30px !important;
-    min-height: 30px !important;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    font-size: 0 !important;
-    line-height: 0 !important;
-    background-color: #fff7e5;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
-  }
-
-  .mobile-panel-close::before,
-  .recruit-modal__close::before,
-  .recruit-evolution-modal__close::before {
-    content: "✕";
-    font-size: 16px;
-    line-height: 1;
-    color: #4a2b17;
+  .recruit-modal__close,
+  .recruit-evolution-modal__close {
+    display: none !important;
   }
 
   .equipped-item-panel.is-mobile-popup-open .equipped-grade-blocks,
