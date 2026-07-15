@@ -1,4 +1,4 @@
-const CACHE_VERSION = "game-company-grow-v12";
+const CACHE_VERSION = "game-company-grow-v13";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-app-shell`;
 
 const APP_SHELL_FILES = [

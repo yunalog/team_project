@@ -75,6 +75,7 @@ function runAutoDrawStep() {
     return;
   }
 
+  // 자동판매는 장비를 보관하지 않고 폐기만 하며 아이디어 환급을 지급하지 않습니다.
   log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
   autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
   // 자동 뽑기 중에는 회사 탭의 스쿼드 선택 DOM을 다시 만들지 않습니다.

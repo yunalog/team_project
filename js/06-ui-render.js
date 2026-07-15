@@ -549,6 +549,15 @@ function renderShop() {
 }
 
 function renderSquadManagement() {
+  const managementKey = JSON.stringify({
+    squad: state.squad,
+    recruits: state.recruits,
+    boosts: state.recruitBoosts,
+    promotions: state.recruitPromotions,
+  });
+  if (managementKey === lastSquadManagementKey && refs.squadFormation.childElementCount > 0) return;
+  lastSquadManagementKey = managementKey;
+
   const positionNames = ["2번 자리", "3번 자리", "4번 자리"];
   const deployedIds = new Set(state.squad.filter(Boolean));
 

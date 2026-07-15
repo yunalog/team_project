@@ -1225,6 +1225,7 @@ function handleSquadChange(event) {
   state.squad[slotIndex] = nextId;
   state.squadConfigured = true;
   lastRosterKey = "";
+  lastSquadManagementKey = "";
   const recruit = recruits.find((item) => item.id === nextId);
   const positionNumber = slotIndex + 2;
   log(recruit ? `${positionNumber}번 자리에 ${recruit.name} 배치 완료` : `${positionNumber}번 자리를 비웠습니다.`);
