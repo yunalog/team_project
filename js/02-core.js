@@ -145,6 +145,7 @@ function bindEvents() {
     const mobilePanelBackdrop = event.target.classList?.contains("is-mobile-popup-open") ? event.target : null;
     const companyPanelOpenButton = event.target.closest("[data-open-company-panel]");
     const companyPanelCloseButton = event.target.closest("[data-close-company-panel]");
+    const recruitGrowthCloseButton = event.target.closest("[data-close-recruit-growth]");
     const recruitButton = event.target.closest("[data-buy-recruit]");
     const recruitSelectCard = event.target.closest("[data-select-recruit]");
     const recruitPromotionButton = event.target.closest("[data-recruit-promote]");
@@ -166,9 +167,15 @@ function bindEvents() {
     if (mobilePanelCloseButton || mobilePanelBackdrop) closeMobileBattlePanels();
     if (companyPanelOpenButton) openMobileCompanyPanel(companyPanelOpenButton.dataset.openCompanyPanel);
     if (companyPanelCloseButton) closeMobileCompanyPanels();
+    if (recruitGrowthCloseButton) closeMobileRecruitGrowth();
     if (tab) switchTab(tab);
-    if (recruitSelectCard && !event.target.closest("button, select, a")) {
+    if (
+      recruitSelectCard &&
+      !event.target.closest("button, select, a") &&
+      (!isMobileLayout() || event.target.closest(".recruit-card-avatar"))
+    ) {
       selectRecruitForGrowth(recruitSelectCard.dataset.selectRecruit);
+      if (isMobileLayout()) openMobileRecruitGrowth();
     }
     if (recruitButton) buyRecruit(recruitButton.dataset.buyRecruit);
     if (recruitPromotionButton) openRecruitPromotion(recruitPromotionButton.dataset.recruitPromote);
@@ -185,6 +192,30 @@ function bindEvents() {
     if (worldTutorialConfirm) startGuidedTutorial();
     if (guidedTutorialNext) nextGuidedTutorialStep();
     if (guidedTutorialSkip) completeActiveTutorial();
+
+    if (isMobileLayout()) {
+      if (
+        !mobilePanelOpenButton &&
+        !event.target.closest(".is-mobile-popup-open") &&
+        document.querySelector(".is-mobile-popup-open")
+      ) {
+        closeMobileBattlePanels();
+      }
+      if (
+        !companyPanelOpenButton &&
+        !event.target.closest(".is-company-popup-open") &&
+        document.querySelector(".is-company-popup-open")
+      ) {
+        closeMobileCompanyPanels();
+      }
+      if (
+        !recruitSelectCard &&
+        !event.target.closest(".is-mobile-recruit-growth-open") &&
+        document.querySelector(".is-mobile-recruit-growth-open")
+      ) {
+        closeMobileRecruitGrowth();
+      }
+    }
   });
 
   refs.manualWorkButton.addEventListener("click", () => {
@@ -222,6 +253,7 @@ function bindEvents() {
   window.addEventListener("resize", () => {
     if (!isMobileLayout()) closeMobileBattlePanels();
     if (!isMobileLayout()) closeMobileCompanyPanels();
+    if (!isMobileLayout()) closeMobileRecruitGrowth();
   });
   window.addEventListener("scroll", positionGuidedTutorial, true);
   window.addEventListener("pagehide", persistStateBeforePageExit);
@@ -278,6 +310,22 @@ function openMobileCompanyPanel(panelName) {
 function closeMobileCompanyPanels() {
   document.querySelectorAll(".is-company-popup-open").forEach((panel) => {
     panel.classList.remove("is-company-popup-open");
+  });
+  document.body.classList.remove("has-mobile-panel-open");
+}
+
+function openMobileRecruitGrowth() {
+  if (!isMobileLayout()) return;
+  const target = document.querySelector('.tab-panel[data-panel="recruit"] .recruit-board__right');
+  if (!target) return;
+
+  target.classList.add("is-mobile-recruit-growth-open");
+  document.body.classList.add("has-mobile-panel-open");
+}
+
+function closeMobileRecruitGrowth() {
+  document.querySelectorAll(".is-mobile-recruit-growth-open").forEach((panel) => {
+    panel.classList.remove("is-mobile-recruit-growth-open");
   });
   document.body.classList.remove("has-mobile-panel-open");
 }

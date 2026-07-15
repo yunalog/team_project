@@ -9140,3 +9140,70 @@ button:disabled:hover,
   grid-column: 1 / -1 !important;
   grid-row: 3 !important;
 }
+
+/* Mobile-only modal controls and recruit growth flow. Desktop layout is unchanged. */
+@media (max-width: 560px) {
+  .tab-panel[data-panel="battle"] .is-mobile-popup-open > .mobile-panel-close,
+  .company-popup-panel.is-company-popup-open > .mobile-panel-close,
+  .recruit-board__right.is-mobile-recruit-growth-open > .mobile-panel-close {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    z-index: 3 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 0 3px !important;
+    border: 2px solid #4a2b17 !important;
+    border-radius: 7px !important;
+    background: linear-gradient(180deg, #e76f51 0%, #b84032 100%) !important;
+    color: #fff8e8 !important;
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    box-shadow: 0 2px 0 #6f251e !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board {
+    display: block !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__left {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__right {
+    display: none !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__right.is-mobile-recruit-growth-open {
+    position: fixed !important;
+    inset: 14px !important;
+    z-index: 5000 !important;
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: calc(100dvh - 28px) !important;
+    padding: 42px 12px 14px !important;
+    overflow: hidden !important;
+    border: 3px solid #4a2b17 !important;
+    border-radius: 12px !important;
+    background: linear-gradient(180deg, #fff8e8 0%, #efd8b0 100%) !important;
+    box-shadow: 0 0 0 9999px rgba(20, 14, 8, 0.62), 0 18px 48px rgba(0, 0, 0, 0.35) !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__right.is-mobile-recruit-growth-open .recruit-focus-panel {
+    display: block !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+}
