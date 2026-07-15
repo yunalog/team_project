@@ -9143,6 +9143,26 @@ button:disabled:hover,
 
 /* Mobile-only modal controls and recruit growth flow. Desktop layout is unchanged. */
 @media (max-width: 560px) {
+  .tab-panel[data-panel="battle"] .equipped-item-panel.is-mobile-popup-open .equipment-panel-toggle {
+    display: none !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__right.is-mobile-recruit-growth-open .recruit-focus-portrait {
+    width: 100% !important;
+    height: clamp(180px, 32dvh, 300px) !important;
+    min-height: 180px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .tab-panel[data-panel="recruit"] .recruit-board__right.is-mobile-recruit-growth-open .recruit-focus-avatar {
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+    border-radius: 7px !important;
+    background-size: contain !important;
+  }
+
   .tab-panel[data-panel="battle"] .is-mobile-popup-open > .mobile-panel-close,
   .company-popup-panel.is-company-popup-open > .mobile-panel-close,
   .recruit-board__right.is-mobile-recruit-growth-open > .mobile-panel-close {
