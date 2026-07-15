@@ -502,6 +502,8 @@ function renderShop() {
     refs.recruitList.innerHTML = recruits
       .map((recruit) => {
         const isSelected = recruit.id === activeRecruitPanelId;
+        const recruitLevel = getRecruitCount(recruit.id);
+        const mobileCaption = recruitLevel > 0 ? `Lv.${recruitLevel} ${getRecruitRankLabel(recruit, recruitLevel)}` : "없음";
         return `
           <div class="shop-item recruit-class-card${isSelected ? " is-selected" : ""}" data-select-recruit="${recruit.id}" role="button" tabindex="0" style="--recruit-color: ${recruit.color};">
             <div class="recruit-class-title">
@@ -511,7 +513,7 @@ function renderShop() {
             <div class="recruit-class-body">
               <div class="recruit-class-head">
                 ${getRecruitAvatarMarkup(recruit, "recruit-card-avatar")}
-                <span class="recruit-mobile-caption">Lv.${getRecruitCount(recruit.id)} ${getRecruitRankLabel(recruit, getRecruitCount(recruit.id))}</span>
+                <span class="recruit-mobile-caption">${mobileCaption}</span>
               </div>
               <div class="recruit-class-stats">
                 ${formatRecruitStatRows(recruit)}
