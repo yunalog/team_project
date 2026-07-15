@@ -193,7 +193,7 @@ function bindEvents() {
     if (guidedTutorialNext) nextGuidedTutorialStep();
     if (guidedTutorialSkip) completeActiveTutorial();
 
-    if (isMobileLayout()) {
+    if (isMobileLayout() && !guidedTutorialNext && !guidedTutorialSkip) {
       if (
         !mobilePanelOpenButton &&
         !event.target.closest(".is-mobile-popup-open") &&
@@ -663,7 +663,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
   {
     tab: "recruit",
     selector: ".recruit-class-card .recruit-class-title",
-    mobileSelector: ".recruit-class-card.is-selected",
+    mobileSelector: ".recruit-class-card.is-selected .recruit-card-avatar",
     exactTarget: true,
     mobileSpotlight: { width: 64, height: 64, align: "center" },
     title: "직군 카드",
@@ -673,27 +673,31 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
   {
     tab: "recruit",
     selector: ".recruit-board__right > .section-heading",
+    mobileSelector: ".recruit-board__right.is-mobile-recruit-growth-open > .section-heading",
+    openRecruitGrowth: true,
     exactTarget: true,
     mobileSpotlight: { width: 112, height: 52 },
     title: "직군 성장",
-    text: "선택한 동료의 설명, 스킬, 현재 레벨을 확인하고 동료 획득·레벨업·승급을 진행하는 영역입니다.",
+    text: "모바일에서는 초상화를 누르면 직군 성장 팝업이 열립니다. 선택한 동료의 설명, 스킬과 현재 레벨을 여기에서 확인합니다.",
     placement: "left",
   },
   {
     tab: "recruit",
     selector: ".recruit-focus-action",
     fallbackSelector: ".recruit-board__right",
+    mobileSelector: ".recruit-board__right.is-mobile-recruit-growth-open .recruit-focus-action",
+    openRecruitGrowth: true,
     exactTarget: true,
     mobileSpotlight: { maxWidth: 300, minWidth: 168, height: 54, align: "center", allowUnderBubble: true },
     title: "동료 획득 / 레벨업 / 승급",
-    text: "오른쪽 직군 성장 패널에서 레벨, 이름, 설명, 스탯, 스킬을 확인합니다. 아래 버튼으로 획득이나 레벨업을 진행하고, 승급 가능 상태에서는 승급 진행 버튼으로 바뀝니다.",
+    text: "직군 성장 팝업 아래 버튼으로 동료 획득이나 레벨업을 진행합니다. 승급 가능한 상태에서는 승급 진행 버튼으로 바뀝니다.",
     placement: "left",
   },
   {
     tab: "tools",
     selector: "#companyScene",
     exactTarget: true,
-    mobileSpotlight: { fullWidth: true, height: 332, offsetY: -4, allowUnderBubble: false },
+    mobileSpotlight: { fullWidth: true, height: 250, offsetY: -4, allowUnderBubble: false },
     title: "회사 성장 현황",
     text: "회사 탭으로 이동하면 위쪽 화면이 회사 현황으로 바뀝니다. 회사 레벨과 현재 규모, 다음 성장까지 필요한 EXP를 확인할 수 있습니다.",
     placement: "bottom",
@@ -709,33 +713,33 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
   {
     tab: "tools",
     selector: "#squadFormation",
-    mobileSelector: '[data-open-company-panel="formation"]',
+    mobileSelector: ".squad-management__formation",
     title: "업무 스쿼드 구성",
-    text: "모바일에서는 업무 스쿼드 구성 버튼으로 배치 팝업을 엽니다. 대표 1명과 동료 3명까지 더해 총 4명 팀을 구성할 수 있습니다.",
+    text: "스쿼드 구성 영역에서 대표 1명과 동료 3명까지 더해 총 4명 팀을 구성할 수 있습니다.",
     placement: "top",
   },
   {
     tab: "tools",
     selector: "#squadSynergyPanel",
-    mobileSelector: '[data-open-company-panel="synergy"]',
+    mobileSelector: ".squad-management__synergy",
     title: "조합 시너지",
-    text: "조합 시너지 버튼에서 현재 활성 시너지와 가능한 조합을 확인합니다. 특정 직군 조합을 맞추면 스쿼드 보너스가 발동합니다.",
+    text: "조합 시너지 영역에서 현재 활성 시너지와 가능한 조합을 확인합니다. 특정 직군 조합을 맞추면 스쿼드 보너스가 발동합니다.",
     placement: "top",
   },
   {
     tab: "tools",
     selector: "#squadRoster",
-    mobileSelector: '[data-open-company-panel="roster"]',
+    mobileSelector: ".squad-management__roster",
     title: "보유 동료",
-    text: "보유 동료 버튼에서 합류한 동료와 배치 상태를 확인합니다. 배치된 동료는 전투 화면에 등장하고 자동으로 업무를 처리합니다.",
+    text: "보유 동료 영역에서 합류한 동료와 배치 상태를 확인합니다. 배치된 동료는 전투 화면에 등장하고 자동으로 업무를 처리합니다.",
     placement: "top",
   },
   {
     tab: "tools",
     selector: "#squadFormation",
-    openCompanyPanel: "formation",
+    mobileSelector: "#squadFormation [data-squad-slot]",
     title: "자리 선택",
-    text: "팝업 안의 각 자리 선택 목록에서 보유 동료를 골라 배치합니다. 이미 배치된 동료는 다른 자리에서 중복 선택되지 않습니다.",
+    text: "각 자리 선택 목록에서 보유 동료를 골라 배치합니다. 이미 배치된 동료는 다른 자리에서 중복 선택되지 않습니다.",
     placement: "left",
   },
 ];
@@ -794,6 +798,7 @@ function getActiveTutorialSteps() {
 function prepareTutorialStep(step) {
   closeMobileBattlePanels();
   closeMobileCompanyPanels();
+  closeMobileRecruitGrowth();
   if (!step?.openRecruitDetailFirst && activeRecruitDetailId) closeRecruitDetail();
 
   if (step?.tab && activeTab !== step.tab) {
@@ -807,6 +812,7 @@ function prepareTutorialStep(step) {
   if (isMobileLayout()) {
     if (step.openMobilePanel) openMobileBattlePanel(step.openMobilePanel);
     if (step.openCompanyPanel) openMobileCompanyPanel(step.openCompanyPanel);
+    if (step.openRecruitGrowth) openMobileRecruitGrowth();
   }
 
   if (step.openRecruitDetailFirst) {
@@ -848,7 +854,7 @@ function isMobileTutorialViewport() {
 }
 
 function shouldUseMobileRecruitTutorialLayout() {
-  return activeTutorialMode === "recruitCompany" && isMobileTutorialViewport();
+  return activeTutorialMode === "recruitCompany" && isMobileLayout();
 }
 
 function getMobileTutorialSpotlightRect(baseRect, step) {
@@ -1014,6 +1020,7 @@ function hideGuidedTutorial() {
   closeWorldTutorial();
   closeMobileBattlePanels();
   closeMobileCompanyPanels();
+  closeMobileRecruitGrowth();
   if (activeRecruitDetailId) closeRecruitDetail();
   clearTutorialHighlight();
   if (refs.guidedTutorial) {
