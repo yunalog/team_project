@@ -146,10 +146,8 @@ function equipPendingEquipment() {
 function discardPendingEquipment() {
   if (!state.equipment.pending) return;
 
-  const refund = getEquipmentDiscardRefund(state.equipment.pending);
-  state.idea += refund;
   state.equipment.pending = null;
-  log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
+  log("장비를 버렸습니다.");
   renderAll();
 }
 
@@ -157,10 +155,6 @@ function hasPositiveEquipmentGain(item, equipped = getEquippedItem(item.slot)) {
   const currentPower = equipped ? equipped.powerBonus : 0;
   const currentSkill = equipped ? equipped.skillBonus : 0;
   return item.powerBonus > currentPower && item.skillBonus > currentSkill;
-}
-
-function getEquipmentDiscardRefund(item) {
-  return Math.max(1, Math.floor(getEquipmentScore(item) / 2));
 }
 
 function getMaxEquipmentUpgradeLevel() {

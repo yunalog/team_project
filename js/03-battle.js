@@ -14,10 +14,8 @@
   skillAttackCooldown = SKILL_ATTACK_RATE;
   monsterAttackCooldown = Math.min(1.05, MONSTER_ATTACK_RATE);
   syncUnitHealth();
-  if (state.battleMode === "boss") {
+  if (state.battleMode === "boss" || options.fullyRecover === true) {
     fullyRecoverUnits();
-  } else if (options.recoverUnits !== false) {
-    recoverUnitsForNewWave();
   }
   if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
@@ -172,16 +170,6 @@ function moveEnemies(delta) {
 function updateUnitHealth(delta = 0) {
   const units = getUnits();
   syncUnitHealth(units);
-
-  const pressured = state.enemies.some((enemy) => enemy.hasEngaged || enemy.x <= getMonsterAttackRange(enemy));
-  if (pressured || isSpawningNext) return;
-
-  units.forEach((unit) => {
-    const maxHp = getUnitMaxHp(unit);
-    const currentHp = getUnitHp(unit.id);
-    if (currentHp <= 0 || currentHp >= maxHp) return;
-    state.unitHp[unit.id] = Math.min(maxHp, currentHp + UNIT_HP_RECOVERY_RATE * delta);
-  });
 }
 
 function syncUnitHealth(units = getUnits()) {
@@ -201,19 +189,6 @@ function syncUnitHealth(units = getUnits()) {
     const savedHp = Number(state.unitHp[unit.id]);
     state.unitMaxHp[unit.id] = maxHp;
     state.unitHp[unit.id] = Number.isFinite(savedHp) ? Math.min(maxHp, Math.max(0, savedHp)) : maxHp;
-  });
-}
-
-function recoverUnitsForNewWave() {
-  getUnits().forEach((unit) => {
-    const maxHp = getUnitMaxHp(unit);
-    const currentHp = getUnitHp(unit.id);
-    const recoveryFloor = Math.ceil(maxHp * 0.56);
-    const recoveryGain = Math.ceil(maxHp * 0.18);
-    const nextHp = currentHp <= 0 ? recoveryFloor : Math.min(maxHp, currentHp + recoveryGain);
-    const healedAmount = roundStat(nextHp - currentHp);
-    state.unitHp[unit.id] = nextHp;
-    if (healedAmount > 0) showUnitHeal(healedAmount, unit);
   });
 }
 
@@ -888,7 +863,7 @@ function completeWave(manual) {
 
   window.setTimeout(() => {
     advanceBattleLayer();
-    spawnWave();
+    spawnWave({ fullyRecover: clearedBoss });
     renderAll();
     // 새 스테이지 진입 시 해금 팝업을 확인합니다.
     if (typeof checkRecruitCompanyUnlockPopup === "function") checkRecruitCompanyUnlockPopup();
@@ -904,6 +879,9 @@ function failBossBattle() {
   state.battleMode = "normal";
   state.subStage = NORMAL_STAGES_PER_CHAPTER;
   state.enemies = [];
+  getUnits().forEach((unit) => {
+    state.unitHp[unit.id] = Math.ceil(getUnitMaxHp(unit) * 0.48);
+  });
   syncEnemySummary();
   log(`${state.chapter}스테이지 보스 퇴치 실패. ${state.chapter}-${state.subStage}로 복귀합니다.`);
 

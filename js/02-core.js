@@ -1231,7 +1231,7 @@ function handleSquadChange(event) {
   log(recruit ? `${positionNumber}번 자리에 ${recruit.name} 배치 완료` : `${positionNumber}번 자리를 비웠습니다.`);
   // 편성 변경은 현재 진행 단계의 적을 처음부터 다시 시작하되,
   // 계속 참가하는 팀원의 현재 HP는 보존합니다.
-  spawnWave({ recoverUnits: false });
+  spawnWave();
   renderAll();
 }
 
