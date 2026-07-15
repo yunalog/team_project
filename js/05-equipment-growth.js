@@ -75,10 +75,10 @@ function runAutoDrawStep() {
     return;
   }
 
-  state.idea += getEquipmentDiscardRefund(item);
   log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
   autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
-  renderAll();
+  // 자동 뽑기 중에는 회사 탭의 스쿼드 선택 DOM을 다시 만들지 않습니다.
+  renderBattle();
 }
 
 function createEquipmentItem() {
@@ -290,7 +290,7 @@ function getManualPower() {
 
 function upgradePlayer() {
   const cost = getPlayerUpgradeCost();
-  if (state.gold < cost) {
+  if (!canAffordGold(cost)) {
     log(`대표 역량 강화에는 자금 ${cost}이 필요합니다.`);
     renderBattle();
     return;
@@ -301,6 +301,10 @@ function upgradePlayer() {
   state.clickPower += 1;
   log("대표 역량이 조금 상승했습니다.");
   renderAll();
+}
+
+function canAffordGold(cost) {
+  return Math.max(0, Number(state.gold) || 0) + Number.EPSILON >= Math.max(0, Number(cost) || 0);
 }
 
 function getGrowthValue(type) {

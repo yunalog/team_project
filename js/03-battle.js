@@ -1,4 +1,5 @@
 ﻿function spawnWave() {
+  const options = arguments[0] || {};
   state.stage = state.chapter;
   state.enemies = state.battleMode === "boss" ? createBossWave() : createNormalWave();
   state.enemyMaxHp = state.enemies.reduce((sum, enemy) => sum + enemy.maxHp, 0);
@@ -13,9 +14,19 @@
   skillAttackCooldown = SKILL_ATTACK_RATE;
   monsterAttackCooldown = Math.min(1.05, MONSTER_ATTACK_RATE);
   syncUnitHealth();
-  recoverUnitsForNewWave();
+  if (state.battleMode === "boss") {
+    fullyRecoverUnits();
+  } else if (options.recoverUnits !== false) {
+    recoverUnitsForNewWave();
+  }
   if (hasStartedGame) playBgm(getActiveBgmKey());
   log(`${getProgressLabel()} ${state.battleMode === "boss" ? "보스" : "업무"}가 오른쪽에서 접근합니다.`);
+}
+
+function fullyRecoverUnits() {
+  getUnits().forEach((unit) => {
+    state.unitHp[unit.id] = getUnitMaxHp(unit);
+  });
 }
 
 function createNormalWave() {
