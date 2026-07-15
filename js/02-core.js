@@ -714,6 +714,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#squadFormation",
     mobileSelector: ".squad-management__formation",
+    mobileSpotlight: { fullWidth: true, height: 112, align: "center" },
     title: "업무 스쿼드 구성",
     text: "스쿼드 구성 영역에서 대표 1명과 동료 3명까지 더해 총 4명 팀을 구성할 수 있습니다.",
     placement: "top",
@@ -722,6 +723,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#squadSynergyPanel",
     mobileSelector: ".squad-management__synergy",
+    mobileSpotlight: { fullWidth: true, height: 112, align: "center" },
     title: "조합 시너지",
     text: "조합 시너지 영역에서 현재 활성 시너지와 가능한 조합을 확인합니다. 특정 직군 조합을 맞추면 스쿼드 보너스가 발동합니다.",
     placement: "top",
@@ -730,6 +732,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#squadRoster",
     mobileSelector: ".squad-management__roster",
+    mobileSpotlight: { fullWidth: true, height: 112, align: "center" },
     title: "보유 동료",
     text: "보유 동료 영역에서 합류한 동료와 배치 상태를 확인합니다. 배치된 동료는 전투 화면에 등장하고 자동으로 업무를 처리합니다.",
     placement: "top",
@@ -738,6 +741,7 @@ const RECRUIT_COMPANY_TUTORIAL_STEPS = [
     tab: "tools",
     selector: "#squadFormation",
     mobileSelector: "#squadFormation [data-squad-slot]",
+    mobileSpotlight: { maxWidth: 320, minWidth: 220, height: 58, align: "center" },
     title: "자리 선택",
     text: "각 자리 선택 목록에서 보유 동료를 골라 배치합니다. 이미 배치된 동료는 다른 자리에서 중복 선택되지 않습니다.",
     placement: "left",
@@ -858,7 +862,7 @@ function shouldUseMobileRecruitTutorialLayout() {
 }
 
 function getMobileTutorialSpotlightRect(baseRect, step) {
-  if (!shouldUseMobileRecruitTutorialLayout() || !step?.mobileSpotlight) return baseRect;
+  if (!isMobileLayout() || !step?.mobileSpotlight) return baseRect;
 
   const options = step.mobileSpotlight;
   const viewportPadding = 24;
@@ -905,7 +909,7 @@ function scrollMobileTutorialTargetIntoPanel(target, step) {
   const currentScroll = panel.scrollTop;
   const targetOffset = targetRect.top - panelRect.top + currentScroll;
   const nextScroll = Math.max(0, targetOffset - 18);
-  panel.scrollTo({ top: nextScroll, behavior: "smooth" });
+  panel.scrollTo({ top: nextScroll, behavior: "auto" });
 }
 
 function showGuidedTutorialStep(index) {
@@ -927,7 +931,11 @@ function showGuidedTutorialStep(index) {
     if (shouldUseMobileRecruitTutorialLayout()) {
       scrollMobileTutorialTargetIntoPanel(activeTutorialTarget, step);
     } else if (typeof activeTutorialTarget.scrollIntoView === "function") {
-      activeTutorialTarget.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+      activeTutorialTarget.scrollIntoView({
+        block: "center",
+        inline: "center",
+        behavior: isMobileLayout() ? "auto" : "smooth",
+      });
     }
   }
 
@@ -950,57 +958,52 @@ function positionGuidedTutorial() {
   const padding = 10;
   const spotlightPadding = 8;
   const bubble = refs.guidedTutorialBubble;
-  const bubbleWidth = Math.min(isMobileLayout() ? 336 : 310, window.innerWidth - 20);
+  const bubbleWidth = Math.min(isMobileLayout() ? 320 : 310, window.innerWidth - 20);
   bubble.style.width = `${bubbleWidth}px`;
   bubble.style.maxWidth = `${bubbleWidth}px`;
   bubble.style.maxHeight = `${Math.max(160, window.innerHeight - padding * 2)}px`;
-  const mobileRecruitTutorial = shouldUseMobileRecruitTutorialLayout();
+  const mobileTutorial = isMobileLayout();
 
   const bubbleHeight = bubble.offsetHeight || 168;
   let left = rect.left + rect.width / 2 - bubbleWidth / 2;
   let top = rect.bottom + 16;
   let placement = step.placement;
 
-  if (mobileRecruitTutorial) {
-    left = Math.max(14, Math.min(window.innerWidth - bubbleWidth - 14, window.innerWidth - bubbleWidth - 18));
-    top = Math.max(12, window.innerHeight - bubbleHeight - 22);
-  } else if (isMobileLayout() && (placement === "left" || placement === "right")) {
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    placement = spaceBelow >= bubbleHeight + 24 || spaceBelow >= spaceAbove ? "bottom" : "top";
+  if (mobileTutorial) {
+    const spaceBelow = window.innerHeight - rect.bottom - padding;
+    const spaceAbove = rect.top - padding;
+    placement = spaceBelow >= bubbleHeight + 18 || spaceBelow >= spaceAbove ? "bottom" : "top";
+    left = rect.left + rect.width / 2 - bubbleWidth / 2;
+    top = placement === "bottom" ? rect.bottom + 14 : rect.top - bubbleHeight - 14;
   }
 
-  if (!mobileRecruitTutorial && placement === "top") {
+  if (!mobileTutorial && placement === "top") {
     top = rect.top - bubbleHeight - 16;
-  } else if (!mobileRecruitTutorial && placement === "left") {
+  } else if (!mobileTutorial && placement === "left") {
     left = rect.left - bubbleWidth - 16;
     top = rect.top + rect.height / 2 - bubbleHeight / 2;
-  } else if (!mobileRecruitTutorial && placement === "right") {
+  } else if (!mobileTutorial && placement === "right") {
     left = rect.right + 16;
     top = rect.top + rect.height / 2 - bubbleHeight / 2;
   }
 
+  left = Math.max(padding, Math.min(window.innerWidth - bubbleWidth - padding, left));
+  top = Math.max(padding, Math.min(window.innerHeight - bubbleHeight - padding, top));
+
   if (refs.guidedTutorialSpotlight) {
-    if (mobileRecruitTutorial) {
-      const panelRect = document.querySelector(".tab-panel.is-active")?.getBoundingClientRect();
-      const safeTop = Math.max(8, panelRect ? panelRect.top + 8 : 8);
-      const minSpotlightHeight = Math.max(36, Math.min(86, rect.height));
-      const safeBottomLimit = step.mobileSpotlight?.allowUnderBubble ? panelRect ? panelRect.bottom - 8 : window.innerHeight - 8 : top - 14;
-      const safeBottom = Math.max(safeTop + minSpotlightHeight, Math.min(safeBottomLimit, panelRect ? panelRect.bottom - 8 : window.innerHeight - 8));
-      const targetVisible = rect.bottom > safeTop && rect.top < safeBottom;
+    if (mobileTutorial) {
+      const visibleLeft = Math.max(8, rect.left - spotlightPadding);
+      const visibleTop = Math.max(8, rect.top - spotlightPadding);
+      const visibleRight = Math.min(window.innerWidth - 8, rect.right + spotlightPadding);
+      const visibleBottom = Math.min(window.innerHeight - 8, rect.bottom + spotlightPadding);
+      const targetVisible = visibleRight > visibleLeft && visibleBottom > visibleTop;
       setTutorialHighlightVisible(targetVisible);
-      if (!targetVisible) {
-        bubble.style.left = `${left}px`;
-        bubble.style.top = `${top}px`;
-        return;
+      if (targetVisible) {
+        refs.guidedTutorialSpotlight.style.left = `${visibleLeft}px`;
+        refs.guidedTutorialSpotlight.style.top = `${visibleTop}px`;
+        refs.guidedTutorialSpotlight.style.width = `${visibleRight - visibleLeft}px`;
+        refs.guidedTutorialSpotlight.style.height = `${visibleBottom - visibleTop}px`;
       }
-      const spotlightTop = Math.min(safeBottom - minSpotlightHeight, Math.max(safeTop, rect.top - spotlightPadding));
-      const spotlightBottom = Math.min(safeBottom, rect.bottom + spotlightPadding);
-      const spotlightHeight = Math.max(minSpotlightHeight, spotlightBottom - spotlightTop);
-      refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
-      refs.guidedTutorialSpotlight.style.top = `${spotlightTop}px`;
-      refs.guidedTutorialSpotlight.style.width = `${Math.min(window.innerWidth - 16, rect.width + spotlightPadding * 2)}px`;
-      refs.guidedTutorialSpotlight.style.height = `${spotlightHeight}px`;
     } else {
       setTutorialHighlightVisible(true);
       refs.guidedTutorialSpotlight.style.left = `${Math.max(8, rect.left - spotlightPadding)}px`;
@@ -1010,8 +1013,6 @@ function positionGuidedTutorial() {
     }
   }
 
-  left = Math.max(padding, Math.min(window.innerWidth - bubbleWidth - padding, left));
-  top = Math.max(padding, Math.min(window.innerHeight - bubbleHeight - padding, top));
   bubble.style.left = `${left}px`;
   bubble.style.top = `${top}px`;
 }
