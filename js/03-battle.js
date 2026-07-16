@@ -124,8 +124,9 @@ function getWaveEnemyCount() {
 
 function getEnemyHp() {
   const stageBase = 6 + state.chapter * 2.2 + state.subStage * 1.4;
-  const growthBonus = getDifficultyGrowthPower() * (0.18 + state.chapter * 0.012);
-  return Math.floor(stageBase + growthBonus);
+  const growthBonus = getDifficultyGrowthPower() * (0.32 + state.chapter * 0.018);
+  const attackCycleHp = getSquadFiveSecondSurvivalHp();
+  return Math.floor(Math.max(stageBase + growthBonus, attackCycleHp));
 }
 
 function getBossHp() {
@@ -139,6 +140,21 @@ function getDifficultyGrowthPower() {
   const toolPower = tools.reduce((sum, tool) => sum + getToolLevel(tool.id) * ((tool.click || 0) + (tool.dps || 0)), 0);
   const upgradePower = Math.max(0, state.playerLevel - 1) * 1.3 + Math.max(0, state.clickPower - 1) * 0.6;
   return Math.max(0, upgradePower + recruitPower + equipmentPower + toolPower);
+}
+
+function getSquadFiveSecondSurvivalHp() {
+  const units = getUnits();
+  const sustainedDamage = units.reduce((sum, unit) => {
+    const attackInterval = Math.max(0.35, getUnitAttackInterval(unit));
+    const basicDps = Math.max(1, unit.power || 1) / attackInterval;
+    const skill = unit.skill || {};
+    const skillCooldown = Math.max(0.5, getUnitSkillCooldown(unit));
+    const skillMultiplier = Number(skill.multiplier) || 1;
+    const skillDps = Math.max(1, unit.skillPower || unit.power || 1) * skillMultiplier / skillCooldown;
+    return sum + basicDps + skillDps * 0.72;
+  }, 0);
+  const focusPressure = Math.max(1, sustainedDamage) * 5.15;
+  return Math.ceil(focusPressure);
 }
 
 function getEnemyLaneY(index) {
@@ -472,8 +488,9 @@ function getMonsterAttackTarget() {
 function getMonsterAttackDamage(enemy, unit, extraPressure = 0) {
   const maxHp = getUnitMaxHp(unit);
   const base = enemy.isBoss ? 4 + state.chapter * 0.55 : 1.5 + state.chapter * 0.22 + state.subStage * 0.14;
-  const capRatio = enemy.isBoss ? 0.085 : 0.045;
-  return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(base + extraPressure * 0.65)));
+  const capRatio = enemy.isBoss ? 0.111 : 0.059;
+  const tunedDamage = (base + extraPressure * 0.65) * 1.3;
+  return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(tunedDamage)));
 }
 
 function getUnitMaxHp(unit) {

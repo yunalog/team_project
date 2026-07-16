@@ -177,8 +177,8 @@ function getRecruitBattleStats(recruit) {
   );
   const criticalChance = Math.min(0.55, (base.criticalChance || 0) + levelBonus * 0.0015 + promotionTier * 0.02);
   return {
-    attackPower: roundStat(attackPower),
-    skillPower: roundStat(skillPower),
+    attackPower: Math.max(1, Math.round(attackPower)),
+    skillPower: Math.round(skillPower),
     attackInterval: roundStat(attackInterval, 100),
     criticalChance: roundStat(criticalChance, 10000),
     basicTargets: recruit.basicTargets || 1,
@@ -192,12 +192,12 @@ function getRecruitPower(recruit) {
 function formatRecruitStatLine(recruit) {
   const stats = getRecruitBattleStats(recruit);
   const parts = [
-    `공격 ${stats.attackPower.toFixed(1)}`,
+    `공격 ${formatStatValue(stats.attackPower)}`,
     `속도 ${stats.attackInterval.toFixed(2)}초`,
     `치명 ${(stats.criticalChance * 100).toFixed(1)}%`,
   ];
   if (hasRecruitSkillPowerStat(recruit)) {
-    parts.splice(1, 0, `스킬 ${stats.skillPower.toFixed(1)}`);
+    parts.splice(1, 0, `스킬 ${formatStatValue(stats.skillPower)}`);
   }
   return parts.join(" · ");
 }
@@ -223,11 +223,11 @@ function getRecruitAvatarMarkup(recruit, className = "recruit-card-avatar") {
 function formatRecruitStatRows(recruit) {
   const stats = getRecruitBattleStats(recruit);
   const rows = [
-    ["기본 공격력", stats.attackPower.toFixed(1)],
+    ["기본 공격력", formatStatValue(stats.attackPower)],
     ["공격속도", `${stats.attackInterval.toFixed(2)}초`],
     ["치명타확률", `${(stats.criticalChance * 100).toFixed(1)}%`],
   ];
-  if (hasRecruitSkillPowerStat(recruit)) rows.push(["스킬피해량", stats.skillPower.toFixed(1)]);
+  if (hasRecruitSkillPowerStat(recruit)) rows.push(["스킬피해량", formatStatValue(stats.skillPower)]);
   return rows
     .map(([label, value]) => `<span><b>${label}</b><strong>${value}</strong></span>`)
     .join("");
