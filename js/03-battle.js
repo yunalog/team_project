@@ -287,7 +287,26 @@ function performMonsterAttack(attacker, attackerCount = 1) {
   const extraPressure = Math.max(0, attackerCount - 1);
   const damage = getMonsterAttackDamage(attacker, target, extraPressure);
   const attackDelay = playMonsterSkillEffect(attacker, target);
+  if (getMonsterAttackType(attacker) === "ranged") {
+    scheduleMonsterAreaAttackDamage(attacker, getLivingUnits(), extraPressure, attackDelay);
+    return;
+  }
   scheduleMonsterAttackDamage(attacker, target, damage, attackDelay);
+}
+
+function scheduleMonsterAreaAttackDamage(attacker, targets, extraPressure, attackDelay) {
+  const livingTargets = targets.filter((target) => isUnitAlive(target.id));
+  if (!livingTargets.length) return;
+
+  const damageRatio = attacker.isBoss ? 0.55 : 0.45;
+  livingTargets.forEach((target, index) => {
+    const singleTargetDamage = getMonsterAttackDamage(attacker, target, extraPressure);
+    const distributedDamage = Math.max(1, Math.ceil(singleTargetDamage * damageRatio));
+    window.setTimeout(
+      () => applyMonsterAttackDamage(attacker, target, distributedDamage, { isAreaAttack: true }),
+      attackDelay + index * 55
+    );
+  });
 }
 
 function scheduleMonsterAttackDamage(attacker, target, damage, attackDelay) {
@@ -327,7 +346,7 @@ function splitDamageIntoHits(totalDamage, hitCount) {
   });
 }
 
-function applyMonsterAttackDamage(attacker, target, damage) {
+function applyMonsterAttackDamage(attacker, target, damage, options = {}) {
   if (isSpawningNext || !isUnitAlive(target.id)) return;
 
   state.unitHp[target.id] = Math.max(0, getUnitHp(target.id) - damage);
@@ -337,7 +356,8 @@ function applyMonsterAttackDamage(attacker, target, damage) {
     log(`${target.shortName}이 잠시 전투에서 이탈했습니다.`);
     if (!getLivingUnits().length) handlePartyDown();
   } else {
-    log(`${attacker.isBoss ? "보스" : "몬스터"}가 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
+    const attackLabel = options.isAreaAttack ? "광역 공격" : "공격";
+    log(`${attacker.isBoss ? "보스" : "몬스터"}의 ${attackLabel}이 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
   }
 }
 
@@ -462,7 +482,11 @@ function getUnitMaxHp(unit) {
 
   const recruitCount = unit.recruitId ? getRecruitCount(unit.recruitId) : 1;
   const boost = unit.recruitId ? getRecruitBoostLevel(unit.recruitId) : 0;
-  return Math.floor(72 + recruitCount * 3 + boost * 5 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2);
+  const recruit = unit.recruitId ? recruits.find((item) => item.id === unit.recruitId) : null;
+  const promotionTier = recruit ? getRecruitPromotionTier(recruit) : 0;
+  return Math.floor(
+    72 + recruitCount * 4 + boost * 6 + promotionTier * 18 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2
+  );
 }
 
 function getUnitHp(unitId) {
