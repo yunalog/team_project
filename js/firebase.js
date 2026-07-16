@@ -20,6 +20,8 @@
   };
 
   const DEFAULT_OFFLINE_PLAN = 8;
+  const NORMAL_STAGES_PER_CHAPTER_FOR_SAVE = 5;
+  const PROGRESS_STEPS_PER_CHAPTER = NORMAL_STAGES_PER_CHAPTER_FOR_SAVE + 1;
 
   let app = null;
   let auth = null;
@@ -125,7 +127,7 @@
 
     const data = snap.data() || {};
     const savedState = data.gameState || null;
-    if (!savedState) return null;
+    if (!isUsableGameState(savedState)) return null;
 
     return {
       ...savedState,
@@ -147,6 +149,7 @@
       offlineRewardPlan: normalizeOfflinePlan(gameState.offlineRewardPlan),
       lastActiveAtMs: nextLastActiveAtMs,
     };
+    nextState.progress = getProgressSnapshot(nextState);
 
     await db.collection("users").doc(user.uid).set(
       {
@@ -163,6 +166,7 @@
 
     gameState.offlineRewardPlan = nextState.offlineRewardPlan;
     gameState.lastActiveAtMs = nextState.lastActiveAtMs;
+    gameState.progress = nextState.progress;
     return true;
   }
 
@@ -171,26 +175,58 @@
     if (!gameState) return false;
 
     gameState.offlineRewardPlan = normalizedHours;
-
-    if (!initFirebase()) return false;
-    const user = auth.currentUser;
-    if (!user) return false;
-
-    await db.collection("users").doc(user.uid).set(
-      {
-        offlineRewardPlan: normalizedHours,
-        "gameState.offlineRewardPlan": normalizedHours,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-    return true;
+    return saveUserGameState(gameState, { updateLastActive: false });
   }
 
   function normalizeOfflinePlan(hours) {
     const value = Number(hours || DEFAULT_OFFLINE_PLAN);
     return OFFLINE_REWARD_PLANS[value] ? value : DEFAULT_OFFLINE_PLAN;
+  }
+
+  function isUsableGameState(savedState) {
+    if (!savedState || typeof savedState !== "object" || Array.isArray(savedState)) return false;
+
+    return [
+      "chapter",
+      "stage",
+      "subStage",
+      "battleMode",
+      "gold",
+      "idea",
+      "recruits",
+      "tools",
+      "growthLevels",
+      "equipment",
+    ].some((key) => Object.prototype.hasOwnProperty.call(savedState, key));
+  }
+
+  function getProgressSnapshot(gameState) {
+    const progress = getNormalizedProgress(gameState);
+    const stageStep = progress.battleMode === "boss" ? PROGRESS_STEPS_PER_CHAPTER : progress.subStage;
+
+    return {
+      chapter: progress.chapter,
+      subStage: progress.subStage,
+      battleMode: progress.battleMode,
+      label: progress.battleMode === "boss" ? `${progress.chapter}-BOSS` : `${progress.chapter}-${progress.subStage}`,
+      index: (progress.chapter - 1) * PROGRESS_STEPS_PER_CHAPTER + stageStep,
+    };
+  }
+
+  function getNormalizedProgress(gameState) {
+    const chapter = Math.max(1, Number(gameState?.chapter) || Number(gameState?.stage) || 1);
+    const subStage = Math.min(
+      NORMAL_STAGES_PER_CHAPTER_FOR_SAVE,
+      Math.max(1, Number(gameState?.subStage) || deriveSubStageFromLegacy(gameState?.stage))
+    );
+    const battleMode = gameState?.battleMode === "boss" ? "boss" : "normal";
+
+    return { chapter, subStage, battleMode };
+  }
+
+  function deriveSubStageFromLegacy(stage) {
+    const legacyStage = Math.max(1, Number(stage) || 1);
+    return ((legacyStage - 1) % NORMAL_STAGES_PER_CHAPTER_FOR_SAVE) + 1;
   }
 
   function applyOfflineReward(gameState, goldPerSecond) {

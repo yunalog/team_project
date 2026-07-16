@@ -31,6 +31,7 @@ function renderAll() {
   renderBattle();
   renderOfflineRewardSetting();
   renderSystemUnlockState();
+  queueStateSave();
 }
 
 function renderOfflineRewardSetting() {
@@ -628,12 +629,11 @@ function renderSquadManagement() {
 function syncSquadRosterHeight() {
   if (!refs?.squadFormation || !refs?.squadRoster) return;
 
-  const formationHeight = refs.squadFormation.getBoundingClientRect().height;
-  if (formationHeight <= 0) return;
+  const rosterPanel = refs.squadRoster.closest(".squad-management__roster");
 
-  const height = `${formationHeight}px`;
-  refs.squadRoster.style.height = height;
-  refs.squadRoster.style.maxHeight = height;
+  refs.squadRoster.style.height = "";
+  refs.squadRoster.style.maxHeight = "";
+  if (rosterPanel) rosterPanel.style.height = "";
 }
 
 function renderSquadSynergyPanel() {

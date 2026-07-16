@@ -1,4 +1,4 @@
-const CACHE_VERSION = "game-company-grow-v4";
+const CACHE_VERSION = "game-company-grow-v12";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-app-shell`;
 
 const APP_SHELL_FILES = [
@@ -41,6 +41,15 @@ function shouldUseNetworkOnly(request) {
   return NETWORK_ONLY_HOSTS.some((host) => url.hostname === host || url.hostname.endsWith(`.${host}`));
 }
 
+function shouldUseNetworkFirst(request) {
+  if (request.method !== "GET") return false;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+
+  return request.destination === "style" || request.destination === "script" || /\.(css|js)$/.test(url.pathname);
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -64,6 +73,21 @@ self.addEventListener("fetch", (event) => {
 
   if (shouldUseNetworkOnly(request)) {
     event.respondWith(fetch(request));
+    return;
+  }
+
+  if (shouldUseNetworkFirst(request)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(APP_SHELL_CACHE).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
     return;
   }
 
