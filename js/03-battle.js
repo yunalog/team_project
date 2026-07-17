@@ -133,8 +133,9 @@ function getWaveEnemyCount() {
 
 function getEnemyHp() {
   const stageBase = 6 + state.chapter * 2.2 + state.subStage * 1.4;
-  const growthBonus = getDifficultyGrowthPower() * (0.18 + state.chapter * 0.012);
-  return Math.floor(stageBase + growthBonus);
+  const growthBonus = getDifficultyGrowthPower() * (0.32 + state.chapter * 0.018);
+  const attackCycleHp = getSquadFiveSecondSurvivalHp();
+  return Math.floor(Math.max(stageBase + growthBonus, attackCycleHp));
 }
 
 function getBossHp() {
@@ -148,6 +149,21 @@ function getDifficultyGrowthPower() {
   const toolPower = tools.reduce((sum, tool) => sum + getToolLevel(tool.id) * ((tool.click || 0) + (tool.dps || 0)), 0);
   const upgradePower = Math.max(0, state.playerLevel - 1) * 1.3 + Math.max(0, state.clickPower - 1) * 0.6;
   return Math.max(0, upgradePower + recruitPower + equipmentPower + toolPower);
+}
+
+function getSquadFiveSecondSurvivalHp() {
+  const units = getUnits();
+  const sustainedDamage = units.reduce((sum, unit) => {
+    const attackInterval = Math.max(0.35, getUnitAttackInterval(unit));
+    const basicDps = Math.max(1, unit.power || 1) / attackInterval;
+    const skill = unit.skill || {};
+    const skillCooldown = Math.max(0.5, getUnitSkillCooldown(unit));
+    const skillMultiplier = Number(skill.multiplier) || 1;
+    const skillDps = Math.max(1, unit.skillPower || unit.power || 1) * skillMultiplier / skillCooldown;
+    return sum + basicDps + skillDps * 0.72;
+  }, 0);
+  const focusPressure = Math.max(1, sustainedDamage) * 5.15;
+  return Math.ceil(focusPressure);
 }
 
 function getEnemyLaneY(index) {
@@ -273,7 +289,26 @@ function performMonsterAttack(attacker, attackerCount = 1) {
   const extraPressure = Math.max(0, attackerCount - 1);
   const damage = getMonsterAttackDamage(attacker, target, extraPressure);
   const attackDelay = playMonsterSkillEffect(attacker, target);
+  if (getMonsterAttackType(attacker) === "ranged") {
+    scheduleMonsterAreaAttackDamage(attacker, getLivingUnits(), extraPressure, attackDelay);
+    return;
+  }
   scheduleMonsterAttackDamage(attacker, target, damage, attackDelay);
+}
+
+function scheduleMonsterAreaAttackDamage(attacker, targets, extraPressure, attackDelay) {
+  const livingTargets = targets.filter((target) => isUnitAlive(target.id));
+  if (!livingTargets.length) return;
+
+  const damageRatio = attacker.isBoss ? 0.55 : 0.45;
+  livingTargets.forEach((target, index) => {
+    const singleTargetDamage = getMonsterAttackDamage(attacker, target, extraPressure);
+    const distributedDamage = Math.max(1, Math.ceil(singleTargetDamage * damageRatio));
+    window.setTimeout(
+      () => applyMonsterAttackDamage(attacker, target, distributedDamage, { isAreaAttack: true }),
+      attackDelay + index * 55
+    );
+  });
 }
 
 function scheduleMonsterAttackDamage(attacker, target, damage, attackDelay) {
@@ -313,7 +348,7 @@ function splitDamageIntoHits(totalDamage, hitCount) {
   });
 }
 
-function applyMonsterAttackDamage(attacker, target, damage) {
+function applyMonsterAttackDamage(attacker, target, damage, options = {}) {
   if (isSpawningNext || !isUnitAlive(target.id)) return;
 
   state.unitHp[target.id] = Math.max(0, getUnitHp(target.id) - damage);
@@ -323,7 +358,8 @@ function applyMonsterAttackDamage(attacker, target, damage) {
     log(`${target.shortName}이 잠시 전투에서 이탈했습니다.`);
     if (!getLivingUnits().length) handlePartyDown();
   } else {
-    log(`${attacker.isBoss ? "보스" : "몬스터"}가 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
+    const attackLabel = options.isAreaAttack ? "광역 공격" : "공격";
+    log(`${attacker.isBoss ? "보스" : "몬스터"}의 ${attackLabel}이 ${target.shortName}에게 ${damage} 피해를 줬습니다.`);
   }
 }
 
@@ -438,8 +474,9 @@ function getMonsterAttackTarget() {
 function getMonsterAttackDamage(enemy, unit, extraPressure = 0) {
   const maxHp = getUnitMaxHp(unit);
   const base = enemy.isBoss ? 4 + state.chapter * 0.55 : 1.5 + state.chapter * 0.22 + state.subStage * 0.14;
-  const capRatio = enemy.isBoss ? 0.085 : 0.045;
-  return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(base + extraPressure * 0.65)));
+  const capRatio = enemy.isBoss ? 0.111 : 0.059;
+  const tunedDamage = (base + extraPressure * 0.65) * 1.3;
+  return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(tunedDamage)));
 }
 
 function getUnitMaxHp(unit) {
@@ -448,7 +485,11 @@ function getUnitMaxHp(unit) {
 
   const recruitCount = unit.recruitId ? getRecruitCount(unit.recruitId) : 1;
   const boost = unit.recruitId ? getRecruitBoostLevel(unit.recruitId) : 0;
-  return Math.floor(72 + recruitCount * 3 + boost * 5 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2);
+  const recruit = unit.recruitId ? recruits.find((item) => item.id === unit.recruitId) : null;
+  const promotionTier = recruit ? getRecruitPromotionTier(recruit) : 0;
+  return Math.floor(
+    72 + recruitCount * 4 + boost * 6 + promotionTier * 18 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2
+  );
 }
 
 function getUnitHp(unitId) {

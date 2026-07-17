@@ -9077,6 +9077,18 @@ button:disabled:hover,
   }
 }
 
+/* Mobile-only close buttons must never appear in the desktop inline layout. */
+.mobile-panel-close {
+  display: none !important;
+}
+
+@media (max-width: 560px) {
+  .is-mobile-popup-open > .mobile-panel-close,
+  .company-popup-panel.is-company-popup-open > .mobile-panel-close {
+    display: inline-grid !important;
+  }
+}
+
 /* Final squad-management placement lock: left formation/synergy, right roster spanning both rows. */
 .tab-panel[data-panel="tools"] .squad-management__section-button,
 .tab-panel[data-panel="tools"] .squad-management__section-button:hover:not(:disabled) {
