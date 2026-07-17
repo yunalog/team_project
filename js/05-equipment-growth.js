@@ -75,10 +75,11 @@ function runAutoDrawStep() {
     return;
   }
 
-  state.idea += getEquipmentDiscardRefund(item);
+  // 자동판매는 장비를 보관하지 않고 폐기만 하며 아이디어 환급을 지급하지 않습니다.
   log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
   autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
-  renderAll();
+  // 자동 뽑기 중에는 회사 탭의 스쿼드 선택 DOM을 다시 만들지 않습니다.
+  renderBattle();
 }
 
 function createEquipmentItem() {
@@ -145,10 +146,8 @@ function equipPendingEquipment() {
 function discardPendingEquipment() {
   if (!state.equipment.pending) return;
 
-  const refund = getEquipmentDiscardRefund(state.equipment.pending);
-  state.idea += refund;
   state.equipment.pending = null;
-  log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
+  log("장비를 버렸습니다.");
   renderAll();
 }
 
@@ -156,10 +155,6 @@ function hasPositiveEquipmentGain(item, equipped = getEquippedItem(item.slot)) {
   const currentPower = equipped ? equipped.powerBonus : 0;
   const currentSkill = equipped ? equipped.skillBonus : 0;
   return item.powerBonus > currentPower && item.skillBonus > currentSkill;
-}
-
-function getEquipmentDiscardRefund(item) {
-  return Math.max(1, Math.floor(getEquipmentScore(item) / 2));
 }
 
 function getMaxEquipmentUpgradeLevel() {
@@ -290,7 +285,7 @@ function getManualPower() {
 
 function upgradePlayer() {
   const cost = getPlayerUpgradeCost();
-  if (state.gold < cost) {
+  if (!canAffordGold(cost)) {
     log(`대표 역량 강화에는 자금 ${cost}이 필요합니다.`);
     renderBattle();
     return;
@@ -301,6 +296,10 @@ function upgradePlayer() {
   state.clickPower += 1;
   log("대표 역량이 조금 상승했습니다.");
   renderAll();
+}
+
+function canAffordGold(cost) {
+  return Math.max(0, Number(state.gold) || 0) + Number.EPSILON >= Math.max(0, Number(cost) || 0);
 }
 
 function getGrowthValue(type) {

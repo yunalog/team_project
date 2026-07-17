@@ -56,6 +56,7 @@ function renderBattle() {
 
   refs.goldText.textContent = Math.floor(state.gold);
   refs.ideaText.textContent = Math.floor(state.idea);
+  updatePlayerUpgradeButtonState(playerCost);
   refs.stageText.textContent = getProgressLabel();
   refs.battlefield.style.setProperty("--battle-bg", `url("${getBattleBackground()}")`);
   renderCompany();
@@ -86,11 +87,6 @@ function renderBattle() {
     button.setAttribute("aria-disabled", String(isUnaffordable));
   });
 
-  const isPlayerUpgradeUnaffordable = state.gold < playerCost;
-  refs.upgradePlayerButton.textContent = `대표 역량 강화 (${playerCost} 자금)`;
-  refs.upgradePlayerButton.disabled = isPlayerUpgradeUnaffordable;
-  refs.upgradePlayerButton.classList.toggle("is-unaffordable", isPlayerUpgradeUnaffordable);
-  refs.upgradePlayerButton.setAttribute("aria-disabled", String(isPlayerUpgradeUnaffordable));
   refs.nextStageButton.textContent = state.battleMode === "boss" ? "보스 재도전" : "다음 단계";
   document.querySelectorAll('.tab-button[data-tab="recruit"]').forEach((button) => {
     const locked = !isRecruitUnlocked();
@@ -99,6 +95,15 @@ function renderBattle() {
     button.textContent = "동료 영입";
   });
   renderEquipment();
+}
+
+function updatePlayerUpgradeButtonState(cost = getPlayerUpgradeCost()) {
+  if (!refs.upgradePlayerButton) return;
+  const isUnaffordable = typeof canAffordGold === "function" ? !canAffordGold(cost) : state.gold < cost;
+  refs.upgradePlayerButton.textContent = `대표 역량 강화 (${cost} 자금)`;
+  refs.upgradePlayerButton.disabled = isUnaffordable;
+  refs.upgradePlayerButton.classList.toggle("is-unaffordable", isUnaffordable);
+  refs.upgradePlayerButton.setAttribute("aria-disabled", String(isUnaffordable));
 }
 
 function renderEquipment() {
@@ -152,11 +157,8 @@ function refreshCostSensitiveButtonStates() {
   });
 
   if (refs.upgradePlayerButton) {
-    const playerCost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
-    const isUnaffordable = state.gold < playerCost;
-    refs.upgradePlayerButton.disabled = isUnaffordable;
-    refs.upgradePlayerButton.classList.toggle("is-unaffordable", isUnaffordable);
-    refs.upgradePlayerButton.setAttribute("aria-disabled", String(isUnaffordable));
+    const playerCost = getPlayerUpgradeCost();
+    updatePlayerUpgradeButtonState(playerCost);
   }
 
   if (typeof refreshRecruitGrowthActionState === "function") {
@@ -500,6 +502,8 @@ function renderShop() {
     refs.recruitList.innerHTML = recruits
       .map((recruit) => {
         const isSelected = recruit.id === activeRecruitPanelId;
+        const recruitLevel = getRecruitCount(recruit.id);
+        const mobileCaption = recruitLevel > 0 ? `Lv.${recruitLevel} ${getRecruitRankLabel(recruit, recruitLevel)}` : "없음";
         return `
           <div class="shop-item recruit-class-card${isSelected ? " is-selected" : ""}" data-select-recruit="${recruit.id}" role="button" tabindex="0" style="--recruit-color: ${recruit.color};">
             <div class="recruit-class-title">
@@ -509,7 +513,7 @@ function renderShop() {
             <div class="recruit-class-body">
               <div class="recruit-class-head">
                 ${getRecruitAvatarMarkup(recruit, "recruit-card-avatar")}
-                <span class="recruit-mobile-caption">Lv.${getRecruitCount(recruit.id)} ${getRecruitRankLabel(recruit, getRecruitCount(recruit.id))}</span>
+                <span class="recruit-mobile-caption">${mobileCaption}</span>
               </div>
               <div class="recruit-class-stats">
                 ${formatRecruitStatRows(recruit)}
@@ -547,6 +551,15 @@ function renderShop() {
 }
 
 function renderSquadManagement() {
+  const managementKey = JSON.stringify({
+    squad: state.squad,
+    recruits: state.recruits,
+    boosts: state.recruitBoosts,
+    promotions: state.recruitPromotions,
+  });
+  if (managementKey === lastSquadManagementKey && refs.squadFormation.childElementCount > 0) return;
+  lastSquadManagementKey = managementKey;
+
   const positionNames = ["2번 자리", "3번 자리", "4번 자리"];
   const deployedIds = new Set(state.squad.filter(Boolean));
 

@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" sizes="192x192" href="Resource/Icon/icon-192.png" />
     <link rel="apple-touch-icon" href="Resource/Icon/icon-192.png" />
-    <link rel="stylesheet" href="style.css?v=squad-management-layout-v11" />
+    <link rel="stylesheet" href="style.css?v=mobile-recruit-caption-v19" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
   <body>
@@ -167,6 +167,7 @@
               <button id="upgradePlayerButton" class="battle-column-action" type="button">대표 역량 강화</button>
               <button class="mobile-battle-popup-button" type="button" data-open-mobile-panel="equipped">장착장비</button>
               <div id="equippedItemPanel" class="equipped-item-panel is-collapsed" aria-expanded="false">
+                <button class="mobile-panel-close" type="button" data-close-mobile-panel aria-label="장착 장비 창 닫기">×</button>
                 <div class="equipped-item-header">
                   <div class="equipped-item-summary">
                     <span class="equipped-item-label">장착 장비</span>
@@ -183,6 +184,7 @@
               <button id="nextStageButton" class="battle-column-action" type="button">다음 의뢰</button>
               <button class="mobile-battle-popup-button" type="button" data-open-mobile-panel="equipment-tools">장비 뽑기 · 연구</button>
               <div id="equipmentToolsPanel" class="equipment-tools-panel">
+                <button class="mobile-panel-close" type="button" data-close-mobile-panel aria-label="장비 뽑기 및 연구 창 닫기">×</button>
                 <div class="equipment-layer" aria-live="polite">
                   <div class="draw-machine-panel" aria-label="장비 뽑기">
                     <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
@@ -230,6 +232,7 @@
               <div class="shop-list" id="recruitList"></div>
             </section>
             <section class="recruit-board__right">
+              <button class="mobile-panel-close" type="button" data-close-recruit-growth aria-label="직군 성장 창 닫기">×</button>
               <h2 class="section-heading">직군 성장</h2>
               <div class="recruit-focus-panel" id="recruitGrowthPanel">
                 <div class="recruit-focus-empty">
@@ -245,6 +248,7 @@
           <div class="company-dashboard">
             <button class="company-popup-button" type="button" data-open-company-panel="facilities">회사 시설 확장</button>
             <div class="company-popup-panel company-facilities-panel" data-company-panel="facilities">
+              <button class="mobile-panel-close" type="button" data-close-company-panel aria-label="회사 시설 확장 창 닫기">×</button>
               <div class="facility-heading">
                 <div>
                   <span class="section-kicker">OFFICE INVESTMENT</span>
@@ -509,12 +513,12 @@
 
 <script src="js/firebase.js?v=save-guard-v1"></script>
 
-<script src="js/01-data.js?v=save-guard-v1"></script>
-<script src="js/02-core.js?v=save-guard-v1"></script>
-<script src="js/03-battle.js?v=auth-gate-v1"></script>
-<script src="js/04-recruits-company.js?v=auth-gate-v1"></script>
-<script src="js/05-equipment-growth.js?v=auth-gate-v1"></script>
-<script src="js/06-ui-render.js?v=squad-layout-v11"></script>
+<script src="js/01-data.js?v=bugfix-v14"></script>
+<script src="js/02-core.js?v=mobile-tutorial-v18"></script>
+<script src="js/03-battle.js?v=bugfix-v14"></script>
+<script src="js/04-recruits-company.js?v=bugfix-v14"></script>
+<script src="js/05-equipment-growth.js?v=bugfix-v14"></script>
+<script src="js/06-ui-render.js?v=mobile-recruit-caption-v19"></script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

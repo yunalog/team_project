@@ -709,6 +709,7 @@ let state;
 let refs;
 let isSpawningNext = false;
 let lastRosterKey = "";
+let lastSquadManagementKey = "";
 let basicAttackCooldown = 0.35;
 let skillAttackCooldown = SKILL_ATTACK_RATE;
 let unitCombatTimers = {};
