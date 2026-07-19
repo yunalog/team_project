@@ -1692,6 +1692,9 @@ function normalizeEnemies(enemies) {
         lane,
         isBoss: Boolean(enemy.isBoss),
         hasEngaged: Boolean(enemy.hasEngaged),
+        bossAttackStep: normalizedEnemy.isBoss
+          ? Math.max(0, Math.floor(Number(enemy.bossAttackStep) || 0)) % 5
+          : 0,
         monsterIndex,
         bossIndex,
         attackType: getMonsterAttackType(withIndex),

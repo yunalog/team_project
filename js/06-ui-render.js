@@ -198,15 +198,15 @@ function refreshCostSensitiveButtonStates() {
 
 function renderEquippedItems() {
   const equippedItems = getEquippedItems();
-  const totalPower = equippedItems.reduce((sum, item) => sum + item.powerBonus, 0);
-  const totalSkill = equippedItems.reduce((sum, item) => sum + item.skillBonus, 0);
+  const totalPower = equippedItems.reduce((sum, item) => sum + getEquipmentCombatPowerBonus(item), 0);
+  const totalSkill = equippedItems.reduce((sum, item) => sum + getEquipmentCombatSkillBonus(item), 0);
 
   refs.equippedItemPanel.classList.toggle("is-empty", equippedItems.length === 0);
   refs.equippedItemPanel.classList.toggle("is-collapsed", !equipmentPanelExpanded);
   refs.equippedItemPanel.setAttribute("aria-expanded", String(equipmentPanelExpanded));
   refs.equipmentPanelToggleButton.textContent = equipmentPanelExpanded ? "최소화" : "목록 보기";
   refs.equipmentPanelToggleButton.setAttribute("aria-expanded", String(equipmentPanelExpanded));
-  refs.equippedItemStats.textContent = `공격력 +${totalPower} / 스킬 공격력 +${totalSkill}`;
+  refs.equippedItemStats.textContent = `공격력 +${formatStatValue(totalPower)} / 스킬 공격력 +${formatStatValue(totalSkill)}`;
   refs.equippedGradeBlocks.innerHTML = equipmentSlots
     .map((slot) => {
       const item = getEquippedItem(slot.id);
@@ -240,7 +240,7 @@ function renderEquippedItems() {
           <span class="equipped-list-copy">
             <span class="equipped-list-grade">${item.grade}</span>
             <strong>${item.name}</strong>
-            <small>공격력 +${item.powerBonus} · 스킬 +${item.skillBonus}</small>
+            <small>공격력 +${formatStatValue(getEquipmentCombatPowerBonus(item))} · 스킬 +${formatStatValue(getEquipmentCombatSkillBonus(item))}</small>
           </span>
         </div>
       `;
@@ -272,16 +272,18 @@ function renderEquipmentUpgrade() {
 
 function formatEquipmentBonus(item, equipped) {
   const slot = equipmentSlots.find((equipmentSlot) => equipmentSlot.id === item.slot);
-  const currentPower = equipped ? equipped.powerBonus : 0;
-  const currentSkill = equipped ? equipped.skillBonus : 0;
-  const powerDiff = item.powerBonus - currentPower;
-  const skillDiff = item.skillBonus - currentSkill;
-  return `${slot ? slot.name : "장비"} · 공격력 <span class="stat-positive">+${item.powerBonus}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${item.skillBonus}</span> (${formatDiff(skillDiff)})`;
+  const itemPower = getEquipmentCombatPowerBonus(item);
+  const itemSkill = getEquipmentCombatSkillBonus(item);
+  const currentPower = equipped ? getEquipmentCombatPowerBonus(equipped) : 0;
+  const currentSkill = equipped ? getEquipmentCombatSkillBonus(equipped) : 0;
+  const powerDiff = Math.round((itemPower - currentPower) * 10) / 10;
+  const skillDiff = Math.round((itemSkill - currentSkill) * 10) / 10;
+  return `${slot ? slot.name : "장비"} · 공격력 <span class="stat-positive">+${formatStatValue(itemPower)}</span> (${formatDiff(powerDiff)}) / 스킬 공격력 <span class="stat-positive">+${formatStatValue(itemSkill)}</span> (${formatDiff(skillDiff)})`;
 }
 
 function formatDiff(value) {
-  if (value > 0) return `<span class="stat-positive">+${value}</span>`;
-  if (value < 0) return `<span class="stat-negative">${value}</span>`;
+  if (value > 0) return `<span class="stat-positive">+${formatStatValue(value)}</span>`;
+  if (value < 0) return `<span class="stat-negative">-${formatStatValue(Math.abs(value))}</span>`;
   return `<span class="stat-neutral">0</span>`;
 }
 

@@ -263,6 +263,14 @@ function getEquipmentScore(item) {
   return item.powerBonus + item.skillBonus;
 }
 
+function getEquipmentCombatPowerBonus(item) {
+  return roundStat((Number(item?.powerBonus) || 0) * PLAYER_EQUIPMENT_STAT_RATE);
+}
+
+function getEquipmentCombatSkillBonus(item) {
+  return roundStat((Number(item?.skillBonus) || 0) * PLAYER_EQUIPMENT_STAT_RATE);
+}
+
 function getPlayerUpgradeCost(level = state.playerLevel) {
   const completedLevels = Math.max(0, (Number(level) || 1) - 1);
   const earlyLevels = Math.min(completedLevels, 12);
@@ -272,13 +280,13 @@ function getPlayerUpgradeCost(level = state.playerLevel) {
 
 function getPlayerPower() {
   const levelBonus = Math.max(0, state.playerLevel - 1) * 0.22 * PLAYER_UPGRADE_STAT_RATE;
-  const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + item.powerBonus, 0);
+  const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + getEquipmentCombatPowerBonus(item), 0);
   return roundStat(1 + levelBonus + equipmentBonus);
 }
 
 function getPlayerSkillPower() {
   const levelBonus = Math.max(0, state.playerLevel - 1) * 0.26 * PLAYER_UPGRADE_STAT_RATE;
-  const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + item.skillBonus, 0);
+  const equipmentBonus = getEquippedItems().reduce((sum, item) => sum + getEquipmentCombatSkillBonus(item), 0);
   return roundStat(1 + levelBonus + equipmentBonus);
 }
 

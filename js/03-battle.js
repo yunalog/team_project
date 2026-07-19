@@ -60,6 +60,7 @@ function createBossWave() {
       lane: 0,
       isBoss: true,
       hasEngaged: false,
+      bossAttackStep: 0,
       bossIndex,
       image: getMonsterImage(bossSeed),
       skillImage: getMonsterSkillImage(bossSeed),
@@ -303,18 +304,27 @@ function performMonsterAttack(attacker, attackerCount = 1) {
   const extraPressure = Math.max(0, attackerCount - 1);
   const damage = getMonsterAttackDamage(attacker, target, extraPressure);
   const attackDelay = playMonsterSkillEffect(attacker, target);
-  if (getMonsterAttackType(attacker) === "ranged") {
+  const isBossAreaAttack = attacker.isBoss && advanceBossAttackCycle(attacker);
+  const isFieldAreaAttack = !attacker.isBoss && getMonsterAttackType(attacker) === "ranged";
+  if (isBossAreaAttack || isFieldAreaAttack) {
     scheduleMonsterAreaAttackDamage(attacker, getLivingUnits(), extraPressure, attackDelay);
     return;
   }
   scheduleMonsterAttackDamage(attacker, target, damage, attackDelay);
 }
 
+function advanceBossAttackCycle(attacker) {
+  const currentStep = Math.max(0, Math.floor(Number(attacker.bossAttackStep) || 0)) % 5;
+  const nextStep = currentStep + 1;
+  attacker.bossAttackStep = nextStep % 5;
+  return nextStep === 1 || nextStep === 3 || nextStep === 5;
+}
+
 function scheduleMonsterAreaAttackDamage(attacker, targets, extraPressure, attackDelay) {
   const livingTargets = targets.filter((target) => isUnitAlive(target.id));
   if (!livingTargets.length) return;
 
-  const damageRatio = attacker.isBoss ? 0.55 : 0.45;
+  const damageRatio = attacker.isBoss ? 0.78 : 0.45;
   livingTargets.forEach((target, index) => {
     const singleTargetDamage = getMonsterAttackDamage(attacker, target, extraPressure);
     const distributedDamage = Math.max(1, Math.ceil(singleTargetDamage * damageRatio));
@@ -487,9 +497,10 @@ function getMonsterAttackTarget() {
 
 function getMonsterAttackDamage(enemy, unit, extraPressure = 0) {
   const maxHp = getUnitMaxHp(unit);
-  const base = enemy.isBoss ? 4 + state.chapter * 0.55 : 1.5 + state.chapter * 0.22 + state.subStage * 0.14;
-  const capRatio = enemy.isBoss ? 0.111 : 0.059;
-  const tunedDamage = (base + extraPressure * 0.65) * 1.3;
+  const base = enemy.isBoss ? 5.5 + state.chapter * 0.75 : 1.5 + state.chapter * 0.22 + state.subStage * 0.14;
+  const capRatio = enemy.isBoss ? 0.15 : 0.059;
+  const damageMultiplier = enemy.isBoss ? 1.9 : 1.3;
+  const tunedDamage = (base + extraPressure * (enemy.isBoss ? 0.8 : 0.65)) * damageMultiplier;
   return Math.max(1, Math.min(Math.ceil(maxHp * capRatio), Math.ceil(tunedDamage)));
 }
 
