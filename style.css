@@ -4229,6 +4229,43 @@ textarea {
   user-select: none;
 }
 
+.auto-draw-refund-effect {
+  position: absolute;
+  top: 31%;
+  left: calc(100% - 10px);
+  z-index: 10;
+  min-width: max-content;
+  padding: 3px 7px;
+  border: 1px solid rgba(220, 252, 231, 0.92);
+  border-radius: 6px;
+  background: rgba(20, 83, 45, 0.92);
+  color: #dcfce7;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-shadow: 0 1px 0 #14532d;
+  box-shadow: 0 3px 0 rgba(20, 83, 45, 0.35);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: auto-draw-refund-float 0.86s ease-out forwards;
+}
+
+@keyframes auto-draw-refund-float {
+  0% {
+    opacity: 0;
+    transform: translate(0, 7px) scale(0.82);
+  }
+  22% {
+    opacity: 1;
+    transform: translate(5px, 0) scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(18px, -34px) scale(1);
+  }
+}
+
 .draw-machine-panel .equipment-draw-button,
 .draw-machine-panel .auto-draw-button,
 .draw-machine-panel .equipment-draw-button:hover:not(:disabled),
@@ -4370,6 +4407,13 @@ textarea {
   .draw-machine-panel .equipment-draw-button strong,
   .draw-machine-panel .auto-draw-button {
     font-size: 8px !important;
+  }
+
+  .auto-draw-refund-effect {
+    top: 28%;
+    left: calc(100% - 12px);
+    padding: 3px 6px;
+    font-size: 9px;
   }
 }
 

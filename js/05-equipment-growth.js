@@ -75,10 +75,30 @@ function runAutoDrawStep() {
     return;
   }
 
-  state.idea += getEquipmentDiscardRefund(item);
-  log(`${item.grade} ${item.name}은 두 능력치가 모두 증가하지 않아 자동으로 버렸습니다.`);
+  const refund = getAutoDrawGoldRefund();
+  state.gold += refund;
+  showAutoDrawGoldRefund(refund);
+  log(`${item.grade} ${item.name}을 자동 폐기하고 자금 +${refund}을 회수했습니다.`);
   autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
   renderAll();
+}
+
+function getAutoDrawGoldRefund() {
+  const range = AUTO_DRAW_REFUND_MAX - AUTO_DRAW_REFUND_MIN + 1;
+  return AUTO_DRAW_REFUND_MIN + Math.floor(Math.random() * Math.max(1, range));
+}
+
+function showAutoDrawGoldRefund(amount) {
+  const machine = document.querySelector(".draw-machine-panel");
+  if (!machine) return;
+
+  const effect = document.createElement("span");
+  effect.className = "auto-draw-refund-effect";
+  effect.textContent = `자금 +${amount}`;
+  effect.setAttribute("role", "status");
+  effect.setAttribute("aria-label", `자동 폐기 자금 ${amount} 회수`);
+  machine.appendChild(effect);
+  window.setTimeout(() => effect.remove(), 900);
 }
 
 function createEquipmentItem() {
