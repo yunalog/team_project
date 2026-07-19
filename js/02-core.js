@@ -190,7 +190,7 @@ function bindEvents() {
   refs.manualWorkButton.addEventListener("click", () => {
     useManualWork();
   });
-  refs.upgradePlayerButton.addEventListener("click", upgradePlayer);
+  bindPlayerUpgradeControls();
   refs.nextStageButton.addEventListener("click", () => {
     if (state.battleMode !== "boss") advanceBattleLayer();
     spawnWave();
@@ -1317,6 +1317,65 @@ function canSyncCloudSave() {
     !isCloudSaveBlocked &&
     Boolean(window.FirebaseGame?.getCurrentUser?.())
   );
+}
+
+function bindPlayerUpgradeControls() {
+  const button = refs.upgradePlayerButton;
+  if (!button) return;
+
+  let holdDelayTimer = null;
+  let repeatTimer = null;
+  let pointerHandled = false;
+
+  const stopRepeating = () => {
+    if (holdDelayTimer) window.clearTimeout(holdDelayTimer);
+    if (repeatTimer) window.clearTimeout(repeatTimer);
+    holdDelayTimer = null;
+    repeatTimer = null;
+    button.classList.remove("is-hold-upgrading");
+  };
+
+  const repeatUpgrade = () => {
+    if (!upgradePlayer()) {
+      stopRepeating();
+      return;
+    }
+    repeatTimer = window.setTimeout(repeatUpgrade, 120);
+  };
+
+  button.addEventListener("pointerdown", (event) => {
+    if (button.disabled || (event.pointerType === "mouse" && event.button !== 0)) return;
+
+    event.preventDefault();
+    stopRepeating();
+    pointerHandled = true;
+    button.classList.add("is-hold-upgrading");
+    upgradePlayer();
+
+    if (!button.disabled) {
+      holdDelayTimer = window.setTimeout(repeatUpgrade, 350);
+    }
+  });
+
+  button.addEventListener("click", (event) => {
+    if (pointerHandled) {
+      event.preventDefault();
+      pointerHandled = false;
+      return;
+    }
+    upgradePlayer();
+  });
+
+  const finishPointerInput = () => {
+    stopRepeating();
+    window.setTimeout(() => {
+      pointerHandled = false;
+    }, 0);
+  };
+
+  window.addEventListener("pointerup", finishPointerInput);
+  window.addEventListener("pointercancel", finishPointerInput);
+  window.addEventListener("blur", finishPointerInput);
 }
 
 function blockCloudSave(reason = "") {

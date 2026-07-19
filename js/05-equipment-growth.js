@@ -75,28 +75,28 @@ function runAutoDrawStep() {
     return;
   }
 
-  const refund = getAutoDrawGoldRefund();
+  const refund = getEquipmentDiscardGoldRefund();
   state.gold += refund;
-  showAutoDrawGoldRefund(refund);
+  showEquipmentGoldRefund(refund);
   log(`${item.grade} ${item.name}을 자동 폐기하고 자금 +${refund}을 회수했습니다.`);
   autoDrawTimer = window.setTimeout(runAutoDrawStep, 260);
   renderAll();
 }
 
-function getAutoDrawGoldRefund() {
-  const range = AUTO_DRAW_REFUND_MAX - AUTO_DRAW_REFUND_MIN + 1;
-  return AUTO_DRAW_REFUND_MIN + Math.floor(Math.random() * Math.max(1, range));
+function getEquipmentDiscardGoldRefund() {
+  const range = EQUIPMENT_DISCARD_REFUND_MAX - EQUIPMENT_DISCARD_REFUND_MIN + 1;
+  return EQUIPMENT_DISCARD_REFUND_MIN + Math.floor(Math.random() * Math.max(1, range));
 }
 
-function showAutoDrawGoldRefund(amount) {
-  const machine = document.querySelector(".draw-machine-panel");
+function showEquipmentGoldRefund(amount) {
+  const machine = document.querySelector(".draw-machine-visual");
   if (!machine) return;
 
   const effect = document.createElement("span");
-  effect.className = "auto-draw-refund-effect";
+  effect.className = "equipment-refund-effect";
   effect.textContent = `자금 +${amount}`;
   effect.setAttribute("role", "status");
-  effect.setAttribute("aria-label", `자동 폐기 자금 ${amount} 회수`);
+  effect.setAttribute("aria-label", `장비 폐기 자금 ${amount} 회수`);
   machine.appendChild(effect);
   window.setTimeout(() => effect.remove(), 900);
 }
@@ -165,10 +165,11 @@ function equipPendingEquipment() {
 function discardPendingEquipment() {
   if (!state.equipment.pending) return;
 
-  const refund = getEquipmentDiscardRefund(state.equipment.pending);
-  state.idea += refund;
+  const refund = getEquipmentDiscardGoldRefund();
+  state.gold += refund;
   state.equipment.pending = null;
-  log(`장비를 버리고 아이디어 +${refund}을 얻었습니다.`);
+  showEquipmentGoldRefund(refund);
+  log(`장비를 버리고 자금 +${refund}을 회수했습니다.`);
   renderAll();
 }
 
@@ -176,10 +177,6 @@ function hasPositiveEquipmentGain(item, equipped = getEquippedItem(item.slot)) {
   const currentPower = equipped ? equipped.powerBonus : 0;
   const currentSkill = equipped ? equipped.skillBonus : 0;
   return item.powerBonus > currentPower && item.skillBonus > currentSkill;
-}
-
-function getEquipmentDiscardRefund(item) {
-  return Math.max(1, Math.floor(getEquipmentScore(item) / 2));
 }
 
 function getMaxEquipmentUpgradeLevel() {
@@ -321,7 +318,7 @@ function upgradePlayer() {
   if (state.gold < cost) {
     log(`대표 역량 강화에는 자금 ${cost}이 필요합니다.`);
     renderBattle();
-    return;
+    return false;
   }
 
   const previousMaxHp = getUnitMaxHp(getPlayerUnit());
@@ -331,6 +328,7 @@ function upgradePlayer() {
   const hpIncrease = applyUnitMaxHpGrowth(getPlayerUnit(), previousMaxHp);
   log(`대표 역량이 상승하고 최대 체력이 +${hpIncrease} 증가했습니다.`);
   renderAll();
+  return true;
 }
 
 function getGrowthValue(type) {

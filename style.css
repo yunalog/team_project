@@ -4229,10 +4229,18 @@ textarea {
   user-select: none;
 }
 
-.auto-draw-refund-effect {
+.draw-machine-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.equipment-refund-effect {
   position: absolute;
-  top: 31%;
-  left: calc(100% - 10px);
+  top: 3%;
+  left: 50%;
   z-index: 10;
   min-width: max-content;
   padding: 3px 7px;
@@ -4254,15 +4262,15 @@ textarea {
 @keyframes auto-draw-refund-float {
   0% {
     opacity: 0;
-    transform: translate(0, 7px) scale(0.82);
+    transform: translate(-50%, 8px) scale(0.82);
   }
   22% {
     opacity: 1;
-    transform: translate(5px, 0) scale(1.08);
+    transform: translate(-50%, 0) scale(1.08);
   }
   100% {
     opacity: 0;
-    transform: translate(18px, -34px) scale(1);
+    transform: translate(-50%, -34px) scale(1);
   }
 }
 
@@ -4409,12 +4417,22 @@ textarea {
     font-size: 8px !important;
   }
 
-  .auto-draw-refund-effect {
-    top: 28%;
-    left: calc(100% - 12px);
+  .equipment-refund-effect {
+    top: 2%;
+    left: 50%;
     padding: 3px 6px;
     font-size: 9px;
   }
+}
+
+#upgradePlayerButton {
+  touch-action: manipulation;
+  user-select: none;
+}
+
+#upgradePlayerButton.is-hold-upgrading:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow: 0 0 0 2px rgba(255, 247, 204, 0.72) inset, 0 0 12px rgba(76, 175, 80, 0.38);
 }
 
 @media (max-width: 720px) {
@@ -4804,8 +4822,14 @@ textarea {
   pointer-events: auto;
 }
 
-.battle-equipment-section .draw-machine-image {
+.battle-equipment-section .draw-machine-visual {
   grid-area: machine;
+  width: 100%;
+  max-width: 150px;
+  justify-self: center;
+}
+
+.battle-equipment-section .draw-machine-image {
   width: 100%;
   max-width: 150px;
   justify-self: center;

@@ -152,7 +152,7 @@ function refreshCostSensitiveButtonStates() {
   });
 
   if (refs.upgradePlayerButton) {
-    const playerCost = Math.floor(18 * Math.pow(1.4, state.playerLevel - 1));
+    const playerCost = getPlayerUpgradeCost();
     const isUnaffordable = state.gold < playerCost;
     refs.upgradePlayerButton.disabled = isUnaffordable;
     refs.upgradePlayerButton.classList.toggle("is-unaffordable", isUnaffordable);

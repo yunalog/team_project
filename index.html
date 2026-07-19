@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/png" sizes="192x192" href="Resource/Icon/icon-192.png" />
     <link rel="apple-touch-icon" href="Resource/Icon/icon-192.png" />
-    <link rel="stylesheet" href="style.css?v=auto-draw-refund-v1" />
+    <link rel="stylesheet" href="style.css?v=hold-upgrade-refund-v2" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/neodgm/neodgm-webfont@1.601/neodgm/style.css">
 </head>
   <body>
@@ -185,7 +185,9 @@
               <div id="equipmentToolsPanel" class="equipment-tools-panel">
                 <div class="equipment-layer" aria-live="polite">
                   <div class="draw-machine-panel" aria-label="장비 뽑기">
-                    <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
+                    <div class="draw-machine-visual">
+                      <img src="Resource/UI/Draw_Machine.png" alt="" class="draw-machine-image" />
+                    </div>
                     <button id="equipmentDrawButton" class="equipment-draw-button" type="button">
                       <span>뽑기</span>
                       <strong id="equipmentDrawCost">10</strong>
@@ -510,12 +512,12 @@
 <script src="js/firebase.js?v=save-guard-v1"></script>
 <script src="js/firebase-local-bypass.js?v=local-auth-v2"></script>
 
-<script src="js/01-data.js?v=auto-draw-refund-v1"></script>
-<script src="js/02-core.js?v=battle-balance-v1"></script>
+<script src="js/01-data.js?v=hold-upgrade-refund-v1"></script>
+<script src="js/02-core.js?v=hold-upgrade-refund-v1"></script>
 <script src="js/03-battle.js?v=hp-growth-v1"></script>
 <script src="js/04-recruits-company.js?v=hp-growth-v1"></script>
-<script src="js/05-equipment-growth.js?v=auto-draw-refund-v1"></script>
-<script src="js/06-ui-render.js?v=battle-balance-v1"></script>
+<script src="js/05-equipment-growth.js?v=hold-upgrade-refund-v2"></script>
+<script src="js/06-ui-render.js?v=hold-upgrade-refund-v1"></script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
