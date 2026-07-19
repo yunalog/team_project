@@ -300,21 +300,28 @@ function setupStartAuthGate() {
 
 function updateStartAuthGate(user = titleAuthUser) {
   if (isAuthGateReady) titleAuthUser = user || null;
-  const isLoggedIn = isAuthGateReady && Boolean(titleAuthUser);
+  const isLocalAuth = Boolean(window.FirebaseGame?.isLocalAuthBypass);
+  const isLoggedIn = isAuthGateReady && (Boolean(titleAuthUser) || isLocalAuth);
   const showLogin = isAuthGateReady && !isLoggedIn;
   const showAccountActions = isAuthGateReady && isLoggedIn;
 
   setTitleActionButton(refs.loginButton, showLogin, isTitleLoginInProgress, isTitleLoginInProgress ? "로그인 중..." : "Google 로그인");
-  setTitleActionButton(refs.startButton, showAccountActions, isGameStartInProgress, isGameStartInProgress ? "불러오는 중..." : "게임 시작");
+  setTitleActionButton(
+    refs.startButton,
+    showAccountActions,
+    isGameStartInProgress,
+    isGameStartInProgress ? "불러오는 중..." : isLocalAuth ? "테스트 게임 시작" : "게임 시작"
+  );
   setTitleActionButton(
     refs.titleLogoutButton,
-    showAccountActions,
+    showAccountActions && !isLocalAuth,
     isLogoutInProgress || isGameStartInProgress,
     isLogoutInProgress ? "로그아웃 중..." : "로그아웃"
   );
 
   if (refs.settingLogoutButton) {
-    refs.settingLogoutButton.disabled = !showAccountActions || isLogoutInProgress;
+    refs.settingLogoutButton.hidden = isLocalAuth;
+    refs.settingLogoutButton.disabled = isLocalAuth || !showAccountActions || isLogoutInProgress;
     refs.settingLogoutButton.textContent = isLogoutInProgress ? "로그아웃 중..." : "로그아웃";
   }
 }
@@ -1305,7 +1312,11 @@ function cloneDefaultState() {
 }
 
 function canSyncCloudSave() {
-  return !isCloudSaveBlocked && Boolean(window.FirebaseGame?.getCurrentUser?.());
+  return (
+    !window.FirebaseGame?.isLocalAuthBypass &&
+    !isCloudSaveBlocked &&
+    Boolean(window.FirebaseGame?.getCurrentUser?.())
+  );
 }
 
 function blockCloudSave(reason = "") {

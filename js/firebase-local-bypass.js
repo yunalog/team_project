@@ -1,9 +1,6 @@
-// Local development auth adapter.
-// It activates only after entering through local-dev.html or with ?localAuth=1.
+// Local development auth adapter for the battle branch.
+// Remove its script tag from index.html before merging the auth flow into main.
 (function () {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get("localAuth") !== "1") return;
-
   const onlineAdapter = window.FirebaseGame || {};
   const localUser = {
     uid: "local-battle-dev",
