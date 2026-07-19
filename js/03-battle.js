@@ -307,7 +307,7 @@ function performMonsterAttack(attacker, attackerCount = 1) {
   const isBossAreaAttack = attacker.isBoss && advanceBossAttackCycle(attacker);
   const isFieldAreaAttack = !attacker.isBoss && getMonsterAttackType(attacker) === "ranged";
   if (isBossAreaAttack || isFieldAreaAttack) {
-    scheduleMonsterAreaAttackDamage(attacker, getLivingUnits(), extraPressure, attackDelay);
+    scheduleMonsterAreaAttackDamage(attacker, target, getLivingUnits(), extraPressure, attackDelay);
     return;
   }
   scheduleMonsterAttackDamage(attacker, target, damage, attackDelay);
@@ -320,14 +320,19 @@ function advanceBossAttackCycle(attacker) {
   return nextStep === 1 || nextStep === 3 || nextStep === 5;
 }
 
-function scheduleMonsterAreaAttackDamage(attacker, targets, extraPressure, attackDelay) {
+function scheduleMonsterAreaAttackDamage(attacker, primaryTarget, targets, extraPressure, attackDelay) {
   const livingTargets = targets.filter((target) => isUnitAlive(target.id));
   if (!livingTargets.length) return;
 
-  const damageRatio = attacker.isBoss ? 0.78 : 0.45;
+  const primaryDamage = getMonsterAttackDamage(attacker, primaryTarget, extraPressure);
   livingTargets.forEach((target, index) => {
-    const singleTargetDamage = getMonsterAttackDamage(attacker, target, extraPressure);
-    const distributedDamage = Math.max(1, Math.ceil(singleTargetDamage * damageRatio));
+    const isPrimaryTarget = target.id === primaryTarget.id;
+    const targetDamage = attacker.isBoss
+      ? Math.ceil(getMonsterAttackDamage(attacker, target, extraPressure) * 0.78)
+      : isPrimaryTarget
+        ? primaryDamage
+        : Math.ceil(primaryDamage * NORMAL_MONSTER_SPLASH_DAMAGE_RATIO);
+    const distributedDamage = Math.max(1, targetDamage);
     window.setTimeout(
       () => applyMonsterAttackDamage(attacker, target, distributedDamage, { isAreaAttack: true }),
       attackDelay + index * 55
@@ -515,6 +520,27 @@ function getUnitMaxHp(unit) {
   return Math.floor(
     72 + recruitCount * 4 + boost * 6 + promotionTier * 18 + hpGrowth * 3 + Math.max(0, unit.power - 1) * 1.2
   );
+}
+
+function applyUnitMaxHpGrowth(unit, previousMaxHp) {
+  if (!unit) return 0;
+
+  if (!state.unitHp || typeof state.unitHp !== "object") state.unitHp = {};
+  if (!state.unitMaxHp || typeof state.unitMaxHp !== "object") state.unitMaxHp = {};
+
+  const nextMaxHp = getUnitMaxHp(unit);
+  const hpIncrease = Math.max(0, nextMaxHp - Math.max(0, Number(previousMaxHp) || 0));
+  const currentHp = Number(state.unitHp[unit.id]);
+
+  state.unitMaxHp[unit.id] = nextMaxHp;
+  if (!Number.isFinite(currentHp)) {
+    state.unitHp[unit.id] = nextMaxHp;
+  } else if (currentHp > 0) {
+    state.unitHp[unit.id] = Math.min(nextMaxHp, currentHp + hpIncrease);
+  }
+
+  if (hpIncrease > 0 && currentHp > 0) showUnitHeal(hpIncrease, unit);
+  return hpIncrease;
 }
 
 function getUnitHp(unitId) {

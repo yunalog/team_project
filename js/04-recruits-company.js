@@ -492,9 +492,13 @@ function enhanceRecruitDetail() {
   const cost = getRecruitEnhancementCost(recruit.id);
   if (state.gold < cost) return;
 
+  const activeUnit = getUnits().find((unit) => unit.recruitId === recruit.id);
+  const previousMaxHp = activeUnit ? getUnitMaxHp(activeUnit) : 0;
   state.gold -= cost;
   state.recruitBoosts[recruit.id] = (state.recruitBoosts[recruit.id] || 0) + 1;
-  log(`${recruit.name} 전문성이 강화되었습니다.`);
+  const updatedUnit = getUnits().find((unit) => unit.recruitId === recruit.id);
+  const hpIncrease = updatedUnit ? applyUnitMaxHpGrowth(updatedUnit, previousMaxHp) : 6;
+  log(`${recruit.name} 전문성이 강화되고 최대 체력이 +${hpIncrease} 증가했습니다.`);
   renderAll();
 }
 
@@ -624,13 +628,21 @@ function buyRecruit(id) {
   const cost = getRecruitBuyCost(recruit, count);
   if (state.gold < cost) return;
 
+  const activeUnit = getUnits().find((unit) => unit.recruitId === id);
+  const previousMaxHp = activeUnit ? getUnitMaxHp(activeUnit) : 0;
   state.gold -= cost;
   state.recruits[id] = count + 1;
   activeRecruitPanelId = id;
   addCompanyXp(4);
   basicAttackCooldown = Math.min(basicAttackCooldown, 0.2);
   const rankLabel = getRecruitRankLabel(recruit, count + 1);
-  log(`${rankLabel} 영입 완료. 회사 EXP +4`);
+  const updatedUnit = getUnits().find((unit) => unit.recruitId === id);
+  const hpIncrease = count > 0 ? (updatedUnit ? applyUnitMaxHpGrowth(updatedUnit, previousMaxHp) : 4) : 0;
+  log(
+    count > 0
+      ? `${rankLabel} 레벨업 완료. 최대 체력 +${hpIncrease} · 회사 EXP +4`
+      : `${rankLabel} 영입 완료. 회사 EXP +4`
+  );
   renderAll();
 }
 

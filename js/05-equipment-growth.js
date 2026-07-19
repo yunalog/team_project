@@ -304,10 +304,12 @@ function upgradePlayer() {
     return;
   }
 
+  const previousMaxHp = getUnitMaxHp(getPlayerUnit());
   state.gold -= cost;
   state.playerLevel += 1;
   state.clickPower += 1;
-  log("대표 역량이 조금 상승했습니다.");
+  const hpIncrease = applyUnitMaxHpGrowth(getPlayerUnit(), previousMaxHp);
+  log(`대표 역량이 상승하고 최대 체력이 +${hpIncrease} 증가했습니다.`);
   renderAll();
 }
 
