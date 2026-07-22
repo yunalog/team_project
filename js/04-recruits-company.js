@@ -209,8 +209,27 @@ function getRecruitSkillText(recruit) {
 }
 
 
+function getRecruitSprites(recruit, tier = getRecruitPromotionTier(recruit)) {
+  if (!recruit?.sprites) return null;
+
+  const safeTier = Math.min(5, Math.max(0, Number(tier) || 0));
+  if (safeTier === 0) return recruit.sprites;
+
+  const resolveTierPath = (source, actionName) => {
+    const fileName = source.split("/").pop();
+    const roleCode = fileName.split("_")[0];
+    return source.replace(/\/0\/[^/]+$/, `/${safeTier}/${roleCode}${safeTier}차_${actionName}.png`);
+  };
+
+  return {
+    idle: resolveTierPath(recruit.sprites.idle, "Idle"),
+    attack: resolveTierPath(recruit.sprites.attack, "Atk"),
+    skill: resolveTierPath(recruit.sprites.skill, "Skill"),
+  };
+}
+
 function getRecruitSpriteSrc(recruit) {
-  return recruit?.sprites?.idle || recruit?.sprite || "";
+  return getRecruitSprites(recruit)?.idle || recruit?.sprite || "";
 }
 
 function getRecruitAvatarMarkup(recruit, className = "recruit-card-avatar") {
@@ -421,8 +440,9 @@ function renderRecruitPromotionModal() {
   refs.recruitPromotionModal.classList.toggle("is-evolving", isComplete);
   refs.recruitPromotionModal.classList.toggle("is-complete", isComplete);
 
-  refs.recruitPromotionAvatar.innerHTML = recruit.sprites?.idle
-    ? `<span class="recruit-evolution-aura" aria-hidden="true"></span><img src="${recruit.sprites.idle}" alt="${recruit.name}" />`
+  const promotionSprite = getRecruitSpriteSrc(recruit);
+  refs.recruitPromotionAvatar.innerHTML = promotionSprite
+    ? `<span class="recruit-evolution-aura" aria-hidden="true"></span><img src="${promotionSprite}" alt="${recruit.name}" />`
     : `<span class="recruit-evolution-aura" aria-hidden="true"></span><span>${recruit.mark}</span>`;
 
   refs.recruitPromotionTitle.textContent = isComplete ? "승급 완료!" : `${recruit.name} 승급`;

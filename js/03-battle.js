@@ -1067,6 +1067,7 @@ function getUnits() {
       id: `squad-${slotIndex}-${recruit.id}`,
       recruitId: recruit.id,
       count: 1,
+      sprites: getRecruitSprites(recruit),
       ...stats,
     }));
   });

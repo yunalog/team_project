@@ -683,7 +683,7 @@ function getSquadCharacterAvatarMarkup(recruit, isLeader = false) {
   const level = recruit ? getRecruitCount(recruit.id) : 0;
   const name = isLeader ? "대표" : getRecruitRankLabel(recruit, level);
   const color = isLeader ? "#059669" : recruit.color;
-  const sprite = isLeader ? "Anim/Player_1/Motion.png" : recruit.sprites?.idle;
+  const sprite = isLeader ? "Anim/Player_1/Motion.png" : getRecruitSpriteSrc(recruit);
 
   if (!sprite) {
     const mark = isLeader ? "C" : recruit.mark;

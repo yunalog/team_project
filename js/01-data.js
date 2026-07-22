@@ -137,9 +137,9 @@ const recruits = [
       desc: "5초 동안 전체 동료 공격력과 스킬 피해량 20% 증가",
     },
     sprites: {
-      idle: "Anim/Player_CP/CP_Idle.png",
-      attack: "Anim/Player_CP/CP_Atk.png",
-      skill: "Anim/Player_CP/CP_Skill.png",
+      idle: "Anim/Player_CP/0/CP_Idle.png",
+      attack: "Anim/Player_CP/0/CP_Atk.png",
+      skill: "Anim/Player_CP/0/CP_Skill.png",
     },
   },
   {
@@ -163,9 +163,9 @@ const recruits = [
       desc: "4초 동안 자신의 공격속도 30% 증가",
     },
     sprites: {
-      idle: "Anim/Player_DG/DG_Idle.png",
-      attack: "Anim/Player_DG/DG_ATK.png",
-      skill: "Anim/Player_DG/DG_Skill.png",
+      idle: "Anim/Player_DG/0/DG_Idle.png",
+      attack: "Anim/Player_DG/0/DG_ATK.png",
+      skill: "Anim/Player_DG/0/DG_Skill.png",
     },
   },
   {
@@ -189,9 +189,9 @@ const recruits = [
       desc: "스킬 피해량에 비례한 광역 데미지",
     },
     sprites: {
-      idle: "Anim/Player_ART/ART_Idle.png",
-      attack: "Anim/Player_ART/ART_Atk.png",
-      skill: "Anim/Player_ART/ART_Skill.png",
+      idle: "Anim/Player_ART/0/ART_Idle.png",
+      attack: "Anim/Player_ART/0/ART_Atk.png",
+      skill: "Anim/Player_ART/0/ART_Skill.png",
     },
   },
   {
@@ -218,9 +218,9 @@ const recruits = [
       desc: "5초 동안 전체 동료 공격력 5%, 스킬 피해량 5%, 공격속도 10%, 치명타 확률 10% 증가",
     },
     sprites: {
-      idle: "Anim/Player_BG/BG_Idle.png",
-      attack: "Anim/Player_BG/BG_Atk.png",
-      skill: "Anim/Player_BG/BG_Skill.png",
+      idle: "Anim/Player_BG/0/BG_Idle.png",
+      attack: "Anim/Player_BG/0/BG_Atk.png",
+      skill: "Anim/Player_BG/0/BG_Skill.png",
     },
   },
   {
@@ -244,9 +244,9 @@ const recruits = [
       desc: "5초 동안 모든 적이 아군에게 받는 피해 10% 증가",
     },
     sprites: {
-      idle: "Anim/Player_QA/QA_Idle.png",
-      attack: "Anim/Player_QA/QA_Atk.png",
-      skill: "Anim/Player_QA/QA_Skill.png",
+      idle: "Anim/Player_QA/0/QA_Idle.png",
+      attack: "Anim/Player_QA/0/QA_Atk.png",
+      skill: "Anim/Player_QA/0/QA_Skill.png",
     },
   },
   {
@@ -269,9 +269,9 @@ const recruits = [
       desc: "전체 아군에게 스킬 피해량에 비례하는 광역 힐",
     },
     sprites: {
-      idle: "Anim/Player_SD/SD_Idle.png",
-      attack: "Anim/Player_SD/SD_Atk.png",
-      skill: "Anim/Player_SD/SD_Skill.png",
+      idle: "Anim/Player_SD/0/SD_Idle.png",
+      attack: "Anim/Player_SD/0/SD_Atk.png",
+      skill: "Anim/Player_SD/0/SD_Skill.png",
     },
   },
   {
@@ -297,9 +297,9 @@ const recruits = [
       desc: "5초 동안 공격속도 15% 증가, 기본공격이 모든 적을 타격",
     },
     sprites: {
-      idle: "Anim/Player_PD/PD_Idle.png",
-      attack: "Anim/Player_PD/PD_Atk.png",
-      skill: "Anim/Player_PD/PD_Skill.png",
+      idle: "Anim/Player_PD/0/PD_Idle.png",
+      attack: "Anim/Player_PD/0/PD_Atk.png",
+      skill: "Anim/Player_PD/0/PD_Skill.png",
     },
   },
   {
@@ -321,9 +321,9 @@ const recruits = [
       desc: "본인을 제외한 아군 동료 전체 스킬 쿨타임 초기화",
     },
     sprites: {
-      idle: "Anim/Player_DA/DA_Idle.png",
-      attack: "Anim/Player_DA/DA_Atk.png",
-      skill: "Anim/Player_DA/DA_Skill.png",
+      idle: "Anim/Player_DA/0/DA_Idle.png",
+      attack: "Anim/Player_DA/0/DA_Atk.png",
+      skill: "Anim/Player_DA/0/DA_Skill.png",
     },
   },
 ];
